@@ -1,0 +1,84 @@
+ .titlebar {
+  background: linear-gradient(to top, #ebebeb, #d5d5d5);
+  height: 20px;
+  border-top: 1px solid #f3f1f3;
+  border-bottom: 1px solid #b1aeb1;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  user-select: none;
+}
+
+.buttons {
+  padding-left: 8px;
+  padding-top: 3px;
+  float: left;
+  line-height: 0;
+}
+
+.close {
+  background: #ff5c5c;
+  font-size: 9pt;
+  width: 11px;
+  height: 11px;
+  border: 1px solid #e33e41;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.minimize {
+  background: #ffbd4c;
+  font-size: 9pt;
+  line-height: 11px;
+  margin-left: 4px;
+  width: 11px;
+  height: 11px;
+  border: 1px solid #e09e3e;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.zoom {
+  background: #00ca56;
+  font-size: 9pt;
+  line-height: 11px;
+  margin-left: 6px;
+  width: 11px;
+  height: 11px;
+  border: 1px solid #14ae46;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.content {
+  font: 1em monospace;
+  white-space: nowrap;
+  background: #333333;
+  color: #efefef;
+  flex: 1;
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+  padding: 5px 10px;
+  overflow-y: auto;
+}
+
+.user-input {
+  border-right: 10px solid rgb(77, 77, 77);
+  display: inline-block;
+  margin: 0 0 3px 0;
+}
+
+.terminal {
+  width: 800px;
+  height: 400px;
+  position: fixed;
+  top: 30%;
+  left: 0;
+  right: 0;
+  margin: auto;
+  transform: translateY(-30%);
+  border: 1px solid #acacac;
+  border-radius: 6px;
+  box-shadow: 0 0 20px #acacac;
+  display: flex;
+  flex-direction: column;
+}

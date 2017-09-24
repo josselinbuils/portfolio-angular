@@ -2,10 +2,15 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 
 import { AppComponent } from './app.component';
+import { TerminalComponent } from './terminal/terminal.component';
+import {} from './html.d';
+import { SafeHtmlPipe } from './safe-html.pipe';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    TerminalComponent,
+    SafeHtmlPipe
   ],
   imports: [
     BrowserModule
@@ -13,4 +18,5 @@ import { AppComponent } from './app.component';
   providers: [],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {
+}

@@ -1,0 +1,13 @@
+<div class="terminal">
+  <div class="titlebar">
+    <div class="buttons">
+      <div class="close"></div>
+      <div class="minimize"></div>
+      <div class="zoom"></div>
+    </div>
+  </div>
+  <div class="content">
+    <div [innerHTML]="content | safeHtml"></div>
+    <p class="user-input">josselinbuils$&nbsp;{{userInput}}</p>
+  </div>
+</div>
