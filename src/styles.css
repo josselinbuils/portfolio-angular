@@ -18,3 +18,11 @@ p {
   margin: -5px -7px 5px -7px;
   padding: 5px 7px;
 }
+
+.light {
+  color: #c5c5c5;
+}
+
+.top-margin {
+  margin-top: 10px;
+}
