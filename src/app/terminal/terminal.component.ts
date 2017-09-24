@@ -4,13 +4,15 @@ import about from './templates/about.html';
 import charizard from './templates/charizard.html';
 import hello from './templates/hello.html';
 import help from './templates/help.html';
+import work from './templates/work.html';
 
 const templates = {
   about,
   charizard,
   clear: terminal => terminal.content = '',
   hello,
-  help
+  help,
+  work
 };
 
 export enum KEY_CODE {
