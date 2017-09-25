@@ -1,4 +1,5 @@
+<p class="light" *ngIf="!repositories">Loading...</p>
 <div class="card" *ngFor="let repos of repositories">
-  <p>{{repos.name}}<span class="language light">{{repos.language}}</span></p>
+  <p>{{repos.name}}<span class="language">{{repos.language}}</span></p>
   <p class="light description">{{repos.description}}</p>
 </div>
