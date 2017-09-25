@@ -1,0 +1,12 @@
+:host {
+  display: block;
+}
+
+.description {
+  margin: 10px;
+  text-align: justify;
+}
+
+.period {
+  float: right;
+}

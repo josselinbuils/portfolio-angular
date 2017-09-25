@@ -1,0 +1,12 @@
+:host {
+  display: block;
+  margin: 2px 0;
+}
+
+.card {
+  width: 35ch;
+}
+
+.description {
+  float: right;
+}

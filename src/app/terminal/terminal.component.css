@@ -1,4 +1,4 @@
- .titlebar {
+.titlebar {
   background: linear-gradient(to top, #ebebeb, #d5d5d5);
   height: 20px;
   border-top: 1px solid #f3f1f3;
@@ -64,7 +64,8 @@
 .user-input {
   border-right: 10px solid rgb(77, 77, 77);
   display: inline-block;
-  margin: 0 0 3px 0;
+  margin-bottom: 3px;
+  white-space: pre;
 }
 
 .terminal {

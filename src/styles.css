@@ -3,8 +3,8 @@ body {
 }
 
 p {
-  margin: 2px 0;
   white-space: normal;
+  margin: 0;
 }
 
 .card {
@@ -21,8 +21,4 @@ p {
 
 .light {
   color: #c5c5c5;
-}
-
-.top-margin {
-  margin-top: 10px;
 }

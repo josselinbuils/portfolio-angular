@@ -1,24 +1,16 @@
-import { AfterContentInit, Component, HostListener, OnInit } from '@angular/core';
+import {
+  AfterContentInit, Component, ComponentFactoryResolver, HostListener, OnInit, ViewChild, ViewContainerRef
+} from '@angular/core';
 
-import about from './commands/about.html';
-
-import charizard from './commands/charizard.html';
-import { cd } from './commands/cd';
-import hello from './commands/hello.html';
-import help from './commands/help.html';
-import ls from './commands/ls.html';
-import work from './commands/work.html';
-
-const commands = {
-  about,
-  cd: cd,
-  charizard,
-  clear: terminal => terminal.content = '',
-  hello,
-  help,
-  ls,
-  work
-};
+import { AboutComponent } from './executors/about/about.component';
+import { BashErrorComponent } from './executors/bash-error/bash-error.component';
+import { CdComponent } from './executors/cd/cd.component';
+import { CommandComponent } from './executors/command/command.component';
+import { Executor } from './executors/executor';
+import { HelpComponent } from './executors/help/help.component';
+import { LsComponent } from './executors/ls/ls.component';
+import { ProjectsComponent } from './executors/projects/projects.component';
+import { WorkComponent } from './executors/work/work.component';
 
 enum KEY_CODE {
   BACK_SPACE = 8,
@@ -27,44 +19,53 @@ enum KEY_CODE {
   UP = 38
 }
 
+const executors = {
+  about: AboutComponent,
+  cd: CdComponent,
+  help: HelpComponent,
+  ls: LsComponent,
+  projects: ProjectsComponent,
+  work: WorkComponent
+};
+
 @Component({
   selector: 'app-terminal',
   templateUrl: './terminal.component.html',
   styleUrls: ['./terminal.component.css']
 })
 export class TerminalComponent implements AfterContentInit, OnInit {
+  @ViewChild('vc', {read: ViewContainerRef}) viewContainerRef: ViewContainerRef;
+
   commandIndex: number;
   commands: string[];
-  content: string;
   userInput: string;
 
-  constructor() {
-    this.content = '';
+  constructor(private componentFactoryResolver: ComponentFactoryResolver) {
     this.userInput = '';
     this.commandIndex = 0;
     this.commands = [];
   }
 
+  private loadComponent(component, args) {
+    const componentFactory = this.componentFactoryResolver.resolveComponentFactory(component);
+    const componentRef = this.viewContainerRef.createComponent(componentFactory);
+    (<Executor> componentRef.instance).args = args;
+  }
+
   private exec(str) {
-    const command = str.split(' ')[0];
+    const command = str.trim().split(' ')[0];
+
+    this.loadComponent(CommandComponent, [str]);
 
     if (command.length > 0) {
       this.commands.push(str);
       this.commandIndex = this.commands.length;
-      this.content += `<p>josselinbuils$ ${str}</p>`;
 
-      if (commands[command]) {
-        if (typeof commands[command] === 'function') {
-          commands[command](this, str.split(' ').slice(1));
-        } else {
-          this.content += commands[command];
-        }
+      if ( executors[command]) {
+        this.loadComponent( executors[command], str.split(' ').slice(1));
       } else {
-        this.content += `<p>-bash: ${command}: command not found</p>`;
+        this.loadComponent(BashErrorComponent, [command, 'command not found']);
       }
-
-    } else {
-      this.content += '<p>josselinbuils$</p>';
     }
   }
 
