@@ -8,9 +8,8 @@ import { Executor } from '../executor';
 })
 export class LsComponent implements Executor {
   args: string[];
-  directories: string[];
+  directories: string[] = ['bin', 'boot', 'dev', 'etc', 'home', 'lib', 'media', 'mnt', 'opt', 'proc', 'srv', 'usr', 'var', 'tmp'];
 
   constructor() {
-    this.directories = ['bin', 'boot', 'dev', 'etc', 'home', 'lib', 'media', 'mnt', 'opt', 'proc', 'srv', 'usr', 'var', 'tmp'];
   }
 }

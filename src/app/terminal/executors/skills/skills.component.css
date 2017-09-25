@@ -1,0 +1,15 @@
+:host {
+  display: block;
+}
+
+.green {
+  color: #6A8759;
+}
+
+.orange {
+  color: orange;
+}
+
+p {
+  margin: 5px;
+}

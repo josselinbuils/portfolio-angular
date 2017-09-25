@@ -10,6 +10,7 @@ import { Executor } from './executors/executor';
 import { HelpComponent } from './executors/help/help.component';
 import { LsComponent } from './executors/ls/ls.component';
 import { ProjectsComponent } from './executors/projects/projects.component';
+import { SkillsComponent } from './executors/skills/skills.component';
 import { WorkComponent } from './executors/work/work.component';
 
 enum KEY_CODE {
@@ -25,6 +26,7 @@ const executors = {
   help: HelpComponent,
   ls: LsComponent,
   projects: ProjectsComponent,
+  skills: SkillsComponent,
   work: WorkComponent
 };
 
@@ -61,8 +63,8 @@ export class TerminalComponent implements AfterContentInit, OnInit {
       this.commands.push(str);
       this.commandIndex = this.commands.length;
 
-      if ( executors[command]) {
-        this.loadComponent( executors[command], str.split(' ').slice(1));
+      if (executors[command]) {
+        this.loadComponent(executors[command], str.split(' ').slice(1));
       } else {
         this.loadComponent(BashErrorComponent, [command, 'command not found']);
       }

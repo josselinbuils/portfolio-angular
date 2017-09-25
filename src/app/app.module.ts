@@ -2,39 +2,42 @@ import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 
-import { AppComponent } from './app.component';
-import { TerminalComponent } from './terminal/terminal.component';
 import { AboutComponent } from './terminal/executors/about/about.component';
+import { AppComponent } from './app.component';
+import { BashErrorComponent } from './terminal/executors/bash-error/bash-error.component';
 import { CdComponent } from './terminal/executors/cd/cd.component';
 import { CommandComponent } from './terminal/executors/command/command.component';
-import { BashErrorComponent } from './terminal/executors/bash-error/bash-error.component';
-import { LsComponent } from './terminal/executors/ls/ls.component';
 import { HelpComponent } from './terminal/executors/help/help.component';
-import { WorkComponent } from './terminal/executors/work/work.component';
+import { LsComponent } from './terminal/executors/ls/ls.component';
 import { ProjectsComponent } from './terminal/executors/projects/projects.component';
+import { SkillsComponent } from './terminal/executors/skills/skills.component';
+import { TerminalComponent } from './terminal/terminal.component';
+import { WorkComponent } from './terminal/executors/work/work.component';
 
 @NgModule({
   declarations: [
-    AppComponent,
-    TerminalComponent,
     AboutComponent,
+    AppComponent,
+    BashErrorComponent,
     CdComponent,
     CommandComponent,
-    BashErrorComponent,
-    LsComponent,
     HelpComponent,
-    WorkComponent,
-    ProjectsComponent
+    LsComponent,
+    ProjectsComponent,
+    SkillsComponent,
+    TerminalComponent,
+    WorkComponent
   ],
   entryComponents: [
     AboutComponent,
+    BashErrorComponent,
     CdComponent,
     CommandComponent,
-    BashErrorComponent,
-    LsComponent,
     HelpComponent,
-    WorkComponent,
-    ProjectsComponent
+    LsComponent,
+    ProjectsComponent,
+    SkillsComponent,
+    WorkComponent
   ],
   imports: [
     BrowserModule,
