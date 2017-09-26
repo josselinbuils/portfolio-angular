@@ -9,13 +9,30 @@
 .card {
   width: 237px;
   margin: 5px 0;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.card:hover {
+  background: #444444;
+}
+
+.card, .card:visited, .card:hover, .card:active {
+  color: inherit;
 }
 
 .description {
-  margin: 10px 5px 5px 5px;
+  margin: 10px 5px 10px 5px;
   text-align: justify;
 }
 
 .language {
   float: right;
+}
+
+.updated {
+  text-align: right;
+  font-size: .9em;
 }

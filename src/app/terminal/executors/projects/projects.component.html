@@ -1,5 +1,6 @@
 <p class="light" *ngIf="!repositories">Loading...</p>
-<div class="card" *ngFor="let repos of repositories">
+<a class="card" *ngFor="let repos of repositories" href="{{repos.url}}" target="_blank">
   <p>{{repos.name}}<span class="language">{{repos.language}}</span></p>
   <p class="light description">{{repos.description}}</p>
-</div>
+  <p class="updated">Updated {{repos.updated}}</p>
+</a>
