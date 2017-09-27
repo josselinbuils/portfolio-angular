@@ -1,6 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { Executor } from '../executor';
 
+const commands = [
+  'cat', 'cd', 'chmod', 'chown', 'cp', 'kill', 'locate', 'ls', 'man', 'mkdir', 'mv', 'passwd', 'pwd', 'rm', 'rmdir',
+  'ssh', 'su', 'sudo', 'touch', 'whereis', 'who'
+];
+
 @Component({
   selector: 'app-bash-error',
   templateUrl: './bash-error.component.html',
@@ -16,6 +21,6 @@ export class BashErrorComponent implements Executor, OnInit {
 
   ngOnInit() {
     this.command = this.args[0];
-    this.errorMessage = this.args[1];
+    this.errorMessage = commands.indexOf(this.command) !== -1 ? 'Permission denied' : 'command not found';
   }
 }

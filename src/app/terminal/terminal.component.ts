@@ -1,14 +1,12 @@
 import {
-  AfterContentInit, Component, ComponentFactoryResolver, HostListener, OnInit, ViewChild, ViewContainerRef
+  AfterContentInit, Component, ComponentFactoryResolver, HostListener, OnInit, Type, ViewChild, ViewContainerRef
 } from '@angular/core';
 
 import { AboutComponent } from './executors/about/about.component';
 import { BashErrorComponent } from './executors/bash-error/bash-error.component';
-import { CdComponent } from './executors/cd/cd.component';
 import { CommandComponent } from './executors/command/command.component';
 import { Executor } from './executors/executor';
 import { HelpComponent } from './executors/help/help.component';
-import { LsComponent } from './executors/ls/ls.component';
 import { ProjectsComponent } from './executors/projects/projects.component';
 import { SkillsComponent } from './executors/skills/skills.component';
 import { WorkComponent } from './executors/work/work.component';
@@ -22,9 +20,7 @@ enum KEY_CODE {
 
 const executors = {
   about: AboutComponent,
-  cd: CdComponent,
   help: HelpComponent,
-  ls: LsComponent,
   projects: ProjectsComponent,
   skills: SkillsComponent,
   work: WorkComponent
@@ -48,13 +44,13 @@ export class TerminalComponent implements AfterContentInit, OnInit {
     this.commands = [];
   }
 
-  private loadComponent(component, args) {
+  private loadComponent(component: Type<{}>, args: any[]) {
     const componentFactory = this.componentFactoryResolver.resolveComponentFactory(component);
     const componentRef = this.viewContainerRef.createComponent(componentFactory);
     (<Executor> componentRef.instance).args = args;
   }
 
-  private exec(str) {
+  private exec(str: string) {
     const command = str.trim().split(' ')[0];
 
     this.loadComponent(CommandComponent, [str]);
@@ -66,7 +62,7 @@ export class TerminalComponent implements AfterContentInit, OnInit {
       if (executors[command]) {
         this.loadComponent(executors[command], str.split(' ').slice(1));
       } else {
-        this.loadComponent(BashErrorComponent, [command, 'command not found']);
+        this.loadComponent(BashErrorComponent, [command]);
       }
     }
   }
