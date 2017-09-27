@@ -42,6 +42,10 @@
   white-space: pre;
 }
 
+div + .user-input {
+  margin-top: 2px;
+}
+
 .terminal {
   width: 800px;
   height: 400px;
