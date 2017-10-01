@@ -88,12 +88,22 @@ export class TerminalComponent implements AfterContentInit, OnInit {
       this.commands.push(str);
       this.commandIndex = this.commands.length;
 
-      if (command === 'clear') {
-        this.clear();
-      } else if (executors[command]) {
-        this.loadComponent(executors[command], str.split(' ').slice(1));
-      } else {
-        this.loadComponent(BashErrorComponent, [command]);
+      switch (command) {
+
+        case 'clear':
+          this.clear();
+          break;
+
+        case 'teravia':
+          window.open('/teravia');
+          break;
+
+        default:
+          if (executors[command]) {
+            this.loadComponent(executors[command], str.split(' ').slice(1));
+          } else {
+            this.loadComponent(BashErrorComponent, [command]);
+          }
       }
     }
   }
