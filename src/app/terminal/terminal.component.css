@@ -70,4 +70,14 @@ div + .user-input {
   box-shadow: 0 0 20px #acacac;
   display: flex;
   flex-direction: column;
+  perspective: 300px;
+}
+
+@keyframes spinner {
+  0% {
+    transform: rotate3d(0, 0, 0, 0);
+  }
+  100% {
+    transform: rotate3d(0, 1, 0, 360deg);
+  }
 }

@@ -128,6 +128,19 @@ export class TerminalComponent implements AfterContentInit, OnInit {
           this.clear();
           break;
 
+        case 'flip':
+          if (!this.style['transform']) {
+            this.style['transform'] = 'rotate3d(0, 1, 0, 180deg)';
+          } else {
+            delete this.style['transform'];
+          }
+          break;
+
+        case 'rotate':
+          this.style['animation'] = 'spinner 0.5s ease-out';
+          setTimeout(() => delete this.style['animation'], 500);
+          break;
+
         case 'teravia':
           window.open('/teravia');
           break;
