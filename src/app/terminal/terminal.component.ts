@@ -46,6 +46,7 @@ export class TerminalComponent implements AfterContentInit, OnInit {
   private commandIndex: number;
   private commands: string[];
   private components: ComponentRef<{}>[];
+  private lastDisplayProperties: any;
 
   constructor(private componentFactoryResolver: ComponentFactoryResolver, private renderer: Renderer2) {
     this.userInput = '';
@@ -56,12 +57,30 @@ export class TerminalComponent implements AfterContentInit, OnInit {
     this.style = {};
   }
 
-  startMove(): void {
+  maximize(): void {
+    const displayProperties = this.getDisplayProperties();
+    const {x, y, width, height} = displayProperties;
+
+    if (x === -1 && y === -1 && width === (window.innerWidth + 2) && height === (window.innerHeight + 2)) {
+      const {lastX, lastY, lastWidth, lastHeight} = this.lastDisplayProperties;
+      this.setDisplayProperties(lastX, lastY, lastWidth, lastHeight);
+    } else {
+      this.lastDisplayProperties = {lastX: x, lastY: y, lastWidth: width, lastHeight: height};
+      this.setDisplayProperties(-1, -1, window.innerWidth + 2, window.innerHeight + 2);
+    }
+  }
+
+  startMove(downEvent: MouseEvent): void {
+
+    if ((<any> downEvent.target).classList.value.indexOf('maximize') !== -1) {
+      return;
+    }
+
     this.contentSelectable = false;
 
-    const cancelMouseMove: () => void = this.renderer.listen('window', 'mousemove', (event: MouseEvent) => {
-      this.style['left.px'] += event.movementX;
-      this.style['top.px'] += event.movementY;
+    const cancelMouseMove: () => void = this.renderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
+      this.style['left.px'] += moveEvent.movementX;
+      this.style['top.px'] += moveEvent.movementY;
     });
 
     const cancelMouseUp: () => void = this.renderer.listen('window', 'mouseup', () => {
@@ -74,9 +93,9 @@ export class TerminalComponent implements AfterContentInit, OnInit {
   startResize(): void {
     this.contentSelectable = false;
 
-    const cancelMouseMove: () => void = this.renderer.listen('window', 'mousemove', (event: MouseEvent) => {
-      this.style['width.px'] += event.movementX;
-      this.style['height.px'] += event.movementY;
+    const cancelMouseMove: () => void = this.renderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
+      this.style['width.px'] += moveEvent.movementX;
+      this.style['height.px'] += moveEvent.movementY;
     });
 
     const cancelMouseUp: () => void = this.renderer.listen('window', 'mouseup', () => {
@@ -123,11 +142,27 @@ export class TerminalComponent implements AfterContentInit, OnInit {
     }
   }
 
+  private getDisplayProperties(): any {
+    return {
+      x: this.style['left.px'],
+      y: this.style['top.px'],
+      width: this.style['width.px'],
+      height: this.style['height.px']
+    };
+  }
+
   private loadComponent(component: Type<{}>, args: any[]) {
     const componentFactory = this.componentFactoryResolver.resolveComponentFactory(component);
     const componentRef = this.viewContainerRef.createComponent(componentFactory);
     (<Executor> componentRef.instance).args = args;
     this.components.push(componentRef);
+  }
+
+  private setDisplayProperties(x: number, y: number, width: number, height: number): void {
+    this.style['left.px'] = x;
+    this.style['top.px'] = y;
+    this.style['width.px'] = width;
+    this.style['height.px'] = height;
   }
 
   @HostListener('window:keydown', ['$event'])
@@ -172,10 +207,10 @@ export class TerminalComponent implements AfterContentInit, OnInit {
     const content = this.contentElementRef.nativeElement;
     const terminal = this.terminalElementRef.nativeElement;
 
-    this.style['left.px'] = Math.round((window.screen.width - terminal.clientWidth) * 0.5);
-    this.style['top.px'] = Math.round((window.screen.height - terminal.clientHeight) * 0.15);
-    this.style['width.px'] = terminal.clientWidth;
-    this.style['height.px'] = terminal.clientHeight;
+    const x = Math.round((window.innerWidth - terminal.clientWidth) * 0.5);
+    const y = Math.round((window.innerHeight - terminal.clientHeight) * 0.2);
+
+    this.setDisplayProperties(x, y, terminal.clientWidth, terminal.clientHeight);
 
     new MutationObserver(() => content.scrollTop = content.scrollHeight - content.clientHeight)
       .observe(content, {

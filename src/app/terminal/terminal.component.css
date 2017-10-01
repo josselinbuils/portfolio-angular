@@ -35,6 +35,11 @@
   cursor: default;
 }
 
+.maximize:hover {
+  background: #8fd800;
+  border-color: #71ab00;
+}
+
 .resize {
   width: 10px;
   height: 10px;
