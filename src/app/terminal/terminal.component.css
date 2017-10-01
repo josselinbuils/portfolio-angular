@@ -51,10 +51,9 @@ div + .user-input {
   height: 400px;
   position: fixed;
   top: 30%;
-  left: 0;
-  right: 0;
+  left: 50%;
   margin: auto;
-  transform: translateY(-30%);
+  transform: translateX(-50%) translateY(-30%);
   border-radius: 6px; /* Needed by box shadow */
   box-shadow: 0 0 20px #acacac;
   display: flex;
