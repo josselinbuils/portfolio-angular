@@ -8,7 +8,7 @@ img {
 }
 
 .info {
-  margin: 0 10px;
+  margin: 0 45px;
   display: flex;
   flex-direction: column;
   justify-content: space-around;
