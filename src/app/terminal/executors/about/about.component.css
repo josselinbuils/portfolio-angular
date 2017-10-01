@@ -7,11 +7,14 @@ img {
   height: 100%;
 }
 
-div {
-  margin: 0 45px;
+.info {
+  margin: 0 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
 }
 
 .resume {
-  margin: 45px 0;
   font-size: 3em;
+  max-width: 22ch;
 }

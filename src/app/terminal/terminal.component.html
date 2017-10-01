@@ -1,9 +1,10 @@
-<div #terminal class="terminal" [ngStyle]="{'left.px': leftPosition, 'top.px': topPosition}">
+<div #terminal class="terminal" [ngStyle]="style">
   <div class="titlebar" (mousedown)="startMove()">
     <div class="maximize"></div>
   </div>
-  <div class="content" [ngStyle]="{'user-select': (isMoving ? 'none' : 'auto')}">
+  <div #content class="content" [ngStyle]="{'user-select': (contentSelectable ? 'auto' : 'none')}">
     <div #vc></div>
     <p class="user-input">josselinbuils$&nbsp;{{userInput}}</p>
   </div>
+  <div class="resize" (mousedown)="startResize()"></div>
 </div>

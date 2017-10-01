@@ -35,13 +35,13 @@ const executors = {
   styleUrls: ['./terminal.component.css']
 })
 export class TerminalComponent implements AfterContentInit, OnInit {
+  @ViewChild('content', {read: ElementRef}) contentElementRef: ElementRef;
   @ViewChild('terminal', {read: ElementRef}) terminalElementRef: ElementRef;
   @ViewChild('vc', {read: ViewContainerRef}) viewContainerRef: ViewContainerRef;
 
   userInput: string;
-  isMoving: boolean;
-  leftPosition: number;
-  topPosition: number;
+  contentSelectable: boolean;
+  style: any;
 
   private commandIndex: number;
   private commands: string[];
@@ -52,23 +52,38 @@ export class TerminalComponent implements AfterContentInit, OnInit {
     this.commandIndex = 0;
     this.commands = [];
     this.components = [];
-    this.isMoving = false;
+    this.contentSelectable = true;
+    this.style = {};
   }
 
   startMove(): void {
-    const terminalBoundingRect = this.terminalElementRef.nativeElement.getBoundingClientRect();
-
-    this.leftPosition = Math.round(terminalBoundingRect.left + terminalBoundingRect.width * 0.5);
-    this.topPosition = Math.round(terminalBoundingRect.top + terminalBoundingRect.height * 0.3);
-    this.isMoving = true;
+    this.contentSelectable = false;
 
     const cancelMouseMove: () => void = this.renderer.listen('window', 'mousemove', (event: MouseEvent) => {
-      this.leftPosition += event.movementX;
-      this.topPosition += event.movementY;
+      this.style['left.px'] += event.movementX;
+      this.style['top.px'] += event.movementY;
     });
 
     const cancelMouseUp: () => void = this.renderer.listen('window', 'mouseup', () => {
-      this.isMoving = false;
+      this.contentSelectable = true;
+      cancelMouseMove();
+      cancelMouseUp();
+    });
+  }
+
+  startResize(): void {
+    this.contentSelectable = false;
+
+    const cancelMouseMove: () => void = this.renderer.listen('window', 'mousemove', (event: MouseEvent) => {
+      this.style['width.px'] += event.movementX;
+      this.style['height.px'] += event.movementY;
+    });
+
+    const cancelMouseUp: () => void = this.renderer.listen('window', 'mouseup', () => {
+      const terminal = this.terminalElementRef.nativeElement;
+      this.style['width.px'] = terminal.clientWidth;
+      this.style['height.px'] = terminal.clientHeight;
+      this.contentSelectable = true;
       cancelMouseMove();
       cancelMouseUp();
     });
@@ -154,7 +169,13 @@ export class TerminalComponent implements AfterContentInit, OnInit {
   }
 
   ngAfterContentInit(): void {
-    const content = document.querySelector('app-terminal .content');
+    const content = this.contentElementRef.nativeElement;
+    const terminal = this.terminalElementRef.nativeElement;
+
+    this.style['left.px'] = Math.round((window.screen.width - terminal.clientWidth) * 0.5);
+    this.style['top.px'] = Math.round((window.screen.height - terminal.clientHeight) * 0.15);
+    this.style['width.px'] = terminal.clientWidth;
+    this.style['height.px'] = terminal.clientHeight;
 
     new MutationObserver(() => content.scrollTop = content.scrollHeight - content.clientHeight)
       .observe(content, {
