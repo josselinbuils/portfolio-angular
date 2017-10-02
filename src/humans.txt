@@ -1,0 +1,8 @@
+/* TEAM */
+Your title: Josselin Buils
+Site: josselin.buils@gmail.com.
+Location: Versailles, France
+
+/* SITE */
+Standards: HTML5, CSS3, ES7
+Components: Angular 4
