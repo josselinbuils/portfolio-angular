@@ -1,5 +1,12 @@
+@import '~font-awesome/css/font-awesome.css';
+
 body {
   background: #efefef;
+  color: #efefef;
+}
+
+a, a:hover, a:focus, a:active {
+  color: #efefef !important;
 }
 
 p {
