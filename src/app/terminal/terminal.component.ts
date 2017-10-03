@@ -198,7 +198,7 @@ export class TerminalComponent implements AfterContentInit, OnInit {
 
   @HostListener('window:keydown', ['$event'])
   keyboardListener(event: KeyboardEvent): void {
-    if (!event.altKey && !event.metaKey) {
+    if (!event.altKey && !event.ctrlKey && !event.metaKey) {
       if (event.key.length === 1) {
         this.userInput += event.key;
       } else {
@@ -225,7 +225,8 @@ export class TerminalComponent implements AfterContentInit, OnInit {
             }
         }
       }
-    } else if (!event.altKey && event.metaKey && event.keyCode === KEY_CODE.K) {
+    } else if (!event.altKey && (event.metaKey || event.ctrlKey) && event.keyCode === KEY_CODE.K) {
+      event.preventDefault();
       this.clear();
     }
   }
