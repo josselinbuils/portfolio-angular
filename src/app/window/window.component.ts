@@ -1,4 +1,5 @@
 import { AfterContentInit, Component, ElementRef, Input, Renderer2, ViewChild } from '@angular/core';
+import { WindowManagerService } from '../window-manager.service';
 
 @Component({
   selector: 'app-window',
@@ -8,8 +9,10 @@ import { AfterContentInit, Component, ElementRef, Input, Renderer2, ViewChild } 
 export class WindowComponent implements AfterContentInit {
   @ViewChild('content') contentElementRef: ElementRef;
 
+  @Input() closable: boolean;
   @Input() contentStyle: any;
   @Input() title: string;
+  @Input() id: number;
 
   @Input()
   set scrollTop(value: number) {
@@ -19,7 +22,11 @@ export class WindowComponent implements AfterContentInit {
   private lastDisplayProperties: any;
   private window: HTMLElement;
 
-  constructor(private elementRef: ElementRef, private renderer: Renderer2) {
+  constructor(private elementRef: ElementRef, private renderer: Renderer2, private windowManagerService: WindowManagerService) {
+  }
+
+  close(): void {
+    this.windowManagerService.closeWindow(this.id);
   }
 
   maximize(): void {

@@ -39,16 +39,30 @@
   position: relative;
 }
 
-.maximize {
+.buttons {
+  position: absolute;
+  top: 3px;
+  left: 5px;
+}
+
+.close, .maximize {
   background: rgba(0, 0, 0, 0.1);
   border: 1px solid #acacac;
   height: 10px;
   width: 10px;
   border-radius: 6px;
   cursor: default;
-  position: absolute;
-  left: 8px;
-  top: 5px;
+  margin-left: 3px;
+  display: inline-block;
+}
+
+.close:hover {
+  background: #ff5722;
+  border-color: red;
+}
+
+.maximize {
+  left: 26px;
 }
 
 .maximize:hover {

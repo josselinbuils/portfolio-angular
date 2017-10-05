@@ -1,8 +1,11 @@
 <div class="titlebar" (mousedown)="startMove($event)" (dblclick)="maximize()">
-  <span class="maximize" (click)="maximize()"></span>
+  <div class="buttons">
+    <span *ngIf="closable" class="close" (click)="close()"></span>
+    <span class="maximize" (click)="maximize()"></span>
+  </div>
   <span class="title">{{title}}</span>
 </div>
 <div #content class="content" [ngStyle]="contentStyle">
-  <ng-content ></ng-content>
+  <ng-content></ng-content>
 </div>
 <div class="resize" (mousedown)="startResize($event)"></div>
