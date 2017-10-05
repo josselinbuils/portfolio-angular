@@ -64,11 +64,16 @@ export class WindowComponent implements AfterContentInit {
     });
   }
 
-  startResize(): void {
+  startResize(downEvent: MouseEvent): void {
     this.setSelectable(false);
 
+    const startWidth = this.window.clientWidth;
+    const startHeight = this.window.clientHeight;
+
     const cancelMouseMove: () => void = this.renderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
-      this.setSize(this.window.clientWidth + moveEvent.movementX, this.window.clientHeight + moveEvent.movementY);
+      const width = startWidth + moveEvent.clientX - downEvent.clientX;
+      const height = startHeight + moveEvent.clientY - downEvent.clientY;
+      this.setSize(width, height);
     });
 
     const cancelMouseUp: () => void = this.renderer.listen('window', 'mouseup', () => {

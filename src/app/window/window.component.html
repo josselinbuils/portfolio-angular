@@ -5,4 +5,4 @@
 <div #content class="content" [ngStyle]="contentStyle">
   <ng-content ></ng-content>
 </div>
-<div class="resize" (mousedown)="startResize()"></div>
+<div class="resize" (mousedown)="startResize($event)"></div>
