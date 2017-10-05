@@ -9,10 +9,13 @@ import { WindowManagerService } from '../window-manager.service';
 export class WindowComponent implements AfterContentInit {
   @ViewChild('content') contentElementRef: ElementRef;
 
-  @Input() closable: boolean;
+  @Input() closable = true;
   @Input() contentStyle: any;
-  @Input() title: string;
   @Input() id: number;
+  @Input() resizable = true;
+  @Input() title: string;
+  @Input() width: number;
+  @Input() height: number;
 
   @Input()
   set scrollTop(value: number) {
@@ -128,10 +131,12 @@ export class WindowComponent implements AfterContentInit {
   ngAfterContentInit(): void {
     this.window = this.elementRef.nativeElement;
 
-    const x: number = Math.round((window.innerWidth - this.window.clientWidth) * 0.5);
-    const y: number = Math.round((window.innerHeight - this.window.clientHeight) * 0.2);
+    const width = this.width || this.window.clientWidth;
+    const height = this.height || this.window.clientHeight;
+    const x: number = Math.round((window.innerWidth - width) * 0.5);
+    const y: number = Math.round((window.innerHeight - height) * 0.2);
 
-    this.setSize(this.window.clientWidth, this.window.clientHeight);
+    this.setSize(width, height);
     this.setPosition(x, y);
   }
 }
