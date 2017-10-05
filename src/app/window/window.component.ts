@@ -1,7 +1,5 @@
 import {AfterContentInit, Component, ElementRef, Input, Renderer2, ViewChild} from '@angular/core';
 
-const LIMIT_OFFSET = 1;
-
 @Component({
   selector: 'app-window',
   templateUrl: './window.component.html',
@@ -27,10 +25,10 @@ export class WindowComponent implements AfterContentInit {
   maximize(): void {
     const displayProperties = this.window.getBoundingClientRect();
     const {left, top, width, height} = displayProperties;
-    const xMin = -LIMIT_OFFSET;
-    const yMin = -LIMIT_OFFSET;
-    const maxWidth = window.innerWidth + 2 * LIMIT_OFFSET;
-    const maxHeight = window.innerHeight + 2 * LIMIT_OFFSET;
+    const xMin = -1;
+    const yMin = -1;
+    const maxWidth = window.innerWidth + 2;
+    const maxHeight = window.innerHeight + 2;
 
     if (left === xMin && top === yMin && width === maxWidth && height === maxHeight) {
       const last = this.lastDisplayProperties;
@@ -82,10 +80,10 @@ export class WindowComponent implements AfterContentInit {
   }
 
   private setPosition(x: number, y: number): void {
-    const xMin = -LIMIT_OFFSET;
-    const yMin = -LIMIT_OFFSET;
-    const xMax = window.innerWidth + LIMIT_OFFSET - this.window.clientWidth;
-    const yMax = window.innerHeight + LIMIT_OFFSET - this.window.clientHeight;
+    const xMin = - this.window.clientWidth + 30;
+    const yMin = -1;
+    const xMax = window.innerWidth + 30;
+    const yMax = window.innerHeight - 21;
 
     x = Math.min(Math.max(x, xMin), xMax);
     y = Math.min(Math.max(y, yMin), yMax);
