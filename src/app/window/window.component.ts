@@ -94,8 +94,14 @@ export class WindowComponent implements AfterContentInit {
 
   private setSelectable(selectable: boolean): void {
     const content = this.contentElementRef.nativeElement;
-    this.setStyle('user-select', selectable ? 'auto' : 'none');
-    this.renderer.setStyle(content, 'pointer-events', selectable ? 'auto' : 'none');
+
+    if (selectable) {
+      this.setStyle('user-select', selectable ? 'auto' : 'none');
+      this.renderer.setStyle(content, 'pointer-events', selectable ? 'auto' : 'none');
+    } else {
+      this.renderer.removeStyle(this.window, 'user-select');
+      this.renderer.removeStyle(content, 'pointer-events');
+    }
   }
 
   private setSize(width: number, height: number): void {
