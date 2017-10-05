@@ -36,6 +36,7 @@
   border-bottom-right-radius: 6px;
   flex-grow: 1;
   overflow: auto;
+  position: relative;
 }
 
 .maximize {

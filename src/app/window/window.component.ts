@@ -1,4 +1,4 @@
-import {AfterContentInit, Component, ElementRef, Input, Renderer2, ViewChild} from '@angular/core';
+import { AfterContentInit, Component, ElementRef, Input, Renderer2, ViewChild } from '@angular/core';
 
 @Component({
   selector: 'app-window',
@@ -80,7 +80,7 @@ export class WindowComponent implements AfterContentInit {
   }
 
   private setPosition(x: number, y: number): void {
-    const xMin = - this.window.clientWidth + 30;
+    const xMin = -this.window.clientWidth + 30;
     const yMin = -1;
     const xMax = window.innerWidth + 30;
     const yMax = window.innerHeight - 21;
@@ -93,7 +93,9 @@ export class WindowComponent implements AfterContentInit {
   }
 
   private setSelectable(selectable: boolean): void {
+    const content = this.contentElementRef.nativeElement;
     this.setStyle('user-select', selectable ? 'auto' : 'none');
+    this.renderer.setStyle(content, 'pointer-events', selectable ? 'auto' : 'none');
   }
 
   private setSize(width: number, height: number): void {

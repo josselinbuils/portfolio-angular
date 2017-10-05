@@ -3,14 +3,16 @@ import {
   OnInit, Type, ViewChild, ViewContainerRef
 } from '@angular/core';
 
-import {AboutComponent} from './executors/about/about.component';
-import {BashErrorComponent} from './executors/bash-error/bash-error.component';
-import {CommandComponent} from './executors/command/command.component';
-import {Executor} from './executors/executor';
-import {HelpComponent} from './executors/help/help.component';
-import {ProjectsComponent} from './executors/projects/projects.component';
-import {SkillsComponent} from './executors/skills/skills.component';
-import {WorkComponent} from './executors/work/work.component';
+import { AboutComponent } from './executors/about/about.component';
+import { BashErrorComponent } from './executors/bash-error/bash-error.component';
+import { CommandComponent } from './executors/command/command.component';
+import { Executor } from './executors/executor';
+import { HelpComponent } from './executors/help/help.component';
+import { ProjectsComponent } from './executors/projects/projects.component';
+import { SkillsComponent } from './executors/skills/skills.component';
+import { WorkComponent } from './executors/work/work.component';
+import { WindowManagerService } from '../window-manager.service';
+import { BrowserComponent } from '../browser/browser.component';
 
 enum KEY_CODE {
   BACK_SPACE = 8,
@@ -45,7 +47,7 @@ export class TerminalComponent implements AfterContentInit, OnInit {
   private commands: string[];
   private components: ComponentRef<{}>[];
 
-  constructor(private componentFactoryResolver: ComponentFactoryResolver) {
+  constructor(private componentFactoryResolver: ComponentFactoryResolver, private windowManagerService: WindowManagerService) {
     this.userInput = '';
     this.commandIndex = 0;
     this.commands = [];
@@ -81,7 +83,7 @@ export class TerminalComponent implements AfterContentInit, OnInit {
           break;
 
         case 'teravia':
-          window.open('/teravia');
+          this.windowManagerService.openWindow(BrowserComponent);
           break;
 
         default:

@@ -12,6 +12,8 @@ import { SkillsComponent } from './terminal/executors/skills/skills.component';
 import { TerminalComponent } from './terminal/terminal.component';
 import { WorkComponent } from './terminal/executors/work/work.component';
 import { WindowComponent } from './window/window.component';
+import { BrowserComponent } from './browser/browser.component';
+import { WindowManagerService } from './window-manager.service';
 
 @NgModule({
   declarations: [
@@ -24,11 +26,13 @@ import { WindowComponent } from './window/window.component';
     SkillsComponent,
     TerminalComponent,
     WorkComponent,
-    WindowComponent
+    WindowComponent,
+    BrowserComponent
   ],
   entryComponents: [
     AboutComponent,
     BashErrorComponent,
+    BrowserComponent,
     CommandComponent,
     HelpComponent,
     ProjectsComponent,
@@ -39,7 +43,7 @@ import { WindowComponent } from './window/window.component';
     BrowserModule,
     HttpClientModule
   ],
-  providers: [],
+  providers: [WindowManagerService],
   bootstrap: [AppComponent]
 })
 export class AppModule {
