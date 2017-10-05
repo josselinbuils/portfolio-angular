@@ -11,10 +11,11 @@
 }
 
 .title {
-  color: black;
-  font-family: Helvetica, Arial, sans-serif;
+  color: #1b1b1b;
+  font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
   font-size: .8em;
   line-height: 22px;
+  cursor: default;
 }
 
 .titlebar {
