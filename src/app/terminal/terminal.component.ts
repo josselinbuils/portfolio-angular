@@ -1,8 +1,6 @@
 import {
   AfterContentInit, Component, ComponentFactory, ComponentFactoryResolver, ComponentRef, ElementRef, HostListener,
-  OnInit, Renderer2,
-  Type, ViewChild,
-  ViewContainerRef
+  OnInit, Type, ViewChild, ViewContainerRef
 } from '@angular/core';
 
 import {AboutComponent} from './executors/about/about.component';
@@ -30,93 +28,28 @@ const executors = {
   work: WorkComponent
 };
 
-const LIMIT_OFFSET = 1;
-
 @Component({
   selector: 'app-terminal',
   templateUrl: './terminal.component.html',
   styleUrls: ['./terminal.component.css']
 })
 export class TerminalComponent implements AfterContentInit, OnInit {
-  @ViewChild('content') contentElementRef: ElementRef;
   @ViewChild('terminal') terminalElementRef: ElementRef;
-  @ViewChild('vc', {read: ViewContainerRef}) viewContainerRef: ViewContainerRef;
+  @ViewChild('commands', {read: ViewContainerRef}) commandsViewContainerRef: ViewContainerRef;
 
+  contentStyle = {background: '#333333'};
   userInput: string;
-  contentSelectable: boolean;
-  style: any;
+  scrollTop: number;
 
   private commandIndex: number;
   private commands: string[];
   private components: ComponentRef<{}>[];
-  private lastDisplayProperties: any;
-  private terminal: HTMLElement;
 
-  constructor(private componentFactoryResolver: ComponentFactoryResolver, private renderer: Renderer2) {
+  constructor(private componentFactoryResolver: ComponentFactoryResolver) {
     this.userInput = '';
     this.commandIndex = 0;
     this.commands = [];
     this.components = [];
-    this.contentSelectable = true;
-    this.style = {};
-  }
-
-  maximize(): void {
-    const displayProperties = this.getDisplayProperties();
-    const {x, y, width, height} = displayProperties;
-    const xMin = -LIMIT_OFFSET;
-    const yMin = -LIMIT_OFFSET;
-    const maxWidth = window.innerWidth + 2 * LIMIT_OFFSET;
-    const maxHeight = window.innerHeight + 2 * LIMIT_OFFSET;
-
-    if (x === xMin && y === yMin && width === maxWidth && height === maxHeight) {
-      const last = this.lastDisplayProperties;
-      this.setSize(last.width, last.height);
-      this.setPosition(last.x, last.y);
-    } else {
-      this.lastDisplayProperties = displayProperties;
-      this.setPosition(xMin, yMin);
-      this.setSize(maxWidth, maxHeight);
-    }
-  }
-
-  startMove(downEvent: MouseEvent): void {
-
-    if ((<HTMLElement> downEvent.target).className.indexOf('maximize') !== -1) {
-      return;
-    }
-
-    const terminalBoundingRect: any = this.terminal.getBoundingClientRect();
-    const dx: number = terminalBoundingRect.left - downEvent.clientX;
-    const dy: number = terminalBoundingRect.top - downEvent.clientY;
-
-    this.contentSelectable = false;
-
-    const cancelMouseMove: () => void = this.renderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
-      this.setPosition(moveEvent.clientX + dx, moveEvent.clientY + dy);
-    });
-
-    const cancelMouseUp: () => void = this.renderer.listen('window', 'mouseup', () => {
-      this.contentSelectable = true;
-      cancelMouseMove();
-      cancelMouseUp();
-    });
-  }
-
-  startResize(): void {
-    this.contentSelectable = false;
-
-    const cancelMouseMove: () => void = this.renderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
-      this.style['width.px'] += moveEvent.movementX;
-      this.style['height.px'] += moveEvent.movementY;
-    });
-
-    const cancelMouseUp: () => void = this.renderer.listen('window', 'mouseup', () => {
-      this.setSize(this.terminal.clientWidth, this.terminal.clientHeight);
-      this.contentSelectable = true;
-      cancelMouseMove();
-      cancelMouseUp();
-    });
   }
 
   private clear(): void {
@@ -140,16 +73,11 @@ export class TerminalComponent implements AfterContentInit, OnInit {
           break;
 
         case 'flip':
-          if (!this.style['transform']) {
-            this.style['transform'] = 'rotate3d(0, 1, 0, 180deg)';
+          if (!this.contentStyle['transform']) {
+            this.contentStyle['transform'] = 'rotate3d(0, 1, 0, 180deg)';
           } else {
-            delete this.style['transform'];
+            delete this.contentStyle['transform'];
           }
-          break;
-
-        case 'rotate':
-          this.style['animation'] = 'spinner 0.5s ease-out';
-          setTimeout(() => delete this.style['animation'], 500);
           break;
 
         case 'teravia':
@@ -166,34 +94,11 @@ export class TerminalComponent implements AfterContentInit, OnInit {
     }
   }
 
-  private getDisplayProperties(): any {
-    return {
-      x: this.style['left.px'],
-      y: this.style['top.px'],
-      width: this.style['width.px'],
-      height: this.style['height.px']
-    };
-  }
-
   private loadComponent(component: Type<{}>, args: any[]) {
     const componentFactory: ComponentFactory<{}> = this.componentFactoryResolver.resolveComponentFactory(component);
-    const componentRef: ComponentRef<{}> = this.viewContainerRef.createComponent(componentFactory);
+    const componentRef: ComponentRef<{}> = this.commandsViewContainerRef.createComponent(componentFactory);
     (<Executor> componentRef.instance).args = args;
     this.components.push(componentRef);
-  }
-
-  private setPosition(x: number, y: number): void {
-    const xMin = -LIMIT_OFFSET;
-    const yMin = -LIMIT_OFFSET;
-    const xMax = window.innerWidth + LIMIT_OFFSET - this.style['width.px'];
-    const yMax = window.innerHeight + LIMIT_OFFSET - this.style['height.px'];
-    this.style['left.px'] = Math.min(Math.max(x, xMin), xMax);
-    this.style['top.px'] = Math.min(Math.max(y, yMin), yMax);
-  }
-
-  private setSize(width: number, height: number): void {
-    this.style['width.px'] = width;
-    this.style['height.px'] = height;
   }
 
   @HostListener('window:keydown', ['$event'])
@@ -236,18 +141,9 @@ export class TerminalComponent implements AfterContentInit, OnInit {
   }
 
   ngAfterContentInit(): void {
-    const content: HTMLElement = this.contentElementRef.nativeElement;
-
-    this.terminal = this.terminalElementRef.nativeElement;
-
-    const x: number = Math.round((window.innerWidth - this.terminal.clientWidth) * 0.5);
-    const y: number = Math.round((window.innerHeight - this.terminal.clientHeight) * 0.2);
-
-    this.setSize(this.terminal.clientWidth, this.terminal.clientHeight);
-    this.setPosition(x, y);
-
-    new MutationObserver(() => content.scrollTop = content.scrollHeight - content.clientHeight)
-      .observe(content, {
+    const terminal = this.terminalElementRef.nativeElement;
+    new MutationObserver(() => this.scrollTop = terminal.clientHeight)
+      .observe(terminal, {
         childList: true,
         subtree: true
       });

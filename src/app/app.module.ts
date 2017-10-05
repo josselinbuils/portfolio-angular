@@ -11,6 +11,7 @@ import { ProjectsComponent } from './terminal/executors/projects/projects.compon
 import { SkillsComponent } from './terminal/executors/skills/skills.component';
 import { TerminalComponent } from './terminal/terminal.component';
 import { WorkComponent } from './terminal/executors/work/work.component';
+import { WindowComponent } from './window/window.component';
 
 @NgModule({
   declarations: [
@@ -22,7 +23,8 @@ import { WorkComponent } from './terminal/executors/work/work.component';
     ProjectsComponent,
     SkillsComponent,
     TerminalComponent,
-    WorkComponent
+    WorkComponent,
+    WindowComponent
   ],
   entryComponents: [
     AboutComponent,

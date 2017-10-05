@@ -1,10 +1,6 @@
-<div #terminal class="terminal" [ngStyle]="style">
-  <div class="titlebar" (mousedown)="startMove($event)" (dblclick)="maximize()">
-    <div class="maximize" (click)="maximize()"></div>
-  </div>
-  <div #content class="content" [ngStyle]="{'user-select': (contentSelectable ? 'auto' : 'none')}">
-    <div #vc></div>
+<app-window [contentStyle]="contentStyle" [scrollTop]="scrollTop" title="Terminal">
+  <div #terminal class="terminal">
+    <div #commands></div>
     <p class="user-input">josselinbuils$&nbsp;{{userInput}}</p>
   </div>
-  <div class="resize" (mousedown)="startResize()"></div>
-</div>
+</app-window>
