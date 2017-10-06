@@ -104,36 +104,38 @@ export class TerminalComponent extends WindowInstance implements AfterContentIni
 
   @HostListener('window:keydown', ['$event'])
   keyboardListener(event: KeyboardEvent): void {
-    if (!event.altKey && !event.ctrlKey && !event.metaKey) {
-      if (event.key.length === 1) {
-        this.userInput += event.key;
-      } else {
-        switch (event.keyCode) {
-          case KEY_CODE.BACK_SPACE:
-            this.userInput = this.userInput.slice(0, -1);
-            break;
-          case KEY_CODE.ENTER:
-            this.exec(this.userInput);
-            this.userInput = '';
-            break;
-          case KEY_CODE.UP:
-            event.preventDefault();
-            if (this.commandIndex > 0) {
-              this.commandIndex--;
-              this.userInput = this.commands[this.commandIndex];
-            }
-            break;
-          case KEY_CODE.DOWN:
-            event.preventDefault();
-            if (this.commandIndex < (this.commands.length - 1)) {
-              this.commandIndex++;
-              this.userInput = this.commands[this.commandIndex];
-            }
+    if (this.active) {
+      if (!event.altKey && !event.ctrlKey && !event.metaKey) {
+        if (event.key.length === 1) {
+          this.userInput += event.key;
+        } else {
+          switch (event.keyCode) {
+            case KEY_CODE.BACK_SPACE:
+              this.userInput = this.userInput.slice(0, -1);
+              break;
+            case KEY_CODE.ENTER:
+              this.exec(this.userInput);
+              this.userInput = '';
+              break;
+            case KEY_CODE.UP:
+              event.preventDefault();
+              if (this.commandIndex > 0) {
+                this.commandIndex--;
+                this.userInput = this.commands[this.commandIndex];
+              }
+              break;
+            case KEY_CODE.DOWN:
+              event.preventDefault();
+              if (this.commandIndex < (this.commands.length - 1)) {
+                this.commandIndex++;
+                this.userInput = this.commands[this.commandIndex];
+              }
+          }
         }
+      } else if (!event.altKey && (event.metaKey || event.ctrlKey) && event.keyCode === KEY_CODE.K) {
+        event.preventDefault();
+        this.clear();
       }
-    } else if (!event.altKey && (event.metaKey || event.ctrlKey) && event.keyCode === KEY_CODE.K) {
-      event.preventDefault();
-      this.clear();
     }
   }
 
