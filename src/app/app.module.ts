@@ -20,14 +20,14 @@ import { WindowManagerService } from './window-manager.service';
     AboutComponent,
     AppComponent,
     BashErrorComponent,
+    BrowserComponent,
     CommandComponent,
     HelpComponent,
     ProjectsComponent,
     SkillsComponent,
     TerminalComponent,
-    WorkComponent,
     WindowComponent,
-    BrowserComponent
+    WorkComponent
   ],
   entryComponents: [
     AboutComponent,

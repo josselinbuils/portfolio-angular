@@ -97,7 +97,7 @@ export class WindowComponent implements AfterContentInit {
   private setPosition(x: number, y: number): void {
     const xMin = -this.window.clientWidth + 30;
     const yMin = -1;
-    const xMax = window.innerWidth + 30;
+    const xMax = window.innerWidth - 30;
     const yMax = window.innerHeight - 21;
 
     x = Math.min(Math.max(x, xMin), xMax);
