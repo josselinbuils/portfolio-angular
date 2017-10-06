@@ -11,7 +11,6 @@
   text-decoration: none;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
 }
 
 .card:hover {
@@ -23,8 +22,30 @@
 }
 
 .description {
-  margin: 10px 5px 10px 5px;
   text-align: justify;
+  flex-grow: 1;
+}
+
+.preview {
+  margin: 10px 0;
+  height: 129px;
+  line-height: 129px;
+  font-size: 50px;
+  text-align: center;
+}
+
+.preview i {
+  vertical-align: middle;
+}
+
+.preview img {
+  width: 100%;
+  height: 100%;
+  opacity: 0.8;
+}
+
+.card:hover .preview img {
+  opacity: 1;
 }
 
 .language {
@@ -34,4 +55,5 @@
 .updated {
   text-align: right;
   font-size: .9em;
+  margin-top: 10px;
 }

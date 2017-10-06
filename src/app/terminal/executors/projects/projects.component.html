@@ -1,6 +1,10 @@
 <p class="light" *ngIf="!repositories">Loading...</p>
 <a class="card" *ngFor="let repos of repositories" href="{{repos.url}}" target="_blank">
   <p>{{repos.name}}<span class="language">{{repos.language}}</span></p>
+  <div class="preview">
+    <img [src]="repos.imageURL" *ngIf="repos.imageURL" />
+    <i class="fa fa-camera" aria-hidden="true" *ngIf="!repos.imageURL"></i>
+  </div>
   <p class="light description">{{repos.description}}</p>
   <p class="updated">Updated {{repos.updated}}</p>
 </a>
