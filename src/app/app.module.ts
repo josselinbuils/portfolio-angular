@@ -9,6 +9,7 @@ import { CommandComponent } from './terminal/executors/command/command.component
 import { HelpComponent } from './terminal/executors/help/help.component';
 import { ProjectsComponent } from './terminal/executors/projects/projects.component';
 import { SkillsComponent } from './terminal/executors/skills/skills.component';
+import { TaskBarComponent } from './task-bar/task-bar.component';
 import { TerminalComponent } from './terminal/terminal.component';
 import { WorkComponent } from './terminal/executors/work/work.component';
 import { WindowComponent } from './window/window.component';
@@ -25,6 +26,7 @@ import { WindowManagerService } from './window-manager.service';
     HelpComponent,
     ProjectsComponent,
     SkillsComponent,
+    TaskBarComponent,
     TerminalComponent,
     WindowComponent,
     WorkComponent
@@ -37,6 +39,7 @@ import { WindowManagerService } from './window-manager.service';
     HelpComponent,
     ProjectsComponent,
     SkillsComponent,
+    TerminalComponent,
     WorkComponent
   ],
   imports: [

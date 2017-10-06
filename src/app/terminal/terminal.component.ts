@@ -13,6 +13,7 @@ import { SkillsComponent } from './executors/skills/skills.component';
 import { WorkComponent } from './executors/work/work.component';
 import { WindowManagerService } from '../window-manager.service';
 import { BrowserComponent } from '../browser/browser.component';
+import { WindowInstance } from '../window/window-instance';
 
 enum KEY_CODE {
   BACK_SPACE = 8,
@@ -35,23 +36,21 @@ const executors = {
   templateUrl: './terminal.component.html',
   styleUrls: ['./terminal.component.css']
 })
-export class TerminalComponent implements AfterContentInit, OnInit {
+export class TerminalComponent extends WindowInstance implements AfterContentInit, OnInit {
   @ViewChild('terminal') terminalElementRef: ElementRef;
   @ViewChild('commands', {read: ViewContainerRef}) commandsViewContainerRef: ViewContainerRef;
 
-  contentStyle = {background: '#333333'};
-  userInput: string;
+  contentStyle = {background: 'rgba(30, 30, 30, 0.9)'};
+  userInput = '';
   scrollTop: number;
 
-  private commandIndex: number;
-  private commands: string[];
-  private components: ComponentRef<{}>[];
+  private commandIndex = 0;
+  private commands: string[] = [];
+  private components: ComponentRef<{}>[] = [];
 
   constructor(private componentFactoryResolver: ComponentFactoryResolver, private windowManagerService: WindowManagerService) {
-    this.userInput = '';
-    this.commandIndex = 0;
-    this.commands = [];
-    this.components = [];
+    super();
+    this.iconClass = 'fa-terminal';
   }
 
   private clear(): void {

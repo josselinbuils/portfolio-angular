@@ -1,11 +1,13 @@
-<div class="titlebar" (mousedown)="startMove($event)" (dblclick)="maximize()">
-  <div class="buttons">
-    <span *ngIf="closable" class="close" (click)="close()"></span>
-    <span *ngIf="resizable" class="maximize" (click)="maximize()"></span>
+<div #window class="window" [ngClass]="{active: active}" (click)="select()">
+  <div class="titlebar" (mousedown)="startMove($event)" (dblclick)="maximize()">
+    <div class="buttons">
+      <span *ngIf="closable" class="close" (click)="close()"></span>
+      <span *ngIf="resizable" class="maximize" (click)="maximize()"></span>
+    </div>
+    <span class="title">{{title}}</span>
   </div>
-  <span class="title">{{title}}</span>
+  <div #content class="content" [ngStyle]="contentStyle">
+    <ng-content></ng-content>
+  </div>
+  <div *ngIf="resizable" class="resize" (mousedown)="startResize($event)"></div>
 </div>
-<div #content class="content" [ngStyle]="contentStyle">
-  <ng-content></ng-content>
-</div>
-<div *ngIf="resizable" class="resize" (mousedown)="startResize($event)"></div>

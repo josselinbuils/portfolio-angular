@@ -1,4 +1,3 @@
-<app-window [closable]="true" [contentStyle]="contentStyle" [id]="windowId" [resizable]="false" title="Teravia"
-            [width]="1368" [height]="793">
-  <iframe src="https://josselinbuils.me/teravia" frameborder="0" height="100%" width="100%"></iframe>
+<app-window [active]="active" [closable]="true" [id]="id" [resizable]="false" title="Teravia" [width]="1368" [height]="793">
+  <iframe [ngClass]="{inactive: !active}" src="https://josselinbuils.me/teravia" frameborder="0" height="100%" width="100%"></iframe>
 </app-window>

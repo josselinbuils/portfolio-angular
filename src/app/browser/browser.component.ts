@@ -6,10 +6,9 @@ import { WindowInstance } from '../window/window-instance';
   templateUrl: './browser.component.html',
   styleUrls: ['./browser.component.css']
 })
-export class BrowserComponent implements WindowInstance {
-  contentStyle = {background: '#fff'};
-  windowId: number;
-
+export class BrowserComponent extends WindowInstance {
   constructor() {
+    super();
+    this.iconClass = 'fa-gamepad';
   }
 }

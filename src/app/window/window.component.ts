@@ -8,7 +8,9 @@ import { WindowManagerService } from '../window-manager.service';
 })
 export class WindowComponent implements AfterContentInit {
   @ViewChild('content') contentElementRef: ElementRef;
+  @ViewChild('window') windowElementRef: ElementRef;
 
+  @Input() active = false;
   @Input() closable = true;
   @Input() contentStyle: any;
   @Input() id: number;
@@ -23,9 +25,10 @@ export class WindowComponent implements AfterContentInit {
   }
 
   private lastDisplayProperties: any;
+  private maximized = false;
   private window: HTMLElement;
 
-  constructor(private elementRef: ElementRef, private renderer: Renderer2, private windowManagerService: WindowManagerService) {
+  constructor(private renderer: Renderer2, private windowManagerService: WindowManagerService) {
   }
 
   close(): void {
@@ -33,27 +36,33 @@ export class WindowComponent implements AfterContentInit {
   }
 
   maximize(): void {
-    const displayProperties = this.window.getBoundingClientRect();
-    const {left, top, width, height} = displayProperties;
-    const xMin = -1;
-    const yMin = -1;
-    const maxWidth = window.innerWidth + 2;
-    const maxHeight = window.innerHeight + 2;
-
-    if (left === xMin && top === yMin && width === maxWidth && height === maxHeight) {
-      const last = this.lastDisplayProperties;
-      this.setSize(last.width, last.height);
-      this.setPosition(last.left, last.top);
+    if (this.maximized) {
+      const {left, top, width, height} = this.lastDisplayProperties;
+      this.setSize(width, height);
+      this.setPosition(left, top);
+      this.maximized = false;
     } else {
-      this.lastDisplayProperties = displayProperties;
+      const xMin = 59;
+      const yMin = -1;
+      const maxWidth = window.innerWidth - 58;
+      const maxHeight = window.innerHeight + 2;
+
+      this.lastDisplayProperties = this.window.getBoundingClientRect();
       this.setPosition(xMin, yMin);
       this.setSize(maxWidth, maxHeight);
+      this.maximized = true;
     }
+  }
+
+  select(): void {
+    this.windowManagerService.selectWindow(this.id);
   }
 
   startMove(downEvent: MouseEvent): void {
 
-    if ((<HTMLElement> downEvent.target).className.indexOf('maximize') !== -1) {
+    this.select();
+
+    if (this.maximized || (<HTMLElement> downEvent.target).className.indexOf('maximize') !== -1) {
       return;
     }
 
@@ -75,6 +84,13 @@ export class WindowComponent implements AfterContentInit {
   }
 
   startResize(downEvent: MouseEvent): void {
+
+    this.select();
+
+    if (this.maximized) {
+      return;
+    }
+
     this.setSelectable(false);
 
     const startWidth = this.window.clientWidth;
@@ -95,7 +111,7 @@ export class WindowComponent implements AfterContentInit {
   }
 
   private setPosition(x: number, y: number): void {
-    const xMin = -this.window.clientWidth + 30;
+    const xMin = -this.window.clientWidth + 90;
     const yMin = -1;
     const xMax = window.innerWidth - 30;
     const yMax = window.innerHeight - 21;
@@ -129,12 +145,14 @@ export class WindowComponent implements AfterContentInit {
   }
 
   ngAfterContentInit(): void {
-    this.window = this.elementRef.nativeElement;
+    this.window = this.windowElementRef.nativeElement;
 
     const width = this.width || this.window.clientWidth;
     const height = this.height || this.window.clientHeight;
     const x: number = Math.round((window.innerWidth - width) * 0.5);
     const y: number = Math.round((window.innerHeight - height) * 0.2);
+
+    console.log(width, this.width, this.window.clientWidth);
 
     this.setSize(width, height);
     this.setPosition(x, y);

@@ -8,7 +8,4 @@ import { Executor } from '../executor';
 })
 export class WorkComponent implements Executor {
   args: string[];
-
-  constructor() {
-  }
 }

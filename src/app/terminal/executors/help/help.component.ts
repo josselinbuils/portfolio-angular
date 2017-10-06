@@ -8,21 +8,17 @@ import { Executor } from '../executor';
 })
 export class HelpComponent implements Executor {
   args: string[];
-  commands: any[];
-
-  constructor() {
-    this.commands = [{
-      command: 'projects',
-      description: 'my GitHub projects'
-    }, {
-      command: 'skills',
-      description: 'my main skills'
-    }, {
-      command: 'teravia',
-      description: 'a small html5 game'
-    }, {
-      command: 'work',
-      description: 'my work experience'
-    }];
-  }
+  commands = [{
+    command: 'projects',
+    description: 'my GitHub projects'
+  }, {
+    command: 'skills',
+    description: 'my main skills'
+  }, {
+    command: 'teravia',
+    description: 'a small html5 game'
+  }, {
+    command: 'work',
+    description: 'my work experience'
+  }];
 }

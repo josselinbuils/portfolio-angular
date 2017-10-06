@@ -1,3 +1,7 @@
 iframe {
   position: absolute;
 }
+
+iframe.inactive {
+  pointer-events: none;
+}

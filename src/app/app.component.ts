@@ -1,5 +1,6 @@
 import { Component, ViewContainerRef } from '@angular/core';
 import { WindowManagerService } from './window-manager.service';
+import { TerminalComponent } from './terminal/terminal.component';
 
 @Component({
   selector: 'app-root',
@@ -9,5 +10,6 @@ import { WindowManagerService } from './window-manager.service';
 export class AppComponent {
   constructor(private viewContainerRef: ViewContainerRef, private windowManagerService: WindowManagerService) {
     windowManagerService.setViewContainerRef(viewContainerRef);
+    windowManagerService.openWindow(TerminalComponent);
   }
 }

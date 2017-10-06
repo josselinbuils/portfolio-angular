@@ -8,6 +8,4 @@ import { Executor } from '../executor';
 })
 export class AboutComponent implements Executor {
   args: string[];
-
-  constructor() { }
 }
