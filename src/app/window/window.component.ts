@@ -152,8 +152,6 @@ export class WindowComponent implements AfterContentInit {
     const x: number = Math.round((window.innerWidth - width) * 0.5);
     const y: number = Math.round((window.innerHeight - height) * 0.2);
 
-    console.log(width, this.width, this.window.clientWidth);
-
     this.setSize(width, height);
     this.setPosition(x, y);
   }

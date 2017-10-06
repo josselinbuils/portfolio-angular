@@ -4,7 +4,7 @@ import { WindowInstance } from './window/window-instance';
 
 @Injectable()
 export class WindowManagerService {
-  private components: ComponentRef<{}>[] = [];
+  private components: { id: number, ref: ComponentRef<{}> }[] = [];
   private id = -1;
   private subject: BehaviorSubject<WindowInstance[]> = new BehaviorSubject<WindowInstance[]>(<WindowInstance[]> []);
   private viewContainerRef: ViewContainerRef;
@@ -17,15 +17,10 @@ export class WindowManagerService {
   }
 
   closeWindow(id: number) {
-    const index = this.components.findIndex(componentRef => (<WindowInstance> componentRef.instance).id === id);
-
-    if (index !== -1) {
-      this.components[index].destroy();
-      this.components.splice(index, 1);
-      this.publishWindowInstances();
-    } else {
-      throw Error(`No window found with id ${id}`);
-    }
+    const index = this.components.findIndex(component => (<WindowInstance> component.ref.instance).id === id);
+    this.components[index].ref.destroy();
+    this.components.splice(index, 1);
+    this.publishWindowInstances();
   }
 
   isWindowSelected(id: number): boolean {
@@ -37,7 +32,10 @@ export class WindowManagerService {
     const componentRef = this.viewContainerRef.createComponent(componentFactory);
     const id = ++this.id;
     (<WindowInstance> componentRef.instance).id = id;
-    this.components.push(componentRef);
+    this.components.push({
+      id: id,
+      ref: componentRef
+    });
     this.selectWindow(id);
     this.publishWindowInstances();
   }
@@ -56,11 +54,11 @@ export class WindowManagerService {
   }
 
   private getWindowInstance(id: number): WindowInstance {
-    return (<WindowInstance> this.components[id].instance);
+    return <WindowInstance> this.components.find(component => (<WindowInstance> component.ref.instance).id === id).ref.instance;
   }
 
   private getWindowInstances(): WindowInstance[] {
-    return this.components.map(componentRef => (<WindowInstance> componentRef.instance));
+    return this.components.map(component => (<WindowInstance> component.ref.instance));
   }
 
   private publishWindowInstances(): void {
