@@ -43,6 +43,11 @@
   overflow: auto;
   position: relative;
   background: white;
+  user-select: none;
+}
+
+.window.active .content {
+  user-select: inherit;
 }
 
 .buttons {

@@ -1,3 +1,4 @@
-<div *ngFor="let instance of windowInstances" class="task" [ngClass]="{active: instance.active}" (click)="select(instance.id)">
-  <i class="fa" [ngClass]="instance.iconClass" aria-hidden="true"></i>
+<div *ngFor="let app of apps" class="task" (click)="run(app)"
+     [ngClass]="{active: app.instance && app.instance.active, running: app.instance}">
+  <i class="fa" [ngClass]="app.getIcon()" aria-hidden="true"></i>
 </div>

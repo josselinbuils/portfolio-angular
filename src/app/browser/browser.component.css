@@ -1,5 +1,6 @@
 iframe {
   position: absolute;
+  user-select: none;
 }
 
 iframe.inactive {

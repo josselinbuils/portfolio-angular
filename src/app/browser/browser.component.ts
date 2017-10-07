@@ -7,8 +7,9 @@ import { WindowInstance } from '../window/window-instance';
   styleUrls: ['./browser.component.css']
 })
 export class BrowserComponent extends WindowInstance {
+  static iconClass = 'fa-gamepad';
+
   constructor() {
     super();
-    this.iconClass = 'fa-gamepad';
   }
 }

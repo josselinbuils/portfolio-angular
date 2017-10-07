@@ -15,10 +15,14 @@
   line-height: 53px;
   font-size: 32px;
   text-align: center;
-  border: 1px solid #616161;
+  border: 1px solid transparent;
   margin: 3px 2px 0 3px;
 }
 
 .task.active {
   background: #444444;
+}
+
+.task.running {
+  border-color: #616161;
 }

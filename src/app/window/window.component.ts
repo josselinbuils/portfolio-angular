@@ -11,7 +11,6 @@ export class WindowComponent implements AfterContentInit {
   @ViewChild('window') windowElementRef: ElementRef;
 
   @Input() active = false;
-  @Input() closable = true;
   @Input() contentStyle: any;
   @Input() id: number;
   @Input() resizable = true;

@@ -37,6 +37,8 @@ const executors = {
   styleUrls: ['./terminal.component.css']
 })
 export class TerminalComponent extends WindowInstance implements AfterContentInit, OnInit {
+  static iconClass = 'fa-terminal';
+
   @ViewChild('terminal') terminalElementRef: ElementRef;
   @ViewChild('commands', {read: ViewContainerRef}) commandsViewContainerRef: ViewContainerRef;
 
@@ -50,7 +52,6 @@ export class TerminalComponent extends WindowInstance implements AfterContentIni
 
   constructor(private componentFactoryResolver: ComponentFactoryResolver, private windowManagerService: WindowManagerService) {
     super();
-    this.iconClass = 'fa-terminal';
   }
 
   private clear(): void {
