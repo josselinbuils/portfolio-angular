@@ -14,7 +14,7 @@ export class WindowComponent implements AfterContentInit {
   @Input() contentStyle: any;
   @Input() height: number;
   @Input() id: number;
-  @Input() keepRatio = false;
+  @Input() keepContentRatio = false;
   @Input() maxHeight: number;
   @Input() maxWidth: number;
   @Input() minHeight = 200;
@@ -25,12 +25,15 @@ export class WindowComponent implements AfterContentInit {
 
   @Input()
   set scrollTop(value: number) {
-    this.contentElementRef.nativeElement.scrollTop = value;
+    if (this.content) {
+      this.content.scrollTop = value;
+    }
   }
 
+  private content: HTMLElement;
+  private contentRatio: number;
   private lastDisplayProperties: any;
   private maximized = false;
-  private ratio: number;
   private window: HTMLElement;
 
   constructor(private renderer: Renderer2, private windowManagerService: WindowManagerService) {
@@ -138,15 +141,20 @@ export class WindowComponent implements AfterContentInit {
   }
 
   private setSelectable(selectable: boolean): void {
-    const content = this.contentElementRef.nativeElement;
-
     if (selectable) {
       this.renderer.removeStyle(this.window, 'user-select');
-      this.renderer.removeStyle(content, 'pointer-events');
+      this.renderer.removeStyle(this.content, 'pointer-events');
     } else {
       this.renderer.setStyle(this.window, 'user-select', 'none');
-      this.renderer.setStyle(content, 'pointer-events', 'none');
+      this.renderer.setStyle(this.content, 'pointer-events', 'none');
     }
+  }
+
+  private getContentSize(): { width: number, height: number } {
+    return {
+      width: this.content.clientWidth,
+      height: this.content.clientHeight
+    };
   }
 
   private getSize(): { width: number, height: number } {
@@ -173,16 +181,9 @@ export class WindowComponent implements AfterContentInit {
       height = Math.min(height, this.maxHeight);
     }
 
-    if (this.ratio) {
-      const ratio = width / height;
-
-      if (ratio > this.ratio) {
-        height = Math.round(width / this.ratio);
-      } else {
-        width = Math.round(height * this.ratio);
-      }
-
-      console.log(this.ratio, width / height);
+    if (this.contentRatio) {
+      const contentSize = this.getContentSize();
+      height = Math.round(contentSize.width / this.contentRatio) + this.getSize().height - contentSize.height;
     }
 
     this.setStyle('width', width + 'px');
@@ -194,9 +195,10 @@ export class WindowComponent implements AfterContentInit {
   }
 
   ngAfterContentInit(): void {
+    this.content = this.contentElementRef.nativeElement;
     this.window = this.windowElementRef.nativeElement;
 
-    let size = this.getSize();
+    const size = this.getSize();
     const width = this.width || size.width;
     const height = this.height || size.height;
     const x: number = Math.round((window.innerWidth - width) * 0.5);
@@ -205,9 +207,9 @@ export class WindowComponent implements AfterContentInit {
     this.setPosition(x, y);
     this.setSize(width, height);
 
-    if (this.keepRatio) {
-      size = this.getSize();
-      this.ratio = size.width / size.height;
+    if (this.keepContentRatio) {
+      const contentSize = this.getContentSize();
+      this.contentRatio = contentSize.width / contentSize.height;
     }
   }
 }
