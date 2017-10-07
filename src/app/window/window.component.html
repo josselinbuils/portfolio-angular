@@ -1,4 +1,4 @@
-<div #window class="window" [ngClass]="{active: active}" (click)="select()">
+<div #window class="window" [ngClass]="{active: active, maximizing: maximizing}" (click)="select()">
   <div class="titlebar" (mousedown)="startMove($event)" (dblclick)="maximize()">
     <div class="buttons">
       <span class="close" (click)="close()"></span>

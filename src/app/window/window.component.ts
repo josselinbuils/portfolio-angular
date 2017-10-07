@@ -34,6 +34,7 @@ export class WindowComponent implements AfterContentInit {
   private contentRatio: number;
   private lastDisplayProperties: any;
   private maximized = false;
+  private maximizing = false;
   private window: HTMLElement;
 
   constructor(private renderer: Renderer2, private windowManagerService: WindowManagerService) {
@@ -53,22 +54,28 @@ export class WindowComponent implements AfterContentInit {
       return;
     }
 
-    if (this.maximized) {
-      const {left, top, width, height} = this.lastDisplayProperties;
-      this.setSize(width, height);
-      this.setPosition(left, top);
-      this.maximized = false;
-    } else {
-      const xMin = 59;
-      const yMin = -1;
-      const maxWidth = window.innerWidth - 58;
-      const maxHeight = window.innerHeight + 2;
+    this.maximizing = true;
 
-      this.lastDisplayProperties = this.window.getBoundingClientRect();
-      this.setPosition(xMin, yMin);
-      this.setSize(maxWidth, maxHeight);
-      this.maximized = true;
-    }
+    setTimeout(() => {
+      if (this.maximized) {
+        const {left, top, width, height} = this.lastDisplayProperties;
+        this.setSize(width, height);
+        this.setPosition(left, top);
+        this.maximized = false;
+      } else {
+        const xMin = 59;
+        const yMin = -1;
+        const maxWidth = window.innerWidth - 58;
+        const maxHeight = window.innerHeight + 2;
+
+        this.lastDisplayProperties = this.window.getBoundingClientRect();
+        this.setSize(maxWidth, maxHeight);
+        this.setPosition(xMin, yMin);
+        this.maximized = true;
+      }
+
+      setTimeout(() => this.maximizing = false, 210);
+    }, 10);
   }
 
   select(): void {
