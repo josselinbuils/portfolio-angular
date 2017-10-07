@@ -13,7 +13,11 @@
   z-index: 1;
 }
 
-.window.maximizing {
+.window.minimized {
+  opacity: 0;
+}
+
+.window.animate {
   transition: all .2s ease-in-out;
 }
 

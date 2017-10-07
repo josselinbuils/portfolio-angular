@@ -23,8 +23,17 @@ export class WindowManagerService {
     this.publishWindowInstances();
   }
 
+  hideWindow(id: number) {
+    this.getWindowInstance(id).visible = false;
+    this.unselectWindow(id);
+  }
+
   isWindowSelected(id: number): boolean {
     return this.getWindowInstance(id).active;
+  }
+
+  isWindowVisible(id: number): boolean {
+    return this.getWindowInstance(id).visible;
   }
 
   openWindow(component: Type<{}>) {
@@ -38,6 +47,11 @@ export class WindowManagerService {
     });
     this.selectWindow(id);
     this.publishWindowInstances();
+  }
+
+  showWindow(id: number) {
+    this.getWindowInstance(id).visible = true;
+    this.selectWindow(id);
   }
 
   selectWindow(id: number) {

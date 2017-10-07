@@ -65,10 +65,14 @@ export class TaskBarComponent {
     if (app.instance) {
       const id = app.instance.id;
 
-      if (this.windowManagerService.isWindowSelected(id)) {
-        this.windowManagerService.unselectWindow(id);
+      if (this.windowManagerService.isWindowVisible(id)) {
+        if (this.windowManagerService.isWindowSelected(id)) {
+          this.windowManagerService.hideWindow(id);
+        } else {
+          this.windowManagerService.selectWindow(id);
+        }
       } else {
-        this.windowManagerService.selectWindow(id);
+        this.windowManagerService.showWindow(id);
       }
     } else {
       this.windowManagerService.openWindow(app.component);
