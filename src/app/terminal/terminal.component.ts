@@ -12,7 +12,7 @@ import { ProjectsComponent } from './executors/projects/projects.component';
 import { SkillsComponent } from './executors/skills/skills.component';
 import { WorkComponent } from './executors/work/work.component';
 import { WindowManagerService } from '../window-manager.service';
-import { BrowserComponent } from '../browser/browser.component';
+import { TeraviaComponent } from '../teravia/teravia.component';
 import { WindowInstance } from '../window/window-instance';
 
 enum KEY_CODE {
@@ -83,7 +83,7 @@ export class TerminalComponent extends WindowInstance implements AfterContentIni
           break;
 
         case 'teravia':
-          this.windowManagerService.openWindow(BrowserComponent);
+          this.windowManagerService.openWindow(TeraviaComponent);
           break;
 
         default:

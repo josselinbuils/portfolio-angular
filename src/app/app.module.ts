@@ -10,10 +10,10 @@ import { HelpComponent } from './terminal/executors/help/help.component';
 import { ProjectsComponent } from './terminal/executors/projects/projects.component';
 import { SkillsComponent } from './terminal/executors/skills/skills.component';
 import { TaskBarComponent } from './task-bar/task-bar.component';
+import { TeraviaComponent } from './teravia/teravia.component';
 import { TerminalComponent } from './terminal/terminal.component';
 import { WorkComponent } from './terminal/executors/work/work.component';
 import { WindowComponent } from './window/window.component';
-import { BrowserComponent } from './browser/browser.component';
 import { WindowManagerService } from './window-manager.service';
 
 @NgModule({
@@ -21,12 +21,12 @@ import { WindowManagerService } from './window-manager.service';
     AboutComponent,
     AppComponent,
     BashErrorComponent,
-    BrowserComponent,
     CommandComponent,
     HelpComponent,
     ProjectsComponent,
     SkillsComponent,
     TaskBarComponent,
+    TeraviaComponent,
     TerminalComponent,
     WindowComponent,
     WorkComponent
@@ -34,11 +34,11 @@ import { WindowManagerService } from './window-manager.service';
   entryComponents: [
     AboutComponent,
     BashErrorComponent,
-    BrowserComponent,
     CommandComponent,
     HelpComponent,
     ProjectsComponent,
     SkillsComponent,
+    TeraviaComponent,
     TerminalComponent,
     WorkComponent
   ],
