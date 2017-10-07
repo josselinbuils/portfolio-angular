@@ -42,12 +42,13 @@ export class WindowComponent implements AfterContentInit {
     }
   }
 
-  private animate = false;
+  animate = false;
+  minimized = false;
+
   private content: HTMLElement;
   private contentRatio: number;
   private lastDisplayProperties: any;
   private maximized = false;
-  private minimized = false;
   private window: HTMLElement;
 
   constructor(private renderer: Renderer2, private windowManagerService: WindowManagerService) {
