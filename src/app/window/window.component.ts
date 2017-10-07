@@ -92,8 +92,8 @@ export class WindowComponent implements AfterContentInit {
       } else {
         const xMin = 59;
         const yMin = -1;
-        const maxWidth = 100; // window.innerWidth - 58;
-        const maxHeight = 100; // window.innerHeight + 2;
+        const maxWidth = window.innerWidth - 58;
+        const maxHeight = window.innerHeight + 2;
 
         this.lastDisplayProperties = this.window.getBoundingClientRect();
         this.setSize(maxWidth, maxHeight);
