@@ -2,7 +2,7 @@
   <div class="titlebar" (mousedown)="startMove($event)" (dblclick)="maximize()">
     <div class="buttons">
       <span class="close" (click)="close()"></span>
-      <span *ngIf="resizable" class="maximize" (click)="maximize()"></span>
+      <span *ngIf="resizable && canBeMaximized()" class="maximize" (click)="maximize()"></span>
     </div>
     <span class="title">{{title}}</span>
   </div>
