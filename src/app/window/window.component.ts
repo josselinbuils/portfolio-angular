@@ -14,8 +14,11 @@ export class WindowComponent implements AfterContentInit {
   @Input() contentStyle: any;
   @Input() height: number;
   @Input() id: number;
+  @Input() keepRatio = false;
   @Input() maxHeight: number;
   @Input() maxWidth: number;
+  @Input() minHeight = 200;
+  @Input() minWidth = 400;
   @Input() resizable = true;
   @Input() title: string;
   @Input() width: number;
@@ -27,6 +30,7 @@ export class WindowComponent implements AfterContentInit {
 
   private lastDisplayProperties: any;
   private maximized = false;
+  private ratio: number;
   private window: HTMLElement;
 
   constructor(private renderer: Renderer2, private windowManagerService: WindowManagerService) {
@@ -154,12 +158,31 @@ export class WindowComponent implements AfterContentInit {
 
   private setSize(width: number, height: number): void {
 
+    width = Math.max(width, this.minWidth);
+    height = Math.max(height, this.minHeight);
+
+    if (this.maxHeight) {
+      height = Math.min(height, this.maxHeight);
+    }
+
     if (this.maxWidth) {
       width = Math.min(width, this.maxWidth);
     }
 
     if (this.maxHeight) {
       height = Math.min(height, this.maxHeight);
+    }
+
+    if (this.ratio) {
+      const ratio = width / height;
+
+      if (ratio > this.ratio) {
+        height = Math.round(width / this.ratio);
+      } else {
+        width = Math.round(height * this.ratio);
+      }
+
+      console.log(this.ratio, width / height);
     }
 
     this.setStyle('width', width + 'px');
@@ -173,13 +196,18 @@ export class WindowComponent implements AfterContentInit {
   ngAfterContentInit(): void {
     this.window = this.windowElementRef.nativeElement;
 
-    const size = this.getSize();
+    let size = this.getSize();
     const width = this.width || size.width;
     const height = this.height || size.height;
     const x: number = Math.round((window.innerWidth - width) * 0.5);
     const y: number = Math.round((window.innerHeight - height) * 0.2);
 
-    this.setSize(width, height);
     this.setPosition(x, y);
+    this.setSize(width, height);
+
+    if (this.keepRatio) {
+      size = this.getSize();
+      this.ratio = size.width / size.height;
+    }
   }
 }

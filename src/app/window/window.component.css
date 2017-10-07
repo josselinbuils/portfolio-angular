@@ -1,6 +1,4 @@
 .window {
-  min-width: 800px;
-  min-height: 400px;
   position: fixed;
   border-radius: 6px; /* Needed by box shadow */
   box-shadow: 0 0 10px #1f1f1f;

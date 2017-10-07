@@ -1,5 +1,5 @@
-<app-window [active]="active" [id]="id" title="Teravia" [width]="1368" [height]="793" [maxWidth]="1368"
-            [maxHeight]="793">
+<app-window [active]="active" [id]="id" title="Teravia" [keepRatio]="true" [width]="1368" [height]="793"
+            [minWidth]="800" [minHeight]="464" [maxWidth]="1368" [maxHeight]="793">
   <iframe [ngClass]="{inactive: !active}" src="https://josselinbuils.me/teravia" frameborder="0" height="100%"
           width="100%"></iframe>
 </app-window>
