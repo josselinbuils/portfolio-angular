@@ -106,6 +106,10 @@ export class WindowComponent implements AfterContentInit {
     }, DOM_UPDATE_DELAY);
   }
 
+  minimize(): void {
+    this.windowManagerService.hideWindow(this.id);
+  }
+
   select(): void {
     this.windowManagerService.selectWindow(this.id);
   }

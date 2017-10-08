@@ -62,7 +62,7 @@
   left: 5px;
 }
 
-.close, .maximize {
+.close, .minimize, .maximize {
   background: rgba(0, 0, 0, 0.1);
   border: 1px solid #acacac;
   height: 10px;
@@ -73,16 +73,17 @@
   display: inline-block;
 }
 
-.close:hover {
+.buttons:hover .close {
   background: #ff5722;
-  border-color: red;
+  border-color: #d6481c;
 }
 
-.maximize {
-  left: 26px;
+.buttons:hover .minimize {
+  background: #ffbc00;
+  border-color: #d09900;
 }
 
-.maximize:hover {
+.buttons:hover .maximize:not(.disabled) {
   background: #8fd800;
   border-color: #71ab00;
 }
