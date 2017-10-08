@@ -47,7 +47,7 @@ export class WindowComponent implements AfterContentInit {
 
   private content: HTMLElement;
   private contentRatio: number;
-  private lastDisplayProperties: any;
+  private lastDisplayProperties: any = {};
   private maximized = false;
   private window: HTMLElement;
 
@@ -66,11 +66,11 @@ export class WindowComponent implements AfterContentInit {
     this.animate = true;
 
     setTimeout(() => {
-      this.lastDisplayProperties = this.window.getBoundingClientRect();
+      this.lastDisplayProperties.minimize = this.window.getBoundingClientRect();
 
       this.minimized = true;
       this.setSize(0, 0, true);
-      this.setPosition(20, 0);
+      this.setPosition(60, 0, true);
 
       setTimeout(() => this.animate = false, ANIMATION_DURATION + DOM_UPDATE_DELAY);
     }, DOM_UPDATE_DELAY);
@@ -86,7 +86,7 @@ export class WindowComponent implements AfterContentInit {
 
     setTimeout(() => {
       if (this.maximized) {
-        const {left, top, width, height} = this.lastDisplayProperties;
+        const {left, top, width, height} = this.lastDisplayProperties.maximize;
         this.setSize(width, height);
         this.setPosition(left, top);
         this.maximized = false;
@@ -96,7 +96,7 @@ export class WindowComponent implements AfterContentInit {
         const maxWidth = window.innerWidth - 58;
         const maxHeight = window.innerHeight + 2;
 
-        this.lastDisplayProperties = this.window.getBoundingClientRect();
+        this.lastDisplayProperties.maximize = this.window.getBoundingClientRect();
         this.setSize(maxWidth, maxHeight);
         this.setPosition(xMin, yMin);
         this.maximized = true;
@@ -115,15 +115,15 @@ export class WindowComponent implements AfterContentInit {
   }
 
   show() {
-    if (this.lastDisplayProperties) {
+    if (this.lastDisplayProperties.minimize) {
       this.animate = true;
 
       setTimeout(() => {
-        const {left, top, width, height} = this.lastDisplayProperties;
+        const {left, top, width, height} = this.lastDisplayProperties.minimize;
 
         this.minimized = false;
         this.setSize(width, height, true);
-        this.setPosition(left, top);
+        this.setPosition(left, top, true);
 
         setTimeout(() => this.animate = false, ANIMATION_DURATION + DOM_UPDATE_DELAY);
       }, DOM_UPDATE_DELAY);
@@ -182,14 +182,17 @@ export class WindowComponent implements AfterContentInit {
     });
   }
 
-  private setPosition(x: number, y: number): void {
-    const xMin = -this.getSize().width + 90;
-    const yMin = -1;
-    const xMax = window.innerWidth - 30;
-    const yMax = window.innerHeight - 21;
+  private setPosition(x: number, y: number, force: boolean = false): void {
 
-    x = Math.min(Math.max(x, xMin), xMax);
-    y = Math.min(Math.max(y, yMin), yMax);
+    if (!force) {
+      const xMin = -this.getSize().width + 90;
+      const yMin = -1;
+      const xMax = window.innerWidth - 30;
+      const yMax = window.innerHeight - 21;
+
+      x = Math.min(Math.max(x, xMin), xMax);
+      y = Math.min(Math.max(y, yMin), yMax);
+    }
 
     this.setStyle('left', x + 'px');
     this.setStyle('top', y + 'px');
