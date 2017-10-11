@@ -1,0 +1,4 @@
+<app-window [active]="active" [id]="id" title="Notes" [minWidth]="400" [minHeight]="350" [visible]="visible"
+            [contentStyle]="{overflow: 'hidden'}">
+  <textarea title="notes" [(ngModel)]="notes" (ngModelChange)="saveNotes()"></textarea>
+</app-window>

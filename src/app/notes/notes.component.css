@@ -1,0 +1,17 @@
+@import url('https://fonts.googleapis.com/css?family=Kalam');
+
+textarea {
+  border: 0;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: calc(100% - 20px);
+  padding: 10px;
+  resize: none;
+  outline: none;
+  background: rgb(255, 245, 156);
+  font-family: 'Kalam', cursive;
+  font-size: 1.5em;
+}

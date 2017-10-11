@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
 import { App } from './app';
-import { WindowManagerService } from '../window-manager.service';
+import { NotesComponent } from '../notes/notes.component';
 import { TeraviaComponent } from '../teravia/teravia.component';
 import { TerminalComponent } from '../terminal/terminal.component';
 import { WindowInstance } from '../window/window-instance';
+import { WindowManagerService } from '../window-manager.service';
 
 @Component({
   selector: 'app-task-bar',
@@ -12,7 +13,7 @@ import { WindowInstance } from '../window/window-instance';
 })
 export class TaskBarComponent {
 
-  apps: App[] = [new App(TerminalComponent), new App(TeraviaComponent)];
+  apps: App[] = [new App(TerminalComponent), new App(TeraviaComponent), new App(NotesComponent)];
 
   constructor(private windowManagerService: WindowManagerService) {
     windowManagerService.getSubject().subscribe(windowInstances => {

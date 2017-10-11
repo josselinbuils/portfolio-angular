@@ -15,6 +15,8 @@ import { TerminalComponent } from './terminal/terminal.component';
 import { WorkComponent } from './terminal/executors/work/work.component';
 import { WindowComponent } from './window/window.component';
 import { WindowManagerService } from './window-manager.service';
+import { NotesComponent } from './notes/notes.component';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -23,6 +25,7 @@ import { WindowManagerService } from './window-manager.service';
     BashErrorComponent,
     CommandComponent,
     HelpComponent,
+    NotesComponent,
     ProjectsComponent,
     SkillsComponent,
     TaskBarComponent,
@@ -36,6 +39,7 @@ import { WindowManagerService } from './window-manager.service';
     BashErrorComponent,
     CommandComponent,
     HelpComponent,
+    NotesComponent,
     ProjectsComponent,
     SkillsComponent,
     TeraviaComponent,
@@ -44,6 +48,7 @@ import { WindowManagerService } from './window-manager.service';
   ],
   imports: [
     BrowserModule,
+    FormsModule,
     HttpClientModule
   ],
   providers: [WindowManagerService],
