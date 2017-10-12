@@ -1,0 +1,6 @@
+<app-window [active]="active" [id]="id" title="Spotify" [minWidth]="500" [minHeight]="329" [visible]="visible"
+            [contentStyle]="{ background: '#181818'}">
+  <iframe [ngClass]="{inactive: !active}" allowfullscreen="true" frameborder="0" height="100%" width="100%"
+          src="https://open.spotify.com/embed?uri=spotify%3Auser%3A115593804%3Aplaylist%3A18po15ylB899nF8HIhW6cD">
+  </iframe>
+</app-window>
