@@ -44,12 +44,12 @@ export class TerminalComponent extends WindowInstance implements AfterContentIni
   @ViewChild('terminal') terminalElementRef: ElementRef;
   @ViewChild('commands', {read: ViewContainerRef}) commandsViewContainerRef: ViewContainerRef;
 
+  caretIndex = 0;
   contentStyle = {background: 'rgba(30, 30, 30, 0.9)'};
   prefix = 'user$';
   userInput = '';
   scrollTop: number;
 
-  private caretIndex = 0;
   private commandIndex = 0;
   private commands: string[] = [];
   private components: ComponentRef<{}>[] = [];
