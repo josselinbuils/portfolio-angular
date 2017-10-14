@@ -20,6 +20,8 @@ enum KEY_CODE {
   DOWN = 40,
   ENTER = 13,
   K = 75,
+  LEFT = 37,
+  RIGHT = 39,
   UP = 38
 }
 
@@ -43,9 +45,11 @@ export class TerminalComponent extends WindowInstance implements AfterContentIni
   @ViewChild('commands', {read: ViewContainerRef}) commandsViewContainerRef: ViewContainerRef;
 
   contentStyle = {background: 'rgba(30, 30, 30, 0.9)'};
+  prefix = 'user$';
   userInput = '';
   scrollTop: number;
 
+  private caretIndex = 0;
   private commandIndex = 0;
   private commands: string[] = [];
   private components: ComponentRef<{}>[] = [];
@@ -62,10 +66,11 @@ export class TerminalComponent extends WindowInstance implements AfterContentIni
   private exec(str: string): void {
     const command = str.trim().split(' ')[0];
 
-    this.loadComponent(CommandComponent, [str]);
+    this.loadComponent(CommandComponent, [this.prefix, str]);
 
     if (command.length > 0) {
       this.commands.push(str);
+      this.caretIndex = 0;
       this.commandIndex = this.commands.length;
 
       switch (command) {
@@ -105,38 +110,62 @@ export class TerminalComponent extends WindowInstance implements AfterContentIni
 
   @HostListener('window:keydown', ['$event'])
   keyboardListener(event: KeyboardEvent): void {
-    if (this.active) {
-      if (!event.altKey && !event.ctrlKey && !event.metaKey) {
-        if (event.key.length === 1) {
-          this.userInput += event.key;
-        } else {
-          switch (event.keyCode) {
-            case KEY_CODE.BACK_SPACE:
-              this.userInput = this.userInput.slice(0, -1);
-              break;
-            case KEY_CODE.ENTER:
-              this.exec(this.userInput);
-              this.userInput = '';
-              break;
-            case KEY_CODE.UP:
-              event.preventDefault();
-              if (this.commandIndex > 0) {
-                this.commandIndex--;
-                this.userInput = this.commands[this.commandIndex];
-              }
-              break;
-            case KEY_CODE.DOWN:
-              event.preventDefault();
-              if (this.commandIndex < (this.commands.length - 1)) {
-                this.commandIndex++;
-                this.userInput = this.commands[this.commandIndex];
-              }
+
+    if (!this.active) {
+      return;
+    }
+
+    if (event.key.length === 1) {
+      event.preventDefault();
+      this.userInput = this.userInput.slice(0, this.caretIndex) + event.key + this.userInput.slice(this.caretIndex);
+      this.caretIndex++;
+    } else if (!event.altKey && !event.ctrlKey && !event.metaKey) {
+      switch (event.keyCode) {
+
+        case KEY_CODE.BACK_SPACE:
+          if (this.caretIndex > 0) {
+            this.userInput = this.userInput.slice(0, this.caretIndex - 1) + this.userInput.slice(this.caretIndex);
+            this.caretIndex--;
           }
-        }
-      } else if (!event.altKey && (event.metaKey || event.ctrlKey) && event.keyCode === KEY_CODE.K) {
-        event.preventDefault();
-        this.clear();
+          break;
+
+        case KEY_CODE.ENTER:
+          this.exec(this.userInput);
+          this.userInput = '';
+          break;
+
+        case KEY_CODE.DOWN:
+          event.preventDefault();
+          if (this.commandIndex < (this.commands.length - 1)) {
+            this.commandIndex++;
+            this.userInput = this.commands[this.commandIndex];
+          }
+          break;
+
+        case KEY_CODE.LEFT:
+          event.preventDefault();
+          if (this.caretIndex > 0) {
+            this.caretIndex--;
+          }
+          break;
+
+        case KEY_CODE.RIGHT:
+          event.preventDefault();
+          if (this.caretIndex < this.userInput.length) {
+            this.caretIndex++;
+          }
+          break;
+
+        case KEY_CODE.UP:
+          event.preventDefault();
+          if (this.commandIndex > 0) {
+            this.commandIndex--;
+            this.userInput = this.commands[this.commandIndex];
+          }
       }
+    } else if (!event.altKey && (event.metaKey || event.ctrlKey) && event.keyCode === KEY_CODE.K) {
+      event.preventDefault();
+      this.clear();
     }
   }
 

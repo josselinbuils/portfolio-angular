@@ -2,6 +2,10 @@
             [minWidth]="800" [minHeight]="400" [visible]="visible">
   <div #terminal class="terminal">
     <div #commands></div>
-    <p class="user-input">josselinbuils$&nbsp;{{userInput}}</p>
+    <p class="user-input">
+      <span class="prefix" [innerHTML]="prefix"></span><span class="input" [innerHTML]="userInput"></span>
+      <span class="caret" [ngStyle]="{'left.ch': prefix.length + caretIndex + 1}"
+            [innerHTML]="userInput.substr(caretIndex, 1)"></span>
+    </p>
   </div>
 </app-window>

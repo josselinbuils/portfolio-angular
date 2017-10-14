@@ -6,9 +6,23 @@
 }
 
 .user-input {
-  border-right: 10px solid rgb(77, 77, 77);
-  display: inline-block;
   margin-bottom: 3px;
+  position: relative;
+}
+
+.user-input .caret {
+  background: #4d4d4d;
+  position: absolute;
+  top: 0;
+  width: 1.1ch;
+  height: 100%;
+}
+
+.user-input .prefix {
+  margin-right: 1ch;
+}
+
+.user-input .input {
   white-space: pre;
 }
 
