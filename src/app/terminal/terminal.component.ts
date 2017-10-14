@@ -115,14 +115,20 @@ export class TerminalComponent extends WindowInstance implements AfterContentIni
       return;
     }
 
-    if (event.key.length === 1) {
+    if (!event.altKey && (event.metaKey || event.ctrlKey) && event.keyCode === KEY_CODE.K) {
+      event.preventDefault();
+      this.clear();
+
+    } else if (event.key.length === 1) {
       event.preventDefault();
       this.userInput = this.userInput.slice(0, this.caretIndex) + event.key + this.userInput.slice(this.caretIndex);
       this.caretIndex++;
+
     } else if (!event.altKey && !event.ctrlKey && !event.metaKey) {
       switch (event.keyCode) {
 
         case KEY_CODE.BACK_SPACE:
+          event.preventDefault();
           if (this.caretIndex > 0) {
             this.userInput = this.userInput.slice(0, this.caretIndex - 1) + this.userInput.slice(this.caretIndex);
             this.caretIndex--;
@@ -130,6 +136,7 @@ export class TerminalComponent extends WindowInstance implements AfterContentIni
           break;
 
         case KEY_CODE.ENTER:
+          event.preventDefault();
           this.exec(this.userInput);
           this.userInput = '';
           break;
@@ -163,9 +170,6 @@ export class TerminalComponent extends WindowInstance implements AfterContentIni
             this.userInput = this.commands[this.commandIndex];
           }
       }
-    } else if (!event.altKey && (event.metaKey || event.ctrlKey) && event.keyCode === KEY_CODE.K) {
-      event.preventDefault();
-      this.clear();
     }
   }
 
