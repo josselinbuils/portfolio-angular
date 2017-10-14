@@ -17,7 +17,6 @@ import { WindowComponent } from './window/window.component';
 import { WindowManagerService } from './window-manager.service';
 import { NotesComponent } from './notes/notes.component';
 import { FormsModule } from '@angular/forms';
-import { SpotifyComponent } from './spotify/spotify.component';
 
 @NgModule({
   declarations: [
@@ -29,7 +28,6 @@ import { SpotifyComponent } from './spotify/spotify.component';
     NotesComponent,
     ProjectsComponent,
     SkillsComponent,
-    SpotifyComponent,
     TaskBarComponent,
     TeraviaComponent,
     TerminalComponent,
@@ -44,7 +42,6 @@ import { SpotifyComponent } from './spotify/spotify.component';
     NotesComponent,
     ProjectsComponent,
     SkillsComponent,
-    SpotifyComponent,
     TeraviaComponent,
     TerminalComponent,
     WorkComponent
