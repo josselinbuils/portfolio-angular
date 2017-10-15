@@ -14,7 +14,7 @@ import { WindowManagerService } from '../window-manager.service';
 })
 export class TaskBarComponent {
 
-  apps: App[] = [new App(TerminalComponent), new App(TeraviaComponent), new App(NotesComponent), new App(RedditComponent)];
+  apps: App[] = [new App(TerminalComponent), new App(TeraviaComponent), new App(RedditComponent), new App(NotesComponent)];
 
   constructor(private windowManagerService: WindowManagerService) {
     windowManagerService.getSubject().subscribe(windowInstances => {

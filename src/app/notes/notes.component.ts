@@ -22,7 +22,7 @@ export class NotesComponent extends WindowInstance {
 
   constructor() {
     super();
-    this.notes = localStorage.getItem('notes');
+    this.notes = localStorage.getItem('notes') || 'Hello there 😃';
   }
 
   saveNotes(): void {
