@@ -3,6 +3,7 @@ export class WindowInstance {
   active = false;
   id: number;
   visible = true;
+  zIndex: number;
 
   getIconClass(): string {
     return (<any> this.constructor).iconClass;

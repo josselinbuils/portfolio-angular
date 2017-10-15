@@ -55,12 +55,27 @@ export class WindowManagerService {
   }
 
   selectWindow(id: number) {
-    this.getWindowInstances().forEach(windowInstance => windowInstance.active = false);
-    this.getWindowInstance(id).active = true;
+    let i = 0;
+
+    this.getWindowInstances()
+      .filter(windowInstance => windowInstance.id !== id)
+      .sort((a, b) => (a.zIndex < b.zIndex) ? -1 : 1)
+      .forEach((windowInstance, index) => {
+        windowInstance.active = false;
+        windowInstance.zIndex = ++i;
+      });
+
+    const activeWindow = this.getWindowInstance(id);
+    activeWindow.active = true;
+    activeWindow.zIndex = ++i;
   }
 
   setViewContainerRef(viewContainerRef: ViewContainerRef) {
     this.viewContainerRef = viewContainerRef;
+  }
+
+  unselectAllWindows() {
+    this.getWindowInstances().forEach(window => window.active = false);
   }
 
   unselectWindow(id: number) {

@@ -1,4 +1,4 @@
-import { AfterContentInit, Component, ViewChild, ViewContainerRef } from '@angular/core';
+import { AfterContentInit, Component, HostListener, ViewChild, ViewContainerRef } from '@angular/core';
 import { WindowManagerService } from './window-manager.service';
 import { TerminalComponent } from './terminal/terminal.component';
 
@@ -10,7 +10,14 @@ import { TerminalComponent } from './terminal/terminal.component';
 export class AppComponent implements AfterContentInit {
   @ViewChild('windows', {read: ViewContainerRef}) windowsViewContainerRef: ViewContainerRef;
 
-  constructor(private windowManagerService: WindowManagerService) {
+  constructor(private viewContainerRef: ViewContainerRef, private windowManagerService: WindowManagerService) {
+  }
+
+  @HostListener('click', ['$event'])
+  eventListener(event: MouseEvent): void {
+    if (event.target === this.viewContainerRef.element.nativeElement) {
+      this.windowManagerService.unselectAllWindows();
+    }
   }
 
   ngAfterContentInit() {

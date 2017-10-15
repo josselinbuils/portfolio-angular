@@ -25,6 +25,7 @@ export class WindowComponent implements AfterContentInit {
   @Input() resizable = true;
   @Input() title: string;
   @Input() width: number;
+  @Input() zIndex: number;
 
   @Input()
   set scrollTop(value: number) {

@@ -1,5 +1,5 @@
 <app-window [active]="active" [id]="id" title="Reddit" [minWidth]="500" [minHeight]="500" [height]="500"
-            [visible]="visible">
+            [visible]="visible" [zIndex]="zIndex">
   <div class="reddit" *ngFor="let subreddit of subreddits">
     <h1>r/{{subreddit.name}}</h1>
     <div class="spinner" *ngIf="!subreddit.data">
