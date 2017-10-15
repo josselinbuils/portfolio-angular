@@ -1,0 +1,25 @@
+<app-window [active]="active" [id]="id" title="Reddit" [minWidth]="500" [minHeight]="500" [height]="500"
+            [visible]="visible">
+  <div class="reddit" *ngFor="let subreddit of subreddits">
+    <h1>r/{{subreddit.name}}</h1>
+    <div class="spinner" *ngIf="!subreddit.data">
+      <div class="double-bounce1"></div>
+      <div class="double-bounce2"></div>
+    </div>
+    <div class="links">
+      <a class="link" *ngFor="let link of subreddit.data" href="https://www.reddit.com{{link.permalink}}"
+         target="_blank">
+        <div class="score">{{link.score}}</div>
+        <div class="thumbnail" *ngIf="(link.thumbnail || '').substr(0, 4) === 'http'">
+          <img [src]="link.thumbnail"/>
+        </div>
+        <div class="info">
+          <div class="header">u/{{link.author}} - {{link.since}}
+            <span class="right" *ngIf="link.domain !== 'self.' + subreddit.name">{{link.domain}}</span>
+          </div>
+          <div class="body">{{link.title}}</div>
+        </div>
+      </a>
+    </div>
+  </div>
+</app-window>

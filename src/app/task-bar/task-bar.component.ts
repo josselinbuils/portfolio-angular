@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { App } from './app';
 import { NotesComponent } from '../notes/notes.component';
+import { RedditComponent } from '../reddit/reddit.component';
 import { TeraviaComponent } from '../teravia/teravia.component';
 import { TerminalComponent } from '../terminal/terminal.component';
 import { WindowInstance } from '../window/window-instance';
@@ -13,7 +14,7 @@ import { WindowManagerService } from '../window-manager.service';
 })
 export class TaskBarComponent {
 
-  apps: App[] = [new App(TerminalComponent), new App(TeraviaComponent), new App(NotesComponent)];
+  apps: App[] = [new App(TerminalComponent), new App(TeraviaComponent), new App(NotesComponent), new App(RedditComponent)];
 
   constructor(private windowManagerService: WindowManagerService) {
     windowManagerService.getSubject().subscribe(windowInstances => {

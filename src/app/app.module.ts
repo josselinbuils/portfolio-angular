@@ -17,6 +17,7 @@ import { WindowComponent } from './window/window.component';
 import { WindowManagerService } from './window-manager.service';
 import { NotesComponent } from './notes/notes.component';
 import { FormsModule } from '@angular/forms';
+import { RedditComponent } from './reddit/reddit.component';
 
 @NgModule({
   declarations: [
@@ -27,6 +28,7 @@ import { FormsModule } from '@angular/forms';
     HelpComponent,
     NotesComponent,
     ProjectsComponent,
+    RedditComponent,
     SkillsComponent,
     TaskBarComponent,
     TeraviaComponent,
@@ -41,6 +43,7 @@ import { FormsModule } from '@angular/forms';
     HelpComponent,
     NotesComponent,
     ProjectsComponent,
+    RedditComponent,
     SkillsComponent,
     TeraviaComponent,
     TerminalComponent,

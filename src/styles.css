@@ -30,3 +30,7 @@ p {
 .light {
   color: #c5c5c5;
 }
+
+.right {
+  float: right;
+}
