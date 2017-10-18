@@ -8,3 +8,10 @@
   background-image: url('/assets/wallpaper.jpg');
   background-size: cover;
 }
+
+.selection {
+  position: fixed;
+  border: 1px solid #0072ff;
+  background: rgba(0, 114, 255, .4);
+  display: none;
+}
