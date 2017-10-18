@@ -120,6 +120,11 @@ export class TerminalComponent extends WindowInstance implements AfterContentIni
       this.clear();
 
     } else if (event.key.length === 1) {
+
+      if (/[a-z]/i.test(event.key) && (event.altKey || event.metaKey || event.ctrlKey)) {
+        return;
+      }
+
       event.preventDefault();
       this.userInput = this.userInput.slice(0, this.caretIndex) + event.key + this.userInput.slice(this.caretIndex);
       this.caretIndex++;
