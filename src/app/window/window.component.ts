@@ -132,6 +132,7 @@ export class WindowComponent implements AfterContentInit {
   }
 
   startMove(downEvent: MouseEvent): void {
+    downEvent.preventDefault();
 
     this.select();
 
@@ -157,6 +158,7 @@ export class WindowComponent implements AfterContentInit {
   }
 
   startResize(downEvent: MouseEvent): void {
+    downEvent.preventDefault();
 
     this.select();
 

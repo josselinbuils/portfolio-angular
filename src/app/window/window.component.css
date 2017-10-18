@@ -35,8 +35,12 @@
   border: 1px solid #1f1f1f;
   border-top-left-radius: 6px;
   border-top-right-radius: 6px;
-  user-select: none;
   text-align: center;
+}
+
+.titlebar, .titlebar * {
+  user-select: none;
+  cursor: default;
 }
 
 .content {
