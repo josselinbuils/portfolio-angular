@@ -1,4 +1,6 @@
-import { AfterContentInit, Component, ElementRef, Input, Renderer2, ViewChild } from '@angular/core';
+import {
+  AfterContentInit, Component, ComponentRef, ElementRef, Input, Renderer2, ViewChild
+} from '@angular/core';
 import { WindowManagerService } from '../window-manager.service';
 
 const ANIMATION_DURATION = 200;
@@ -13,10 +15,8 @@ export class WindowComponent implements AfterContentInit {
   @ViewChild('content') contentElementRef: ElementRef;
   @ViewChild('window') windowElementRef: ElementRef;
 
-  @Input() active = false;
   @Input() contentStyle: any;
   @Input() height: number;
-  @Input() id: number;
   @Input() keepContentRatio = false;
   @Input() maxHeight: number;
   @Input() maxWidth: number;
@@ -25,7 +25,6 @@ export class WindowComponent implements AfterContentInit {
   @Input() resizable = true;
   @Input() title: string;
   @Input() width: number;
-  @Input() zIndex: number;
 
   @Input()
   set scrollTop(value: number) {
@@ -34,17 +33,13 @@ export class WindowComponent implements AfterContentInit {
     }
   }
 
-  @Input()
-  set visible(visible: boolean) {
-    if (visible) {
-      this.show();
-    } else {
-      this.hide();
-    }
-  }
-
+  active = false;
   animate = false;
+  id: number;
   minimized = false;
+  parentRef: ComponentRef<{}>;
+  visible = true;
+  zIndex: number;
 
   private content: HTMLElement;
   private contentRatio: number;
@@ -64,17 +59,22 @@ export class WindowComponent implements AfterContentInit {
   }
 
   hide() {
-    this.animate = true;
+    if (this.visible) {
+      this.animate = true;
 
-    setTimeout(() => {
-      this.lastDisplayProperties.minimize = this.window.getBoundingClientRect();
+      setTimeout(() => {
+        this.lastDisplayProperties.minimize = this.window.getBoundingClientRect();
 
-      this.minimized = true;
-      this.setSize(0, 0, true);
-      this.setPosition(60, 0, true);
+        this.minimized = true;
+        this.setSize(0, 0, true);
+        this.setPosition(60, 0, true);
 
-      setTimeout(() => this.animate = false, ANIMATION_DURATION + DOM_UPDATE_DELAY);
-    }, DOM_UPDATE_DELAY);
+        setTimeout(() => {
+          this.animate = false;
+          this.visible = false;
+        }, ANIMATION_DURATION + DOM_UPDATE_DELAY);
+      }, DOM_UPDATE_DELAY);
+    }
   }
 
   maximize(): void {
@@ -116,7 +116,7 @@ export class WindowComponent implements AfterContentInit {
   }
 
   show() {
-    if (this.lastDisplayProperties.minimize) {
+    if (!this.visible && this.lastDisplayProperties.minimize) {
       this.animate = true;
 
       setTimeout(() => {
@@ -126,7 +126,10 @@ export class WindowComponent implements AfterContentInit {
         this.setSize(width, height, true);
         this.setPosition(left, top, true);
 
-        setTimeout(() => this.animate = false, ANIMATION_DURATION + DOM_UPDATE_DELAY);
+        setTimeout(() => {
+          this.animate = false;
+          this.visible = true;
+        }, ANIMATION_DURATION + DOM_UPDATE_DELAY);
       }, DOM_UPDATE_DELAY);
     }
   }

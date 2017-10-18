@@ -13,6 +13,7 @@ import { SkillsComponent } from './executors/skills/skills.component';
 import { WorkComponent } from './executors/work/work.component';
 import { WindowManagerService } from '../window-manager.service';
 import { TeraviaComponent } from '../teravia/teravia.component';
+import { WindowComponent } from '../window/window.component';
 import { WindowInstance } from '../window/window-instance';
 
 enum KEY_CODE {
@@ -41,8 +42,9 @@ const executors = {
 export class TerminalComponent extends WindowInstance implements AfterContentInit, OnInit {
   static iconClass = 'fa-terminal';
 
-  @ViewChild('terminal') terminalElementRef: ElementRef;
   @ViewChild('commands', {read: ViewContainerRef}) commandsViewContainerRef: ViewContainerRef;
+  @ViewChild('terminal') terminalElementRef: ElementRef;
+  @ViewChild(WindowComponent) windowComponent: WindowComponent;
 
   caretIndex = 0;
   contentStyle = {background: 'rgba(30, 30, 30, 0.9)'};
@@ -111,7 +113,7 @@ export class TerminalComponent extends WindowInstance implements AfterContentIni
   @HostListener('window:keydown', ['$event'])
   keyboardListener(event: KeyboardEvent): void {
 
-    if (!this.active) {
+    if (!this.windowComponent.active) {
       return;
     }
 

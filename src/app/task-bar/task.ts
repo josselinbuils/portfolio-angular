@@ -1,7 +1,7 @@
 import { Type } from '@angular/core';
 import { WindowInstance } from '../window/window-instance';
 
-export class App {
+export class Task {
   component: Type<{}>;
   instance: WindowInstance;
 

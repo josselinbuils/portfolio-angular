@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
+import { WindowComponent } from '../window/window.component';
 import { WindowInstance } from '../window/window-instance';
 
 const smileys = {
@@ -17,6 +18,8 @@ const smileys = {
 })
 export class NotesComponent extends WindowInstance {
   static iconClass = 'fa-sticky-note';
+
+  @ViewChild(WindowComponent) windowComponent: WindowComponent;
 
   notes: string;
 

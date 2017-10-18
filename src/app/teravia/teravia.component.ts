@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
+import { WindowComponent } from '../window/window.component';
 import { WindowInstance } from '../window/window-instance';
 
 @Component({
@@ -8,6 +9,8 @@ import { WindowInstance } from '../window/window-instance';
 })
 export class TeraviaComponent extends WindowInstance {
   static iconClass = 'fa-gamepad';
+
+  @ViewChild(WindowComponent) windowComponent: WindowComponent;
 
   constructor() {
     super();

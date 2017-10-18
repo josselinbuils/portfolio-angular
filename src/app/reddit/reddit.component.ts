@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import * as moment from 'moment';
+import { WindowComponent } from '../window/window.component';
 import { WindowInstance } from '../window/window-instance';
 
 @Component({
@@ -10,6 +11,8 @@ import { WindowInstance } from '../window/window-instance';
 })
 export class RedditComponent extends WindowInstance implements OnInit {
   static iconClass = 'fa-reddit-alien';
+
+  @ViewChild(WindowComponent) windowComponent: WindowComponent;
 
   subreddits: any[] = [
     {name: 'javascript'},
