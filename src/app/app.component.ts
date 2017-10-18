@@ -13,7 +13,7 @@ export class AppComponent implements AfterContentInit {
   constructor(private viewContainerRef: ViewContainerRef, private windowManagerService: WindowManagerService) {
   }
 
-  @HostListener('click', ['$event'])
+  @HostListener('mousedown', ['$event'])
   eventListener(event: MouseEvent): void {
     if (event.target === this.viewContainerRef.element.nativeElement) {
       this.windowManagerService.unselectAllWindows();

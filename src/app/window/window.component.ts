@@ -264,14 +264,17 @@ export class WindowComponent implements AfterContentInit {
     this.content = this.contentElementRef.nativeElement;
     this.window = this.windowElementRef.nativeElement;
 
-    const size = this.getSize();
+    let size = this.getSize();
     const width = this.width || size.width;
     const height = this.height || size.height;
-    const x: number = Math.round((window.innerWidth - width) * 0.5);
-    const y: number = Math.round((window.innerHeight - height) * 0.2);
+
+    this.setSize(width, height);
+
+    size = this.getSize();
+    const x: number = Math.round((window.innerWidth - size.width) * 0.5);
+    const y: number = Math.round((window.innerHeight - size.height) * 0.2);
 
     this.setPosition(x, y);
-    this.setSize(width, height);
 
     if (this.keepContentRatio) {
       const contentSize = this.getContentSize();

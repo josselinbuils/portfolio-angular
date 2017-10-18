@@ -1,4 +1,4 @@
-<div #window class="window" [ngClass]="{active: active, animate: animate, minimized: minimized}" (click)="select()"
+<div #window class="window" [ngClass]="{active: active, animate: animate, minimized: minimized}" (mousedown)="select()"
      [ngStyle]="{'z-index': zIndex}">
   <div class="titlebar" (mousedown)="startMove($event)" (dblclick)="maximize()">
     <div class="buttons">
