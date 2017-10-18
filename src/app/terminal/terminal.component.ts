@@ -153,6 +153,7 @@ export class TerminalComponent extends WindowInstance implements AfterContentIni
           if (this.commandIndex < (this.commands.length - 1)) {
             this.commandIndex++;
             this.userInput = this.commands[this.commandIndex];
+            this.caretIndex = this.userInput.length;
           }
           break;
 
@@ -175,6 +176,7 @@ export class TerminalComponent extends WindowInstance implements AfterContentIni
           if (this.commandIndex > 0) {
             this.commandIndex--;
             this.userInput = this.commands[this.commandIndex];
+            this.caretIndex = this.userInput.length;
           }
       }
     }
