@@ -11,12 +11,12 @@ import { TerminalComponent } from './terminal/terminal.component';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements AfterContentInit {
-
   @ViewChild('selection') selectionElementRef: ElementRef;
   @ViewChild('windows', {read: ViewContainerRef}) windowsViewContainerRef: ViewContainerRef;
 
+  selectionStyle: any = null;
+
   private selection: HTMLElement;
-  private selectionStyle: any = null;
 
   constructor(private renderer: Renderer2, private viewContainerRef: ViewContainerRef,
               private windowManagerService: WindowManagerService) {
