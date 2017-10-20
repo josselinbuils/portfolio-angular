@@ -1,3 +1,3 @@
-<app-window title="Notes" [minWidth]="400" [minHeight]="350" [contentStyle]="{overflow: 'hidden'}">
-  <textarea title="notes" [(ngModel)]="notes" (ngModelChange)="saveNotes()"></textarea>
+<app-window name="Notes" [minWidth]="400" [minHeight]="350" [contentStyle]="{overflow: 'hidden'}">
+  <textarea [(ngModel)]="notes" (ngModelChange)="saveNotes()"></textarea>
 </app-window>
