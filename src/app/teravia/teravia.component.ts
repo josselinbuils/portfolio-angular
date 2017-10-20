@@ -7,12 +7,7 @@ import { WindowInstance } from '../window/window-instance';
   templateUrl: './teravia.component.html',
   styleUrls: ['./teravia.component.css']
 })
-export class TeraviaComponent extends WindowInstance {
+export class TeraviaComponent implements WindowInstance {
   static iconClass = 'fa-gamepad';
-
   @ViewChild(WindowComponent) windowComponent: WindowComponent;
-
-  constructor() {
-    super();
-  }
 }

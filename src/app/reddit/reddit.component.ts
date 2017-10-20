@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import * as moment from 'moment';
+
 import { WindowComponent } from '../window/window.component';
 import { WindowInstance } from '../window/window-instance';
 
@@ -9,7 +10,7 @@ import { WindowInstance } from '../window/window-instance';
   templateUrl: './reddit.component.html',
   styleUrls: ['./reddit.component.css']
 })
-export class RedditComponent extends WindowInstance implements OnInit {
+export class RedditComponent implements OnInit, WindowInstance {
   static iconClass = 'fa-reddit-alien';
 
   @ViewChild(WindowComponent) windowComponent: WindowComponent;
@@ -23,7 +24,6 @@ export class RedditComponent extends WindowInstance implements OnInit {
   ];
 
   constructor(private http: HttpClient) {
-    super();
   }
 
   ngOnInit() {

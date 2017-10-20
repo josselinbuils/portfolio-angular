@@ -1,4 +1,4 @@
 <div *ngFor="let task of tasks" class="task" (click)="run(task)"
-     [ngClass]="{active: task.instance && task.instance.windowComponent. active, running: task.instance}">
-  <i class="fa" [ngClass]="task.getIcon()" aria-hidden="true"></i>
+     [ngClass]="{active: task.instance && task.instance.windowComponent.active, running: task.instance}">
+  <i class="fa" [ngClass]="task.iconClass" aria-hidden="true"></i>
 </div>

@@ -1,4 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
+
 import { WindowComponent } from '../window/window.component';
 import { WindowInstance } from '../window/window-instance';
 
@@ -16,7 +17,7 @@ const smileys = {
   templateUrl: './notes.component.html',
   styleUrls: ['./notes.component.css']
 })
-export class NotesComponent extends WindowInstance {
+export class NotesComponent implements WindowInstance {
   static iconClass = 'fa-sticky-note';
 
   @ViewChild(WindowComponent) windowComponent: WindowComponent;
@@ -24,7 +25,6 @@ export class NotesComponent extends WindowInstance {
   notes: string;
 
   constructor() {
-    super();
     this.notes = localStorage.getItem('notes') || 'Hello there 😃';
   }
 

@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+
 import { NotesComponent } from '../notes/notes.component';
 import { RedditComponent } from '../reddit/reddit.component';
 import { Task } from './task';
@@ -15,7 +16,8 @@ import { WindowManagerService } from '../window-manager.service';
 export class TaskBarComponent {
 
   tasks: Task[] = [
-    new Task(TerminalComponent), new Task(TeraviaComponent), new Task(RedditComponent), new Task(NotesComponent)
+    new Task(TerminalComponent, true), new Task(TeraviaComponent, true), new Task(RedditComponent, true),
+    new Task(NotesComponent, true)
   ];
 
   constructor(private windowManagerService: WindowManagerService) {
@@ -28,14 +30,16 @@ export class TaskBarComponent {
 
   addNewTasks(windowInstances: WindowInstance[]): void {
     windowInstances.forEach(windowInstance => {
-      const task = this.tasks.find(a => windowInstance instanceof a.component);
+      const refTask = this.tasks.find(task => windowInstance instanceof task.component);
 
-      if (task && (!task.instance || task.instance === windowInstance)) {
-        if (!task.instance) {
-          task.instance = windowInstance;
-        }
-      } else {
-        this.tasks.push(new Task(null, windowInstance));
+      if (!refTask) {
+        throw Error('Unknown task');
+      }
+
+      if (!refTask.instance) {
+        refTask.instance = windowInstance;
+      } else if (refTask.instance !== windowInstance) {
+        this.tasks.push(new Task(refTask.component, false, windowInstance));
       }
     });
   }
@@ -54,10 +58,10 @@ export class TaskBarComponent {
   }
 
   removeOutdatedTasks(windowInstances: WindowInstance[]): void {
-    this.tasks.forEach((app, index) => {
-      if (app.instance && windowInstances.indexOf(app.instance) === -1) {
-        if (app.component) {
-          app.instance = null;
+    this.tasks.forEach((task, index) => {
+      if (task.instance && windowInstances.indexOf(task.instance) === -1) {
+        if (task.pinned) {
+          task.instance = null;
         } else {
           this.tasks.splice(index, 1);
         }
