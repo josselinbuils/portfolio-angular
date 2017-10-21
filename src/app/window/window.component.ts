@@ -1,6 +1,8 @@
 import {
   AfterContentInit, Component, ComponentRef, ElementRef, HostListener, Input, Renderer2, ViewChild
 } from '@angular/core';
+
+import { Constants } from '../constants';
 import { WindowManagerService } from '../window-manager.service';
 
 const ANIMATION_DURATION = 200;
@@ -130,9 +132,12 @@ export class WindowComponent implements AfterContentInit {
   }
 
   startMove(downEvent: MouseEvent): void {
-    downEvent.preventDefault();
 
-    this.select();
+    if (downEvent.button !== Constants.LEFT_MOUSE_BUTTON) {
+      return;
+    }
+
+    downEvent.preventDefault();
 
     if (this.maximized || (<HTMLElement> downEvent.target).className.indexOf('maximize') !== -1) {
       return;
@@ -156,9 +161,12 @@ export class WindowComponent implements AfterContentInit {
   }
 
   startResize(downEvent: MouseEvent): void {
-    downEvent.preventDefault();
 
-    this.select();
+    if (downEvent.button !== Constants.LEFT_MOUSE_BUTTON) {
+      return;
+    }
+
+    downEvent.preventDefault();
 
     if (this.maximized) {
       return;

@@ -4,6 +4,7 @@ import {
 } from '@angular/core';
 import { WindowManagerService } from './window-manager.service';
 import { TerminalComponent } from './terminal/terminal.component';
+import { Constants } from './constants';
 
 @Component({
   selector: 'app-root',
@@ -23,6 +24,11 @@ export class AppComponent implements AfterContentInit {
   }
 
   private startSelect(downEvent: MouseEvent): void {
+
+    if (downEvent.button !== Constants.LEFT_MOUSE_BUTTON) {
+      return;
+    }
+
     downEvent.preventDefault();
 
     const startX: number = downEvent.clientX;
@@ -48,8 +54,13 @@ export class AppComponent implements AfterContentInit {
     });
   }
 
+  @HostListener('contextmenu', ['$event'])
+  contextMenuListener(event: Event): void {
+    event.preventDefault();
+  }
+
   @HostListener('mousedown', ['$event'])
-  eventListener(event: MouseEvent): void {
+  mouseDownListener(event: MouseEvent): void {
     if (event.target === this.viewContainerRef.element.nativeElement) {
       this.windowManagerService.unselectAllWindows();
       this.startSelect(event);
