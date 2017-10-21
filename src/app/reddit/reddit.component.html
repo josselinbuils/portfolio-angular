@@ -29,15 +29,13 @@
         <div class="double-bounce2"></div>
       </div>
       <div class="links">
-        <div class="link" *ngFor="let link of data">
+        <div class="link" *ngFor="let link of data" [ngClass]="{stickied: link.stickied}">
           <div class="link-score">
             <span>{{link.score}}</span>
           </div>
-          <div class="link-thumbnail" *ngIf="(link.thumbnail || '').substr(0, 4) === 'http'">
-            <a [href]="link.url" target="_blank">
-              <img [src]="link.thumbnail"/>
-            </a>
-          </div>
+          <a [href]="link.url" target="_blank" class="link-thumbnail" *ngIf="link.previewUrl"
+             [ngStyle]="{'background-image': 'url(' + link.previewUrl + ')'}">
+          </a>
           <div class="link-info">
             <a class="link-title" [href]="link.url" target="_blank">{{link.title}}</a>
             <div class="link-details">

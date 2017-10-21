@@ -12,7 +12,6 @@
 
 .sidebar {
   flex: 0 0 180px;
-  border-right: 1px solid #5f99cf;
 }
 
 .logo {
@@ -47,9 +46,7 @@ li {
   color: #ff4501;
   margin: 0;
   padding: 5px 15px;
-  background: #cee3f8;
   font-size: 1.5em;
-  border-bottom: 1px solid #5f99cf;
 }
 
 .path span {
@@ -66,12 +63,13 @@ li {
   display: flex;
 }
 
-.link:hover {
-  background: #eff7ff !important;
+.link.stickied {
+  background: #cee3f8;
+  border-radius: 4px;
 }
 
 .link-score {
-  min-width: 80px;
+  flex: 0 0 80px;
   text-align: center;
   color: #7b7b7b;
   display: flex;
@@ -85,27 +83,15 @@ li {
 }
 
 .link-thumbnail {
-  max-width: 80px;
-  width: 100%;
-  position: relative;
+  flex: 0 0 100px;
   margin: 10px 15px 10px 0;
+  background: no-repeat center;
+  background-size: 100px;
 }
 
 .link-thumbnail img {
-  max-height: 100%;
-  max-width: 100%;
-  width: auto;
-  height: auto;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  margin: auto auto auto 0;
-}
-
-.link-title {
-  margin-top: 5px;
+  display: block;
+  max-width: 80px;
 }
 
 .link-details {

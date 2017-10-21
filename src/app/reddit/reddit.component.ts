@@ -39,6 +39,10 @@ export class RedditComponent implements OnInit, WindowInstance {
     this.data.forEach(link => {
       link.since = moment(link.created_utc * 1000).fromNow();
       link.showSubreddit = path.indexOf('/r/') !== 0;
+
+      if (link.preview && link.preview.enabled) {
+        link.previewUrl = link.preview.images[0].resolutions[0].url;
+      }
     });
   }
 
