@@ -119,8 +119,10 @@ a, a:hover, a:focus, a:active {
 .spinner {
   width: 40px;
   height: 40px;
-  position: relative;
-  margin: 15px auto;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .double-bounce1, .double-bounce2 {
