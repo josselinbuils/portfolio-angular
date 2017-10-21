@@ -5,8 +5,6 @@ module.exports = class RedditRoutes {
   static init(router) {
     Logger.info('Initializes reddit routes');
 
-    router.get('/api/reddit/hot', RedditController.getHot);
-    router.get('/api/reddit/top', RedditController.getTop);
     router.get('/api/reddit/r/:subreddit/hot', RedditController.getHot);
     router.get('/api/reddit/r/:subreddit/top', RedditController.getTop);
   }

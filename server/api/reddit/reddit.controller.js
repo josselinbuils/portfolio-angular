@@ -18,24 +18,12 @@ module.exports = class RedditController {
 
   static getHot(req, res) {
     const subreddit = req.params.subreddit;
-    let r = reddit;
-
-    if (subreddit) {
-      r = r.getSubreddit(subreddit);
-    }
-
-    handle(res, r.getHot());
+    handle(res, reddit.getSubreddit(subreddit).getHot({limit: 50}));
   }
 
   static getTop(req, res) {
     const subreddit = req.params.subreddit;
-    let r = reddit;
-
-    if (subreddit) {
-      r = r.getSubreddit(subreddit);
-    }
-
-    handle(res, r.getTop());
+    handle(res, reddit.getSubreddit(subreddit).getTop({limit: 50}));
   }
 };
 

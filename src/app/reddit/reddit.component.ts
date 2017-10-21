@@ -47,6 +47,6 @@ export class RedditComponent implements OnInit, WindowInstance {
   }
 
   ngOnInit() {
-    this.load('/hot');
+    this.load('/r/popular/hot');
   }
 }
