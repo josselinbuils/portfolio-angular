@@ -2,8 +2,8 @@ import {
   AfterContentInit, Component, ComponentRef, ElementRef, HostListener, Input, Renderer2, ViewChild
 } from '@angular/core';
 
-import { Constants } from '../../constants';
-import { WindowManagerService } from '../window-manager.service';
+import { MOUSE_BUTTON } from '../../constants';
+import { WindowManagerService } from './window-manager.service';
 
 const ANIMATION_DURATION = 200;
 const DOM_UPDATE_DELAY = 10;
@@ -133,7 +133,7 @@ export class WindowComponent implements AfterContentInit {
 
   startMove(downEvent: MouseEvent): void {
 
-    if (downEvent.button !== Constants.LEFT_MOUSE_BUTTON) {
+    if (downEvent.button !== MOUSE_BUTTON.LEFT) {
       return;
     }
 
@@ -162,7 +162,7 @@ export class WindowComponent implements AfterContentInit {
 
   startResize(downEvent: MouseEvent): void {
 
-    if (downEvent.button !== Constants.LEFT_MOUSE_BUTTON) {
+    if (downEvent.button !== MOUSE_BUTTON.LEFT) {
       return;
     }
 

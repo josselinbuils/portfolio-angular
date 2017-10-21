@@ -2,9 +2,10 @@ import {
   AfterContentInit, Component, ElementRef, HostListener, Renderer2, ViewChild,
   ViewContainerRef
 } from '@angular/core';
-import { WindowManagerService } from './platform/window-manager.service';
+
+import { MOUSE_BUTTON } from './constants';
+import { WindowManagerService } from './platform/window/window-manager.service';
 import { TerminalComponent } from './apps/terminal/terminal.component';
-import { Constants } from './constants';
 
 @Component({
   selector: 'app-root',
@@ -25,7 +26,7 @@ export class AppComponent implements AfterContentInit {
 
   private startSelect(downEvent: MouseEvent): void {
 
-    if (downEvent.button !== Constants.LEFT_MOUSE_BUTTON) {
+    if (downEvent.button !== MOUSE_BUTTON.LEFT) {
       return;
     }
 
@@ -55,7 +56,7 @@ export class AppComponent implements AfterContentInit {
   }
 
   @HostListener('contextmenu', ['$event'])
-  contextMenuListener(event: Event): void {
+  contextMenuListener(event: MouseEvent): void {
     event.preventDefault();
   }
 

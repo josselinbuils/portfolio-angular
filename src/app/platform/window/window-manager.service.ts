@@ -1,20 +1,17 @@
 import { ComponentFactoryResolver, Injectable, Type, ViewContainerRef } from '@angular/core';
 import { BehaviorSubject } from 'rxjs/Rx';
-import { WindowInstance } from './window/window-instance';
-import { WindowComponent } from './window/window.component';
+import { WindowInstance } from './window-instance';
+import { WindowComponent } from './window.component';
 
 @Injectable()
 export class WindowManagerService {
+  windowInstancesSubject: BehaviorSubject<WindowInstance[]> = new BehaviorSubject<WindowInstance[]>(<WindowInstance[]> []);
+
   private windowComponents: WindowComponent[] = [];
   private id = -1;
-  private subject: BehaviorSubject<WindowInstance[]> = new BehaviorSubject<WindowInstance[]>(<WindowInstance[]> []);
   private viewContainerRef: ViewContainerRef;
 
   constructor(private componentFactoryResolver: ComponentFactoryResolver) {
-  }
-
-  getSubject(): BehaviorSubject<WindowInstance[]> {
-    return this.subject;
   }
 
   closeWindow(id: number) {
@@ -88,6 +85,6 @@ export class WindowManagerService {
   }
 
   private publishWindowInstances(): void {
-    this.subject.next(this.windowComponents.map(windowComponent => <WindowInstance> windowComponent.parentRef.instance));
+    this.windowInstancesSubject.next(this.windowComponents.map(windowComponent => <WindowInstance> windowComponent.parentRef.instance));
   }
 }

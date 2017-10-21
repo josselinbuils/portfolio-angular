@@ -7,6 +7,8 @@ import { AboutComponent } from './apps/terminal/executors/about/about.component'
 import { AppComponent } from './app.component';
 import { BashErrorComponent } from './apps/terminal/executors/bash-error/bash-error.component';
 import { CommandComponent } from './apps/terminal/executors/command/command.component';
+import { ContextMenuComponent } from './platform/context-menu/context-menu.component';
+import { ContextMenuService } from './platform/context-menu/context-menu.service';
 import { HelpComponent } from './apps/terminal/executors/help/help.component';
 import { NotesComponent } from './apps/notes/notes.component';
 import { ProjectsComponent } from './apps/terminal/executors/projects/projects.component';
@@ -17,7 +19,7 @@ import { TeraviaComponent } from './apps/teravia/teravia.component';
 import { TerminalComponent } from './apps/terminal/terminal.component';
 import { WorkComponent } from './apps/terminal/executors/work/work.component';
 import { WindowComponent } from './platform/window/window.component';
-import { WindowManagerService } from './platform/window-manager.service';
+import { WindowManagerService } from './platform/window/window-manager.service';
 
 @NgModule({
   declarations: [
@@ -25,6 +27,7 @@ import { WindowManagerService } from './platform/window-manager.service';
     AppComponent,
     BashErrorComponent,
     CommandComponent,
+    ContextMenuComponent,
     HelpComponent,
     NotesComponent,
     ProjectsComponent,
@@ -54,7 +57,7 @@ import { WindowManagerService } from './platform/window-manager.service';
     FormsModule,
     HttpClientModule
   ],
-  providers: [WindowManagerService],
+  providers: [ContextMenuService, WindowManagerService],
   bootstrap: [AppComponent]
 })
 export class AppModule {

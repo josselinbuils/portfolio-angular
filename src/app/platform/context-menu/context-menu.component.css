@@ -1,0 +1,23 @@
+.context-menu {
+  position: fixed;
+  background: rgba(0, 0, 0, 0.9);
+  border: 1px solid black;
+  border-radius: 5px;
+  margin: 0;
+  z-index: 1000;
+  padding: 5px 0;
+  min-width: 100px;
+  font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+  font-size: .8em;
+  user-select: none;
+}
+
+.context-menu li {
+  padding: 3px 10px;
+  list-style: none;
+  cursor: pointer;
+}
+
+.context-menu li:hover {
+  background: #444444;
+}

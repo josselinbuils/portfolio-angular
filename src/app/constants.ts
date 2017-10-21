@@ -1,3 +1,4 @@
-export class Constants {
-  static readonly LEFT_MOUSE_BUTTON = 0;
+export enum MOUSE_BUTTON {
+  LEFT = 0,
+  RIGHT = 2
 }

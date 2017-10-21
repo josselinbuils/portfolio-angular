@@ -1,12 +1,14 @@
-import { Component } from '@angular/core';
+import { Component, ViewContainerRef } from '@angular/core';
 
+import { ContextMenuService } from '../context-menu/context-menu.service';
+import { DOMUtils } from '../dom-utils';
 import { NotesComponent } from '../../apps/notes/notes.component';
 import { RedditComponent } from '../../apps/reddit/reddit.component';
 import { Task } from './task';
 import { TeraviaComponent } from '../../apps/teravia/teravia.component';
 import { TerminalComponent } from '../../apps/terminal/terminal.component';
 import { WindowInstance } from '../window/window-instance';
-import { WindowManagerService } from '../window-manager.service';
+import { WindowManagerService } from '../window/window-manager.service';
 
 @Component({
   selector: 'app-task-bar',
@@ -20,8 +22,10 @@ export class TaskBarComponent {
     new Task(NotesComponent, true)
   ];
 
-  constructor(private windowManagerService: WindowManagerService) {
-    windowManagerService.getSubject().subscribe(windowInstances => {
+  constructor(private contextMenuService: ContextMenuService, private viewContainerRef: ViewContainerRef,
+              private windowManagerService: WindowManagerService) {
+
+    windowManagerService.windowInstancesSubject.subscribe(windowInstances => {
       this.removeOutdatedTasks(windowInstances);
       this.addNewTasks(windowInstances);
       this.removeDuplicatedTasks();
@@ -40,6 +44,38 @@ export class TaskBarComponent {
         refTask.instance = windowInstance;
       } else if (refTask.instance !== windowInstance) {
         this.tasks.push(new Task(refTask.component, false, windowInstance));
+      }
+    });
+  }
+
+  openContextMenu(task: Task, event: MouseEvent): void {
+
+    if (!task.instance) {
+      return;
+    }
+
+    const taskBarElement = this.viewContainerRef.element.nativeElement;
+    const taskElement = DOMUtils.getParent(<HTMLElement> event.target, '.task');
+
+    const top = taskElement.getBoundingClientRect().top;
+    const left = taskBarElement.getBoundingClientRect().right - 1;
+
+    this.contextMenuService.show({
+      event: event,
+      items: [{
+        title: 'Close',
+        click: function () {
+          this.windowManagerService.closeWindow(task.instance.windowComponent.id);
+        }.bind(this)
+      }],
+      position: {
+        left: left,
+        top: top
+      },
+      style: {
+        'border-left': 'none',
+        'border-top-left-radius': 0,
+        'border-bottom-left-radius': 0
       }
     });
   }

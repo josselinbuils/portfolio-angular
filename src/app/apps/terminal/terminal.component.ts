@@ -11,7 +11,7 @@ import { HelpComponent } from './executors/help/help.component';
 import { ProjectsComponent } from './executors/projects/projects.component';
 import { SkillsComponent } from './executors/skills/skills.component';
 import { WorkComponent } from './executors/work/work.component';
-import { WindowManagerService } from '../../platform/window-manager.service';
+import { WindowManagerService } from '../../platform/window/window-manager.service';
 import { TeraviaComponent } from '../teravia/teravia.component';
 import { WindowComponent } from '../../platform/window/window.component';
 import { WindowInstance } from '../../platform/window/window-instance';
