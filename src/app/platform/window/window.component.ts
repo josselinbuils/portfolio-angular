@@ -3,7 +3,7 @@ import {
 } from '@angular/core';
 
 import { Constants } from '../../constants';
-import { WindowManagerService } from '../../window-manager.service';
+import { WindowManagerService } from '../window-manager.service';
 
 const ANIMATION_DURATION = 200;
 const DOM_UPDATE_DELAY = 10;

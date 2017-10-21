@@ -2,8 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import * as moment from 'moment';
 
-import { WindowComponent } from '../../shared/window/window.component';
-import { WindowInstance } from '../../shared/window/window-instance';
+import { WindowComponent } from '../../platform/window/window.component';
+import { WindowInstance } from '../../platform/window/window-instance';
 
 @Component({
   selector: 'app-reddit',

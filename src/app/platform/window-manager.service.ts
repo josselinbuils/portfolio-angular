@@ -1,7 +1,7 @@
 import { ComponentFactoryResolver, Injectable, Type, ViewContainerRef } from '@angular/core';
 import { BehaviorSubject } from 'rxjs/Rx';
-import { WindowInstance } from './shared/window/window-instance';
-import { WindowComponent } from './shared/window/window.component';
+import { WindowInstance } from './window/window-instance';
+import { WindowComponent } from './window/window.component';
 
 @Injectable()
 export class WindowManagerService {

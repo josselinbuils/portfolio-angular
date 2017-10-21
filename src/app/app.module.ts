@@ -12,12 +12,12 @@ import { NotesComponent } from './apps/notes/notes.component';
 import { ProjectsComponent } from './apps/terminal/executors/projects/projects.component';
 import { RedditComponent } from './apps/reddit/reddit.component';
 import { SkillsComponent } from './apps/terminal/executors/skills/skills.component';
-import { TaskBarComponent } from './task-bar/task-bar.component';
+import { TaskBarComponent } from './platform/task-bar/task-bar.component';
 import { TeraviaComponent } from './apps/teravia/teravia.component';
 import { TerminalComponent } from './apps/terminal/terminal.component';
 import { WorkComponent } from './apps/terminal/executors/work/work.component';
-import { WindowComponent } from './shared/window/window.component';
-import { WindowManagerService } from './window-manager.service';
+import { WindowComponent } from './platform/window/window.component';
+import { WindowManagerService } from './platform/window-manager.service';
 
 @NgModule({
   declarations: [
