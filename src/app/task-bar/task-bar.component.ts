@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
 
-import { NotesComponent } from '../notes/notes.component';
-import { RedditComponent } from '../reddit/reddit.component';
+import { NotesComponent } from '../apps/notes/notes.component';
+import { RedditComponent } from '../apps/reddit/reddit.component';
 import { Task } from './task';
-import { TeraviaComponent } from '../teravia/teravia.component';
-import { TerminalComponent } from '../terminal/terminal.component';
-import { WindowInstance } from '../window/window-instance';
+import { TeraviaComponent } from '../apps/teravia/teravia.component';
+import { TerminalComponent } from '../apps/terminal/terminal.component';
+import { WindowInstance } from '../shared/window/window-instance';
 import { WindowManagerService } from '../window-manager.service';
 
 @Component({

@@ -3,7 +3,7 @@ import {
   ViewContainerRef
 } from '@angular/core';
 import { WindowManagerService } from './window-manager.service';
-import { TerminalComponent } from './terminal/terminal.component';
+import { TerminalComponent } from './apps/terminal/terminal.component';
 import { Constants } from './constants';
 
 @Component({

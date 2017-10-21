@@ -3,20 +3,20 @@ import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 
-import { AboutComponent } from './terminal/executors/about/about.component';
+import { AboutComponent } from './apps/terminal/executors/about/about.component';
 import { AppComponent } from './app.component';
-import { BashErrorComponent } from './terminal/executors/bash-error/bash-error.component';
-import { CommandComponent } from './terminal/executors/command/command.component';
-import { HelpComponent } from './terminal/executors/help/help.component';
-import { NotesComponent } from './notes/notes.component';
-import { ProjectsComponent } from './terminal/executors/projects/projects.component';
-import { RedditComponent } from './reddit/reddit.component';
-import { SkillsComponent } from './terminal/executors/skills/skills.component';
+import { BashErrorComponent } from './apps/terminal/executors/bash-error/bash-error.component';
+import { CommandComponent } from './apps/terminal/executors/command/command.component';
+import { HelpComponent } from './apps/terminal/executors/help/help.component';
+import { NotesComponent } from './apps/notes/notes.component';
+import { ProjectsComponent } from './apps/terminal/executors/projects/projects.component';
+import { RedditComponent } from './apps/reddit/reddit.component';
+import { SkillsComponent } from './apps/terminal/executors/skills/skills.component';
 import { TaskBarComponent } from './task-bar/task-bar.component';
-import { TeraviaComponent } from './teravia/teravia.component';
-import { TerminalComponent } from './terminal/terminal.component';
-import { WorkComponent } from './terminal/executors/work/work.component';
-import { WindowComponent } from './window/window.component';
+import { TeraviaComponent } from './apps/teravia/teravia.component';
+import { TerminalComponent } from './apps/terminal/terminal.component';
+import { WorkComponent } from './apps/terminal/executors/work/work.component';
+import { WindowComponent } from './shared/window/window.component';
 import { WindowManagerService } from './window-manager.service';
 
 @NgModule({

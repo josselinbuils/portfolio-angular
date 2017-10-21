@@ -1,7 +1,7 @@
 import { Component, ViewChild } from '@angular/core';
 
-import { WindowComponent } from '../window/window.component';
-import { WindowInstance } from '../window/window-instance';
+import { WindowComponent } from '../../shared/window/window.component';
+import { WindowInstance } from '../../shared/window/window-instance';
 
 const smileys = {
   ':D': '\uD83D\uDE00',
