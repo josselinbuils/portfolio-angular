@@ -15,26 +15,34 @@ export class RedditComponent implements OnInit, WindowInstance {
 
   @ViewChild(WindowComponent) windowComponent: WindowComponent;
 
-  subreddits: any[] = [
-    {name: 'javascript'},
-    {name: 'angularjs'},
-    {name: 'node'},
-    {name: 'docker'},
-    {name: 'ProgrammerHumor'}
-  ];
+  data: any[];
+  path: string;
+  subreddit: string;
+  subreddits = ['angularjs', 'CrappyDesign', 'docker', 'javascript', 'node', 'ProgrammerHumor', 'todayilearned'];
+
+  // For dev environment
+  private prefix = location.host.indexOf('localhost') === 0 ? 'http://localhost:9000' : '';
 
   constructor(private http: HttpClient) {
   }
 
-  ngOnInit() {
-    this.subreddits.forEach(async subreddit => {
-      subreddit.data = (
-        <any[]> await this.http.get(`api/reddit/${subreddit.name}/top/week`)
-          .first()
-          .toPromise()
-      ).slice(0, 5);
+  async load(path: string): Promise<any> {
+    this.path = path;
+    this.subreddit = path.indexOf('/r/') === 0 ? path.split('/')[2] : null;
 
-      subreddit.data.forEach(link => link.since = moment(link.created_utc * 1000).fromNow(true));
+    this.data = null;
+    this.data = <any[]> await this.http
+      .get(`${this.prefix}/api/reddit${path}`)
+      .first()
+      .toPromise();
+
+    this.data.forEach(link => {
+      link.since = moment(link.created_utc * 1000).fromNow();
+      link.showSubreddit = path.indexOf('/r/') !== 0;
     });
+  }
+
+  ngOnInit() {
+    this.load('/hot');
   }
 }

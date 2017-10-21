@@ -1,57 +1,97 @@
 .reddit {
   font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  overflow: hidden;
+  display: flex;
+  background: #FBFBFB;
 }
 
-h1 {
+.sidebar {
+  flex: 0 0 180px;
+  border-right: 1px solid #5f99cf;
+}
+
+.logo {
+  text-align: center;
+  color: #ff4501;
+  font-size: 100px;
+}
+
+ul {
+  padding-left: 15px;
+}
+
+.menu {
+  color: #7b7b7b;
+  font-size: .9em;
+}
+
+.menu ul {
+  font-size: .9em;
+}
+
+.body {
+  overflow-y: scroll;
+  flex-grow: 1;
+}
+
+li {
+  list-style-type: none;
+}
+
+.path {
   color: #ff4501;
   margin: 0;
   padding: 5px 15px;
   background: #cee3f8;
   font-size: 1.5em;
-  border-top: 1px solid;
-  border-bottom: 1px solid;
-  border-color: #5f99cf;
+  border-bottom: 1px solid #5f99cf;
 }
 
-.reddit:first-child h1 {
-  border-top: 0;
+.path span {
+  float: right;
+  line-height: 3em;
+  font-size: 0.5em;
 }
 
 .links {
-  background: #FBFBFB;
   color: black;
 }
 
 .link {
   display: flex;
-  text-decoration: none;
 }
 
-.link + .link {
-  border-top: 1px solid #5f99cf;
+.link:hover {
+  background: #eff7ff !important;
 }
 
-.score {
+.link-score {
   min-width: 80px;
   text-align: center;
-  padding: 22px 0;
   color: #7b7b7b;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
 }
 
-.info {
+.link-info {
   padding: 10px 10px 10px 0;
   flex-grow: 1;
 }
 
-.thumbnail {
-  max-height: 70px;
+.link-thumbnail {
   max-width: 80px;
   width: 100%;
   position: relative;
-  margin-right: 15px;
+  margin: 10px 15px 10px 0;
 }
 
-.thumbnail img {
+.link-thumbnail img {
   max-height: 100%;
   max-width: 100%;
   width: auto;
@@ -64,20 +104,29 @@ h1 {
   margin: auto auto auto 0;
 }
 
-.header {
-  color: #7b7b7b;
-  font-size: .8em;
-}
-
-.body {
+.link-title {
   margin-top: 5px;
 }
 
-a:hover {
-  background: #eff7ff !important;
+.link-details {
+  color: #7b7b7b;
+  font-size: .7em;
 }
 
-a, a:focus, a:active {
+.fa-comment-o {
+  margin-right: 3px;
+}
+
+a {
+  text-decoration: none;
+  cursor: pointer;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+a, a:hover, a:focus, a:active {
   color: inherit !important;
 }
 

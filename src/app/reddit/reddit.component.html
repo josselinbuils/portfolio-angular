@@ -1,24 +1,62 @@
-<app-window name="Reddit" [minWidth]="500" [minHeight]="500" [height]="500">
-  <div class="reddit" *ngFor="let subreddit of subreddits">
-    <h1>r/{{subreddit.name}}</h1>
-    <div class="spinner" *ngIf="!subreddit.data">
-      <div class="double-bounce1"></div>
-      <div class="double-bounce2"></div>
+<app-window name="Reddit" [minWidth]="850" [minHeight]="500" [height]="500" xmlns="http://www.w3.org/1999/html">
+  <div class="reddit">
+    <div class="sidebar">
+      <div class="logo">
+        <i class="fa fa-reddit-alien" aria-hidden="true"></i>
+      </div>
+      <ul class="menu">
+        <li><a (click)="load('/hot')">Hot</a></li>
+        <li><a (click)="load('/top')">Top</a></li>
+        <li>
+          Subreddits
+          <ul>
+            <li *ngFor="let subreddit of subreddits">
+              <a (click)="load('/r/' + subreddit + '/hot')">r/{{subreddit}}</a>
+            </li>
+          </ul>
+        </li>
+      </ul>
     </div>
-    <div class="links">
-      <a class="link" *ngFor="let link of subreddit.data" href="https://www.reddit.com{{link.permalink}}"
-         target="_blank">
-        <div class="score">{{link.score}}</div>
-        <div class="thumbnail" *ngIf="(link.thumbnail || '').substr(0, 4) === 'http'">
-          <img [src]="link.thumbnail"/>
-        </div>
-        <div class="info">
-          <div class="header">u/{{link.author}} - {{link.since}}
-            <span class="right" *ngIf="link.domain !== 'self.' + subreddit.name">{{link.domain}}</span>
+    <div class="body">
+      <h1 class="path">{{path}}
+        <span *ngIf="subreddit">
+          <a *ngIf="path.slice(-4) !== '/hot'" (click)="load('/r/' + subreddit + '/hot')">Hot</a>
+          <a *ngIf="path.slice(-4) !== '/top'" (click)="load('/r/' + subreddit + '/top')">Top</a>
+        </span>
+      </h1>
+      <div class="spinner" *ngIf="!data">
+        <div class="double-bounce1"></div>
+        <div class="double-bounce2"></div>
+      </div>
+      <div class="links">
+        <div class="link" *ngFor="let link of data">
+          <div class="link-score">
+            <span>{{link.score}}</span>
           </div>
-          <div class="body">{{link.title}}</div>
+          <div class="link-thumbnail" *ngIf="(link.thumbnail || '').substr(0, 4) === 'http'">
+            <a [href]="link.url" target="_blank">
+              <img [src]="link.thumbnail"/>
+            </a>
+          </div>
+          <div class="link-info">
+            <a class="link-title" [href]="link.url" target="_blank">{{link.title}}</a>
+            <div class="link-details">
+              <div>
+                <span>submitted {{link.since}} by u/{{link.author}}</span>
+                <span *ngIf="link.showSubreddit">
+                on <a (click)="load('/r/' + link.subreddit + '/hot')">r/{{link.subreddit}}</a>
+              </span>
+                <span class="right">{{link.domain}}</span>
+              </div>
+              <div>
+                <a [href]="'https://www.reddit.com' + link.permalink" target="_blank">
+                  <i class="fa fa-comment-o" aria-hidden="true"></i>{{link.num_comments}}
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
-      </a>
+      </div>
     </div>
   </div>
 </app-window>
