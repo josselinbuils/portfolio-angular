@@ -1,5 +1,5 @@
 import {
-  AfterContentInit, Component, ComponentRef, ElementRef, Input, Renderer2, ViewChild
+  AfterContentInit, Component, ComponentRef, ElementRef, HostListener, Input, Renderer2, ViewChild
 } from '@angular/core';
 import { WindowManagerService } from '../window-manager.service';
 
@@ -92,14 +92,9 @@ export class WindowComponent implements AfterContentInit {
         this.setPosition(left, top);
         this.maximized = false;
       } else {
-        const xMin = 59;
-        const yMin = -1;
-        const maxWidth = window.innerWidth - 58;
-        const maxHeight = window.innerHeight + 2;
-
         this.lastDisplayProperties.maximize = this.window.getBoundingClientRect();
-        this.setSize(maxWidth, maxHeight);
-        this.setPosition(xMin, yMin);
+        this.setMaxSize();
+        this.setPosition(59, -1);
         this.maximized = true;
       }
 
@@ -228,15 +223,17 @@ export class WindowComponent implements AfterContentInit {
     };
   }
 
+  private setMaxSize(): void {
+    const maxWidth = window.innerWidth - 58;
+    const maxHeight = window.innerHeight + 2;
+    this.setSize(maxWidth, maxHeight, true);
+  }
+
   private setSize(width: number, height: number, force: boolean = false): void {
 
     if (!force) {
       width = Math.max(width, this.minWidth);
       height = Math.max(height, this.minHeight);
-
-      if (this.maxHeight) {
-        height = Math.min(height, this.maxHeight);
-      }
 
       if (this.maxWidth) {
         width = Math.min(width, this.maxWidth);
@@ -258,6 +255,13 @@ export class WindowComponent implements AfterContentInit {
 
   private setStyle(property: string, value: any): void {
     this.renderer.setStyle(this.window, property, value);
+  }
+
+  @HostListener('window:resize')
+  resizeHandler(): void {
+    if (this.maximized) {
+      this.setMaxSize();
+    }
   }
 
   ngAfterContentInit(): void {

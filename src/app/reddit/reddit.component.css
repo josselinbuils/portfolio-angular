@@ -12,6 +12,7 @@
 
 .sidebar {
   flex: 0 0 180px;
+  overflow-y: auto;
 }
 
 .logo {
