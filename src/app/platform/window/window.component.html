@@ -3,8 +3,12 @@
   <div class="titlebar" (mousedown)="startMove($event)" (dblclick)="maximize()">
     <div class="buttons">
       <span class="close" (click)="close()"></span>
-      <span class="minimize" (click)="minimize()"></span>
-      <span class="maximize" [ngClass]="{disabled: !resizable || !canBeMaximized()}" (click)="maximize()"></span>
+      <span class="minimize" (click)="minimize()">
+        <i class="fa fa-minus" aria-hidden="true"></i>
+      </span>
+      <span class="maximize" [ngClass]="{disabled: !resizable || !canBeMaximized()}" (click)="maximize()">
+        <i class="fa fa-plus" aria-hidden="true"></i>
+      </span>
     </div>
     <span class="title">{{windowTitle}}</span>
   </div>

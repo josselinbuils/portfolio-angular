@@ -70,33 +70,29 @@
 .close, .minimize, .maximize {
   background: rgba(0, 0, 0, 0.1);
   border: 1px solid #acacac;
+  color: #acacac;
   height: 12px;
   width: 12px;
   border-radius: 7px;
   cursor: default;
   margin-left: 3px;
   display: inline-block;
-  opacity: .5;
+  vertical-align: top;
 }
 
-.buttons:hover .close {
+.close:hover {
   background: #ff5722;
   border-color: #d6481c;
 }
 
-.buttons:hover .minimize {
-  background: #ffbc00;
-  border-color: #d09900;
+.buttons i {
+  font-size: 10px;
+  line-height: 12px;
+  opacity: 0;
+  vertical-align: top;
 }
 
-.buttons:hover .maximize:not(.disabled) {
-  background: #8fd800;
-  border-color: #71ab00;
-}
-
-.buttons:hover .close:hover,
-.buttons:hover .minimize:hover,
-.buttons:hover .maximize:not(.disabled):hover {
+.minimize:hover i, .maximize:not(.disabled):hover i {
   opacity: 1;
 }
 
