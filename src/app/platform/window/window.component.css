@@ -70,7 +70,7 @@
 .close, .minimize, .maximize {
   background: rgba(0, 0, 0, 0.1);
   border: 1px solid #acacac;
-  color: #acacac;
+  color: #000000;
   height: 12px;
   width: 12px;
   border-radius: 7px;
