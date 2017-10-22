@@ -1,8 +1,9 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, Renderer2 } from '@angular/core';
 
 import { MOUSE_BUTTON } from '../../constants';
-import { ContextMenuService } from './context-menu.service';
 import { ContextMenuItem } from './context-menu-item';
+import { ContextMenuDescriptor } from './context-menu-descriptor';
+import { ContextMenuService } from './context-menu.service';
 import { DOMUtils } from '../dom-utils';
 
 @Component({
@@ -11,14 +12,16 @@ import { DOMUtils } from '../dom-utils';
   styleUrls: ['./context-menu.component.css']
 })
 export class ContextMenuComponent {
-  items: any[];
+
+  descriptor: ContextMenuDescriptor;
   show = false;
   style: any = {};
 
-  constructor(private contextMenuService: ContextMenuService) {
+  private destroyMouseDownListener: () => void;
+
+  constructor(private contextMenuService: ContextMenuService, private renderer: Renderer2) {
     contextMenuService.showSubject.subscribe(descriptor => {
-      event.preventDefault();
-      this.items = descriptor.items;
+      this.descriptor = descriptor;
 
       if (descriptor.position) {
         this.style['top.px'] = descriptor.position.top;
@@ -32,19 +35,23 @@ export class ContextMenuComponent {
         Object.assign(this.style, descriptor.style);
       }
 
-      this.show = true;
+      this.showMenu();
     });
   }
 
   click(item: ContextMenuItem): void {
     if (typeof item.click === 'function') {
-      this.show = false;
+      this.hideMenu();
       item.click();
     }
   }
 
-  @HostListener('window:mousedown', ['$event'])
-  mouseDownListener(event: MouseEvent): void {
+  private hideMenu(): void {
+    this.destroyMouseDownListener();
+    this.show = false;
+  }
+
+  private mouseDownListener(event: MouseEvent): void {
 
     if ([MOUSE_BUTTON.LEFT, MOUSE_BUTTON.RIGHT].indexOf(event.button) === -1) {
       return;
@@ -53,7 +60,12 @@ export class ContextMenuComponent {
     const isContextMenuChild = !!DOMUtils.getParent(<HTMLElement> event.target, '.context-menu');
 
     if (!isContextMenuChild) {
-      this.show = false;
+      this.hideMenu();
     }
+  }
+
+  private showMenu(): void {
+    this.show = true;
+    this.destroyMouseDownListener = this.renderer.listen('window', 'mousedown', this.mouseDownListener.bind(this));
   }
 }

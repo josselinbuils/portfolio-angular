@@ -1,5 +1,6 @@
 import { Component, ViewContainerRef } from '@angular/core';
 
+import { ContextMenuItem } from '../context-menu/context-menu-item';
 import { ContextMenuService } from '../context-menu/context-menu.service';
 import { DOMUtils } from '../dom-utils';
 import { NotesComponent } from '../../apps/notes/notes.component';
@@ -49,33 +50,37 @@ export class TaskBarComponent {
   }
 
   openContextMenu(task: Task, event: MouseEvent): void {
-
-    if (!task.instance) {
-      return;
-    }
-
     const taskBarElement = this.viewContainerRef.element.nativeElement;
     const taskElement = DOMUtils.getParent(<HTMLElement> event.target, '.task');
 
+    const left = taskBarElement.getBoundingClientRect().right;
     const top = taskElement.getBoundingClientRect().top;
-    const left = taskBarElement.getBoundingClientRect().right - 1;
+
+    const items: ContextMenuItem[] = [{
+      iconClass: task.iconClass,
+      title: task.name,
+      click: () => this.windowManagerService.openWindow(task.component)
+    }];
+
+    if (task.instance) {
+      items.push({
+        iconClass: 'fa-close',
+        title: 'Close',
+        click: () => this.windowManagerService.closeWindow(task.instance.windowComponent.id)
+      });
+    }
 
     this.contextMenuService.show({
       event: event,
-      items: [{
-        title: 'Close',
-        click: function () {
-          this.windowManagerService.closeWindow(task.instance.windowComponent.id);
-        }.bind(this)
-      }],
+      items: items,
       position: {
         left: left,
         top: top
       },
       style: {
-        'border-left': 'none',
         'border-top-left-radius': 0,
-        'border-bottom-left-radius': 0
+        'border-bottom-left-radius': 0,
+        'min-height': taskElement.clientHeight + 'px'
       }
     });
   }

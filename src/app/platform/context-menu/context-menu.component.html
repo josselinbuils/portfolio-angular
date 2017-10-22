@@ -1,3 +1,8 @@
-<ul class="context-menu" [ngStyle]="style" [hidden]="!show">
-  <li *ngFor="let item of items" (click)="click(item)" class="context-menu-item">{{item.title}}</li>
+<ul class="context-menu" [ngStyle]="style" *ngIf="show">
+  <li class="item" *ngFor="let item of descriptor.items" (click)="click(item)">
+    <div class="icon">
+      <i class="fa" *ngIf="item.iconClass" [ngClass]="item.iconClass" aria-hidden="true"></i>
+    </div>
+    <div class="title">{{item.title}}</div>
+  </li>
 </ul>

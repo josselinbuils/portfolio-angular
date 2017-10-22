@@ -1,23 +1,38 @@
 .context-menu {
   position: fixed;
   background: rgba(0, 0, 0, 0.9);
-  border: 1px solid black;
-  border-radius: 5px;
+  border-radius: 4px;
   margin: 0;
   z-index: 1000;
-  padding: 5px 0;
-  min-width: 100px;
+  padding: 0;
+  min-width: 120px;
   font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
   font-size: .8em;
   user-select: none;
 }
 
-.context-menu li {
-  padding: 3px 10px;
+.item {
+  margin: 5px 0;
+  padding: 3px 10px 3px 0;
   list-style: none;
   cursor: pointer;
 }
 
-.context-menu li:hover {
+.item + .item {
+  margin-top: 0;
+}
+
+.item:hover {
   background: #444444;
 }
+
+.icon {
+  display: inline-block;
+  width: 25px;
+  text-align: center;
+}
+
+.title {
+  display: inline-block;
+}
+

@@ -6,12 +6,14 @@ export class Task {
   component: Type<{}>;
   iconClass: string;
   instance: WindowInstance;
+  name: string;
   pinned: boolean;
 
   constructor(component: Type<{}>, pinned: boolean, instance?: WindowInstance) {
     this.component = component;
     this.iconClass = (<any> component).iconClass;
     this.instance = instance;
+    this.name = (<any> component).appName;
     this.pinned = pinned;
   }
 }
