@@ -10,18 +10,27 @@
 }
 
 .task {
-  height: 53px;
-  line-height: 53px;
+  height: 60px;
+  line-height: 60px;
   font-size: 32px;
   text-align: center;
-  border: 1px solid transparent;
-  margin: 3px 3px 0 3px;
+  margin-bottom: 5px;
+  position: relative;
 }
 
-.task.active {
+.task:hover, .task.active:hover {
   background: #444444;
 }
 
-.task.running {
-  border-color: #616161;
+.task.active {
+  background: #333333;
+}
+
+.running {
+  background: #007ad8;
+  position: absolute;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  height: 3px;
 }
