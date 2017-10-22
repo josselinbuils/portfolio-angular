@@ -70,12 +70,13 @@
 .close, .minimize, .maximize {
   background: rgba(0, 0, 0, 0.1);
   border: 1px solid #acacac;
-  height: 10px;
-  width: 10px;
-  border-radius: 6px;
+  height: 12px;
+  width: 12px;
+  border-radius: 7px;
   cursor: default;
   margin-left: 3px;
   display: inline-block;
+  opacity: .5;
 }
 
 .buttons:hover .close {
@@ -91,6 +92,12 @@
 .buttons:hover .maximize:not(.disabled) {
   background: #8fd800;
   border-color: #71ab00;
+}
+
+.buttons:hover .close:hover,
+.buttons:hover .minimize:hover,
+.buttons:hover .maximize:not(.disabled):hover {
+  opacity: 1;
 }
 
 .resize {
