@@ -40,6 +40,7 @@ const executors = {
   styleUrls: ['./terminal.component.css']
 })
 export class TerminalComponent implements AfterContentInit, OnInit, WindowInstance {
+  static appName = 'Terminal';
   static iconClass = 'fa-terminal';
 
   @ViewChild('commands', {read: ViewContainerRef}) commandsViewContainerRef: ViewContainerRef;
@@ -51,6 +52,7 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
   prefix = 'user$';
   userInput = '';
   scrollTop: number;
+  title = TerminalComponent.appName;
 
   private commandIndex = 0;
   private commands: string[] = [];

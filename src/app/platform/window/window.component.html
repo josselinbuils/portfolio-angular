@@ -6,7 +6,7 @@
       <span class="minimize" (click)="minimize()"></span>
       <span class="maximize" [ngClass]="{disabled: !resizable || !canBeMaximized()}" (click)="maximize()"></span>
     </div>
-    <span class="title">{{name}}</span>
+    <span class="title">{{windowTitle}}</span>
   </div>
   <div #content class="content" [ngStyle]="contentStyle">
     <ng-content></ng-content>

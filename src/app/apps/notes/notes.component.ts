@@ -18,11 +18,13 @@ const smileys = {
   styleUrls: ['./notes.component.css']
 })
 export class NotesComponent implements WindowInstance {
+  static appName = 'Notes';
   static iconClass = 'fa-sticky-note';
 
   @ViewChild(WindowComponent) windowComponent: WindowComponent;
 
   notes: string;
+  title = NotesComponent.appName;
 
   constructor() {
     this.notes = localStorage.getItem('notes') || 'Hello there 😃';

@@ -24,9 +24,9 @@ export class WindowComponent implements AfterContentInit {
   @Input() maxWidth: number;
   @Input() minHeight = 200;
   @Input() minWidth = 400;
-  @Input() name: string;
   @Input() resizable = true;
   @Input() width: number;
+  @Input() windowTitle: string;
 
   @Input()
   set scrollTop(value: number) {

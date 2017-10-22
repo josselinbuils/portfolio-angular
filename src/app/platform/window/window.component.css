@@ -36,7 +36,7 @@
   background: #f0f0f0;
   height: 20px;
   min-height: 20px;
-  border: 1px solid #1f1f1f;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);;
   border-top-left-radius: 6px;
   border-top-right-radius: 6px;
   text-align: center;
@@ -48,8 +48,6 @@
 }
 
 .content {
-  border: 1px solid #1f1f1f;
-  border-top: none;
   border-bottom-left-radius: 6px;
   border-bottom-right-radius: 6px;
   flex-grow: 1;

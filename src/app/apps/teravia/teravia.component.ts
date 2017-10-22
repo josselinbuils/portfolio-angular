@@ -8,6 +8,10 @@ import { WindowInstance } from '../../platform/window/window-instance';
   styleUrls: ['./teravia.component.css']
 })
 export class TeraviaComponent implements WindowInstance {
+  static appName = 'Teravia';
   static iconClass = 'fa-gamepad';
+
   @ViewChild(WindowComponent) windowComponent: WindowComponent;
+
+  title = TeraviaComponent.appName;
 }

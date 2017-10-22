@@ -11,6 +11,7 @@ import { WindowInstance } from '../../platform/window/window-instance';
   styleUrls: ['./reddit.component.css']
 })
 export class RedditComponent implements OnInit, WindowInstance {
+  static appName = 'Reddit';
   static iconClass = 'fa-reddit-alien';
 
   @ViewChild(WindowComponent) windowComponent: WindowComponent;
@@ -19,6 +20,7 @@ export class RedditComponent implements OnInit, WindowInstance {
   path: string;
   subreddit: string;
   subreddits = ['angularjs', 'CrappyDesign', 'docker', 'javascript', 'node', 'ProgrammerHumor', 'todayilearned'];
+  title = RedditComponent.appName;
 
   // For dev environment
   private prefix = location.host.indexOf('localhost') === 0 ? 'http://localhost:9000' : '';
