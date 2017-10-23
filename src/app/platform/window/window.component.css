@@ -63,37 +63,46 @@
 
 .buttons {
   position: absolute;
-  top: 3px;
-  left: 5px;
+  top: 0;
+  left: 0;
+  height: 21px;
 }
 
-.close, .minimize, .maximize {
-  background: rgba(0, 0, 0, 0.1);
-  border: 1px solid #acacac;
-  color: #000000;
-  height: 12px;
-  width: 12px;
-  border-radius: 7px;
-  cursor: default;
-  margin-left: 3px;
-  display: inline-block;
-  vertical-align: top;
+.button {
+  color: #1b1b1b;
+  width: 21px;
+  height: 100%;
+  float: left;
+}
+
+.button:hover {
+  color: white;
+}
+
+.button i {
+  margin-top: 1px;
+  font-size: 11px;
+  line-height: 21px;
+}
+
+.close {
+  border-top-left-radius: 6px;
+}
+
+.close i {
+  margin-top: 0;
 }
 
 .close:hover {
   background: #ff5722;
-  border-color: #d6481c;
 }
 
-.buttons i {
-  font-size: 10px;
-  line-height: 12px;
-  opacity: 0;
-  vertical-align: top;
+.minimize:hover, .maximize:hover {
+  background: #007ad8;
 }
 
-.minimize:hover i, .maximize:not(.disabled):hover i {
-  opacity: 1;
+.disabled {
+  display: none;
 }
 
 .resize {

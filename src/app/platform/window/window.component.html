@@ -2,13 +2,15 @@
      [ngStyle]="{'z-index': zIndex}">
   <div class="titlebar" (mousedown)="startMove($event)" (dblclick)="maximize()">
     <div class="buttons">
-      <span class="close" (click)="close()"></span>
-      <span class="minimize" (click)="minimize()">
+      <div class="button close" (click)="close()">
+        <i class="fa fa-close" aria-hidden="true"></i>
+      </div>
+      <div class="button minimize" (click)="minimize()">
         <i class="fa fa-minus" aria-hidden="true"></i>
-      </span>
-      <span class="maximize" [ngClass]="{disabled: !resizable || !canBeMaximized()}" (click)="maximize()">
+      </div>
+      <div class="button maximize" [ngClass]="{disabled: !resizable || !canBeMaximized()}" (click)="maximize()">
         <i class="fa fa-plus" aria-hidden="true"></i>
-      </span>
+      </div>
     </div>
     <span class="title">{{windowTitle}}</span>
   </div>
