@@ -23,8 +23,8 @@
 .title {
   color: #656565;
   font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
-  font-size: .8em;
-  line-height: 22px;
+  font-size: .9em;
+  line-height: 23px;
   cursor: default;
 }
 
@@ -34,8 +34,7 @@
 
 .titlebar {
   background: #f0f0f0;
-  height: 20px;
-  min-height: 20px;
+  height: 22px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.2);;
   border-top-left-radius: 6px;
   border-top-right-radius: 6px;
@@ -65,12 +64,12 @@
   position: absolute;
   top: 0;
   left: 0;
-  height: 21px;
+  height: 23px;
 }
 
 .button {
   color: #1b1b1b;
-  width: 21px;
+  width: 23px;
   height: 100%;
   float: left;
 }
@@ -81,8 +80,8 @@
 
 .button i {
   margin-top: 1px;
-  font-size: 11px;
-  line-height: 21px;
+  font-size: 14px;
+  line-height: 23px;
 }
 
 .close {
@@ -94,7 +93,7 @@
 }
 
 .close:hover {
-  background: #ff5722;
+  background: red;
 }
 
 .minimize:hover, .maximize:hover {
