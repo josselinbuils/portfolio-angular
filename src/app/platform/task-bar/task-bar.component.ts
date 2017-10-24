@@ -41,10 +41,22 @@ export class TaskBarComponent {
         throw Error('Unknown task');
       }
 
+      let newTask;
+
       if (!refTask.instance) {
         refTask.instance = windowInstance;
+        newTask = refTask;
       } else if (refTask.instance !== windowInstance) {
         this.tasks.push(new Task(refTask.component, false, windowInstance));
+        newTask = this.tasks[this.tasks.length - 1];
+      }
+
+      if (newTask) {
+        setTimeout(() => {
+          const taskClientRect = document.getElementById(newTask.id).getBoundingClientRect();
+          const topPosition = Math.round(taskClientRect.top + taskClientRect.height / 3);
+          windowInstance.windowComponent.setMinimizedTopPosition(topPosition);
+        });
       }
     });
   }

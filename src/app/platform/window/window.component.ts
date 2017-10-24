@@ -47,6 +47,7 @@ export class WindowComponent implements AfterContentInit {
   private contentRatio: number;
   private lastDisplayProperties: any = {};
   private maximized = false;
+  private minimizedTopPosition: number;
   private window: HTMLElement;
 
   constructor(private renderer: Renderer2, private windowManagerService: WindowManagerService) {
@@ -69,7 +70,7 @@ export class WindowComponent implements AfterContentInit {
 
         this.minimized = true;
         this.setSize(0, 0, true);
-        this.setPosition(60, 0, true);
+        this.setPosition(60, this.minimizedTopPosition, true);
 
         setTimeout(() => {
           this.animate = false;
@@ -110,6 +111,10 @@ export class WindowComponent implements AfterContentInit {
 
   select(): void {
     this.windowManagerService.selectWindow(this.id);
+  }
+
+  setMinimizedTopPosition(top: number) {
+    this.minimizedTopPosition = top;
   }
 
   show() {
