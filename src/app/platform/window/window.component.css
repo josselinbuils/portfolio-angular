@@ -93,7 +93,7 @@
 }
 
 .close:hover {
-  background: red;
+  background: #e20000;
 }
 
 .minimize:hover, .maximize:hover {
