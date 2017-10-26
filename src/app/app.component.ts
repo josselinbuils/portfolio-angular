@@ -1,6 +1,5 @@
 import {
-  AfterContentInit, Component, ElementRef, HostListener, Renderer2, ViewChild,
-  ViewContainerRef
+  AfterContentInit, Component, ElementRef, HostListener, Renderer2, ViewChild, ViewContainerRef
 } from '@angular/core';
 
 import { MOUSE_BUTTON } from './constants';
@@ -53,11 +52,6 @@ export class AppComponent implements AfterContentInit {
       cancelMouseMove();
       cancelMouseUp();
     });
-  }
-
-  @HostListener('contextmenu', ['$event'])
-  contextMenuListener(event: MouseEvent): void {
-    event.preventDefault();
   }
 
   @HostListener('mousedown', ['$event'])

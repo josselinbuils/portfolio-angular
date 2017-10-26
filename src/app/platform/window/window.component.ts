@@ -22,9 +22,10 @@ export class WindowComponent implements AfterContentInit {
   @Input() keepContentRatio = false;
   @Input() maxHeight: number;
   @Input() maxWidth: number;
-  @Input() minHeight = 200;
-  @Input() minWidth = 400;
+  @Input() minHeight = 100;
+  @Input() minWidth = 100;
   @Input() resizable = true;
+  @Input() titleStyle: any;
   @Input() width: number;
   @Input() windowTitle: string;
 

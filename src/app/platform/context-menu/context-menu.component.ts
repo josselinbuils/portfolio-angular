@@ -21,6 +21,8 @@ export class ContextMenuComponent {
 
   constructor(private contextMenuService: ContextMenuService, private renderer: Renderer2) {
     contextMenuService.showSubject.subscribe(descriptor => {
+      descriptor.event.preventDefault();
+
       this.descriptor = descriptor;
 
       if (descriptor.position) {

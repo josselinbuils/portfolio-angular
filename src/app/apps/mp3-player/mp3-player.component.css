@@ -1,0 +1,76 @@
+.flex {
+  display: flex;
+}
+
+.left {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: center;
+}
+
+.music-info {
+  font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+  font-size: .6em;
+  color: #007ad8;
+}
+
+.music-info > span {
+  text-overflow: ellipsis;
+  width: 205px;
+  white-space: nowrap;
+  overflow: hidden;
+  display: block;
+  margin: 0 auto;
+}
+
+.music-preview {
+  flex: 0 0 115px;
+  height: 100px;
+  background: no-repeat;
+  background-size: 100px;
+}
+
+.controls {
+  color: #007ad8;
+  user-select: none;
+}
+
+.controls .button {
+  display: inline-block;
+  line-height: 80px;
+  vertical-align: top;
+}
+
+.controls .button:active {
+  color: #0090ff;
+}
+
+.play-button {
+  font-size: 70px;
+  margin: 0 15px;
+}
+
+.prev-button, .next-button {
+  font-size: 30px;
+}
+
+.progress-bar {
+  background: #3c3c3c;
+  margin: 12px 15px 0;
+}
+
+.progress-bar, .progress-bar .bar {
+  height: 4px;
+  border-radius: 2px;
+}
+
+.progress-bar .bar {
+  width: 0;
+  background: #007ad8;
+}
+
+audio {
+  display: none;
+}

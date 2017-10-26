@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import * as moment from 'moment';
 
+import { HTTP_PREFIX } from '../../env';
 import { WindowComponent } from '../../platform/window/window.component';
 import { WindowInstance } from '../../platform/window/window-instance';
 
@@ -22,9 +23,6 @@ export class RedditComponent implements OnInit, WindowInstance {
   subreddits = ['angularjs', 'CrappyDesign', 'docker', 'javascript', 'node', 'ProgrammerHumor', 'todayilearned'];
   title = RedditComponent.appName;
 
-  // For dev environment
-  private prefix = location.host.indexOf('localhost') === 0 ? 'http://localhost:9000' : '';
-
   constructor(private http: HttpClient) {
   }
 
@@ -34,7 +32,7 @@ export class RedditComponent implements OnInit, WindowInstance {
 
     this.data = null;
     this.data = <any[]> await this.http
-      .get(`${this.prefix}/api/reddit${path}`)
+      .get(`${HTTP_PREFIX}/api/reddit${path}`)
       .first()
       .toPromise();
 

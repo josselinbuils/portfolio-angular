@@ -21,15 +21,8 @@
 }
 
 .title {
-  color: #656565;
-  font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
-  font-size: .9em;
   line-height: 23px;
   cursor: default;
-}
-
-.window.active .title {
-  color: #1b1b1b;
 }
 
 .titlebar {
@@ -39,7 +32,15 @@
   border-top-left-radius: 6px;
   border-top-right-radius: 6px;
   text-align: center;
+  color: #656565;
+  font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+  font-size: .9em;
 }
+
+.window.active .titlebar {
+  color: #1b1b1b;
+}
+
 
 .titlebar, .titlebar * {
   user-select: none;
@@ -68,7 +69,6 @@
 }
 
 .button {
-  color: #1b1b1b;
   width: 23px;
   height: 100%;
   float: left;

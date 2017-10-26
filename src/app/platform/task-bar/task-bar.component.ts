@@ -3,6 +3,7 @@ import { Component, ViewContainerRef } from '@angular/core';
 import { ContextMenuItem } from '../context-menu/context-menu-item';
 import { ContextMenuService } from '../context-menu/context-menu.service';
 import { DOMUtils } from '../dom-utils';
+import { Mp3PlayerComponent } from '../../apps/mp3-player/mp3-player.component';
 import { NotesComponent } from '../../apps/notes/notes.component';
 import { RedditComponent } from '../../apps/reddit/reddit.component';
 import { Task } from './task';
@@ -19,8 +20,8 @@ import { WindowManagerService } from '../window/window-manager.service';
 export class TaskBarComponent {
 
   tasks: Task[] = [
-    new Task(TerminalComponent, true), new Task(TeraviaComponent, true), new Task(RedditComponent, true),
-    new Task(NotesComponent, true)
+    new Task(TerminalComponent, true), new Task(Mp3PlayerComponent, true), new Task(TeraviaComponent, true),
+    new Task(RedditComponent, true), new Task(NotesComponent, true)
   ];
 
   constructor(private contextMenuService: ContextMenuService, private viewContainerRef: ViewContainerRef,

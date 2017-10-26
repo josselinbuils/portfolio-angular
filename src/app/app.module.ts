@@ -10,6 +10,7 @@ import { CommandComponent } from './apps/terminal/executors/command/command.comp
 import { ContextMenuComponent } from './platform/context-menu/context-menu.component';
 import { ContextMenuService } from './platform/context-menu/context-menu.service';
 import { HelpComponent } from './apps/terminal/executors/help/help.component';
+import { Mp3PlayerComponent } from './apps/mp3-player/mp3-player.component';
 import { NotesComponent } from './apps/notes/notes.component';
 import { ProjectsComponent } from './apps/terminal/executors/projects/projects.component';
 import { RedditComponent } from './apps/reddit/reddit.component';
@@ -29,6 +30,7 @@ import { WindowManagerService } from './platform/window/window-manager.service';
     CommandComponent,
     ContextMenuComponent,
     HelpComponent,
+    Mp3PlayerComponent,
     NotesComponent,
     ProjectsComponent,
     RedditComponent,
@@ -44,6 +46,7 @@ import { WindowManagerService } from './platform/window/window-manager.service';
     BashErrorComponent,
     CommandComponent,
     HelpComponent,
+    Mp3PlayerComponent,
     NotesComponent,
     ProjectsComponent,
     RedditComponent,

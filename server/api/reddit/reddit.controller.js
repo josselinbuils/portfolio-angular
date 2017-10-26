@@ -1,29 +1,29 @@
 const snoowrap = require('snoowrap');
 
-const {clientId, clientSecret, username, password} = require('../../config.json');
+const {reddit} = require('../../config.json');
 const {HTTP_INTERNAL_ERROR, USER_AGENT} = require('../../constants.json');
 const Logger = require('../../logger');
 
 validateConfig();
 
-const reddit = new snoowrap({
+const redditAPI = new snoowrap({
   userAgent: USER_AGENT,
-  clientId: clientId,
-  clientSecret: clientSecret,
-  username: username,
-  password: password
+  clientId: reddit.clientId,
+  clientSecret: reddit.clientSecret,
+  username: reddit.username,
+  password: reddit.password
 });
 
 module.exports = class RedditController {
 
   static getHot(req, res) {
     const subreddit = req.params.subreddit;
-    handle(res, reddit.getSubreddit(subreddit).getHot({limit: 50}));
+    handle(res, redditAPI.getSubreddit(subreddit).getHot({limit: 50}));
   }
 
   static getTop(req, res) {
     const subreddit = req.params.subreddit;
-    handle(res, reddit.getSubreddit(subreddit).getTop({limit: 50}));
+    handle(res, redditAPI.getSubreddit(subreddit).getTop({limit: 50}));
   }
 };
 
@@ -38,7 +38,7 @@ function handle(res, promise) {
 }
 
 function validateConfig() {
-  if ([clientId, clientSecret, username, password].some(field => !field)) {
-    throw Error('Invalid configuration');
+  if ([reddit.clientId, reddit.clientSecret, reddit.username, reddit.password].some(field => !field)) {
+    throw Error('Invalid configuration: reddit');
   }
 }
