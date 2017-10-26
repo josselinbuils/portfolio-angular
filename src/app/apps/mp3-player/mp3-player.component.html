@@ -18,10 +18,10 @@
     </div>
     <div class="music-preview" [ngStyle]="{'background-image': 'url(' + music.image + ')'}"></div>
   </div>
-  <div class="progress-bar">
+  <div #progressBar class="progress-bar" (click)="setCurrentTime($event)">
     <div class="bar" [ngStyle]="{width: progress + '%'}"></div>
   </div>
-  <audio>
-    <source src="" type="audio/mp3">
+  <audio #audio>
+    <source #source src="" type="audio/mp3">
   </audio>
 </app-window>

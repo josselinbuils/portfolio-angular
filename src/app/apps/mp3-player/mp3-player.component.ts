@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { AfterContentInit, Component, OnInit, ViewChild } from '@angular/core';
+import { AfterContentInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 
 import { HTTP_PREFIX } from '../../env';
 import { WindowComponent } from '../../platform/window/window.component';
@@ -14,6 +14,9 @@ export class Mp3PlayerComponent implements AfterContentInit, OnInit, WindowInsta
   static appName = 'MP3Player';
   static iconClass = 'fa-headphones';
 
+  @ViewChild('audio') audioElementRef: ElementRef;
+  @ViewChild('progressBar') progressElementRef: ElementRef;
+  @ViewChild('source') sourceElementRef: ElementRef;
   @ViewChild(WindowComponent) windowComponent: WindowComponent;
 
   contentStyle = {
@@ -22,7 +25,7 @@ export class Mp3PlayerComponent implements AfterContentInit, OnInit, WindowInsta
 
   music: any = {};
   musics: any[] = [];
-  progress: number;
+  progress = 0;
 
   get isPaused(): boolean {
     return this.audioElement.paused;
@@ -69,19 +72,25 @@ export class Mp3PlayerComponent implements AfterContentInit, OnInit, WindowInsta
     this.play();
   }
 
+  setCurrentTime(event: MouseEvent) {
+    const progressBarWidth = this.progressElementRef.nativeElement.clientWidth;
+    this.audioElement.currentTime = Math.round(event.offsetX / progressBarWidth * this.audioElement.duration);
+  }
+
   private loadMusic(music: any): void {
-    const source = <any> document.getElementsByTagName('source')[0];
-    source.src = music.audio;
+    this.sourceElementRef.nativeElement.src = music.audio;
     this.audioElement.load();
     this.music = music;
     this.progress = 0;
   }
 
   ngAfterContentInit(): void {
-    this.audioElement = document.getElementsByTagName('audio')[0];
+    this.audioElement = this.audioElementRef.nativeElement;
+
+    this.audioElement.addEventListener('ended', () => this.next());
 
     this.audioElement.addEventListener('timeupdate', () => {
-      this.progress = this.audioElement.currentTime / this.audioElement.duration * 100;
+      this.progress = Math.round(this.audioElement.currentTime / this.audioElement.duration * 10000) / 100;
     });
   }
 
