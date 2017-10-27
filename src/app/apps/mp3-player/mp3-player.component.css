@@ -42,8 +42,13 @@
   vertical-align: top;
 }
 
-.button:active {
+.button:active, .button.checked {
   color: #007ad8;
+}
+
+.random-button, .repeat-button {
+  font-size: 15px;
+  margin: 1px 15px 0;
 }
 
 .play-button {

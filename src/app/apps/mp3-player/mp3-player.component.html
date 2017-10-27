@@ -3,6 +3,9 @@
     <div class="flex">
       <div class="left">
         <div class="controls">
+          <div class="button random-button" [ngClass]="{checked: random}" (click)="random = !random">
+            <i class="fa fa-random" aria-hidden="true"></i>
+          </div>
           <div class="button prev-button" (click)="prev()">
             <i class="fa fa-step-backward" aria-hidden="true"></i>
           </div>
@@ -11,6 +14,9 @@
           </div>
           <div class="button next-button" (click)="next()">
             <i class="fa fa-step-forward" aria-hidden="true"></i>
+          </div>
+          <div class="button repeat-button" [ngClass]="{checked: repeat}" (click)="repeat = !repeat">
+            <i class="fa fa-repeat" aria-hidden="true"></i>
           </div>
         </div>
         <div class="music-info">{{music.artist_name}} - {{music.name}}</div>

@@ -29,6 +29,8 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
   music: any = {};
   musics: any[] = [];
   progress = 0;
+  random = false;
+  repeat = false;
   seeking = false;
 
   titleStyle = {
@@ -43,6 +45,11 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
   }
 
   next(): void {
+
+    if (this.random) {
+      return this.rand();
+    }
+
     let newIndex = this.musics.indexOf(this.music) + 1;
 
     if (newIndex >= this.musics.length) {
@@ -67,11 +74,28 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
   }
 
   prev(): void {
+
+    if (this.random) {
+      return this.rand();
+    }
+
     let newIndex = this.musics.indexOf(this.music) - 1;
 
     if (newIndex < 0) {
       newIndex = this.musics.length - 1;
     }
+
+    const paused = this.audioElement.paused;
+
+    this.loadMusic(this.musics[newIndex]);
+
+    if (!paused) {
+      this.play();
+    }
+  }
+
+  rand(): void {
+    const newIndex = Math.round(this.musics.length * Math.random());
 
     const paused = this.audioElement.paused;
 
@@ -120,7 +144,9 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
     this.audioElement = this.audioElementRef.nativeElement;
 
     this.audioElement.addEventListener('ended', () => {
-      this.next();
+      if (!this.repeat) {
+        this.next();
+      }
       this.play();
     });
 
