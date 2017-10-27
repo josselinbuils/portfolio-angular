@@ -34,3 +34,7 @@ p {
 .right {
   float: right;
 }
+
+.flex {
+  display: flex;
+}

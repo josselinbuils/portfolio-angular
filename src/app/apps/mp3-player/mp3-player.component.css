@@ -1,5 +1,10 @@
-.flex {
-  display: flex;
+* {
+  user-select: none;
+}
+
+.player {
+  font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+  font-size: .6em;
 }
 
 .left {
@@ -11,18 +16,17 @@
 }
 
 .music-info {
-  font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
-  font-size: .6em;
-  color: #007ad8;
-}
-
-.music-info > span {
   text-overflow: ellipsis;
   width: 205px;
   white-space: nowrap;
   overflow: hidden;
   display: block;
   margin: 0 auto;
+  user-select: text;
+}
+
+.seeking .music-info {
+  user-select: none;
 }
 
 .music-preview {
@@ -32,23 +36,18 @@
   background-size: 100px;
 }
 
-.controls {
-  color: #007ad8;
-  user-select: none;
-}
-
-.controls .button {
+.button {
   display: inline-block;
   line-height: 80px;
   vertical-align: top;
 }
 
-.controls .button:active {
-  color: #0090ff;
+.button:active {
+  color: #007ad8;
 }
 
 .play-button {
-  font-size: 70px;
+  font-size: 60px;
   margin: 0 15px;
 }
 
@@ -57,18 +56,46 @@
 }
 
 .progress-bar {
-  background: #3c3c3c;
-  margin: 12px 15px 0;
+  margin: 6px -5px;
+  padding: 6px 0;
+  flex-grow: 1;
 }
 
-.progress-bar, .progress-bar .bar {
+.bar-container {
+  background: #3c3c3c;
+}
+
+.bar-container, .bar {
   height: 4px;
   border-radius: 2px;
 }
 
-.progress-bar .bar {
+.bar {
   width: 0;
+  background: #efefef;
+  position: relative;
+}
+
+.progress-bar:hover .bar, .seeking .bar {
   background: #007ad8;
+}
+
+.progress-bar:hover .bar:after, .seeking .bar:after {
+  content: "";
+  background: #007ad8;
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  position: absolute;
+  top: -3px;
+  right: -5px;
+}
+
+.current-time, .duration {
+  line-height: 28px;
+  text-align: center;
+  margin: 0 15px;
+  cursor: default;
 }
 
 audio {

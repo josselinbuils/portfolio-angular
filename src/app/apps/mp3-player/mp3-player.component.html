@@ -1,27 +1,33 @@
 <app-window [width]="350" [height]="150" [titleStyle]="titleStyle" [contentStyle]="contentStyle" [resizable]="false">
-  <div class="flex">
-    <div class="left">
-      <div class="controls">
-        <div class="button prev-button" (click)="prev()">
-          <i class="fa fa-step-backward" aria-hidden="true"></i>
+  <div class="player" [ngClass]="{seeking: seeking}">
+    <div class="flex">
+      <div class="left">
+        <div class="controls">
+          <div class="button prev-button" (click)="prev()">
+            <i class="fa fa-step-backward" aria-hidden="true"></i>
+          </div>
+          <div class="button play-button" (click)="play()">
+            <i class="fa" [ngClass]="audioElement.paused ? 'fa-play-circle' : 'fa-pause-circle'" aria-hidden="true"></i>
+          </div>
+          <div class="button next-button" (click)="next()">
+            <i class="fa fa-step-forward" aria-hidden="true"></i>
+          </div>
         </div>
-        <div class="button play-button" (click)="play()">
-          <i class="fa" [ngClass]="isPaused ? 'fa-play-circle' : 'fa-pause-circle'" aria-hidden="true"></i>
-        </div>
-        <div class="button next-button" (click)="next()">
-          <i class="fa fa-step-forward" aria-hidden="true"></i>
-        </div>
+        <div class="music-info">{{music.artist_name}} - {{music.name}}</div>
       </div>
-      <div class="music-info">
-        <span>{{music.artist_name}} - {{music.name}}</span>
-      </div>
+      <div class="music-preview" [ngStyle]="{'background-image': 'url(' + music.image + ')'}"></div>
     </div>
-    <div class="music-preview" [ngStyle]="{'background-image': 'url(' + music.image + ')'}"></div>
+    <div class="flex">
+      <div #currentTime class="current-time">00:00</div>
+      <div #progressBar class="progress-bar" (mousedown)="startSeek($event)">
+        <div class="bar-container">
+          <div class="bar" [ngStyle]="{width: progress + '%'}"></div>
+        </div>
+      </div>
+      <div class="duration">{{music.readableDuration || '00:00'}}</div>
+    </div>
+    <audio #audio>
+      <source #source src="" type="audio/mp3">
+    </audio>
   </div>
-  <div #progressBar class="progress-bar" (click)="setCurrentTime($event)">
-    <div class="bar" [ngStyle]="{width: progress + '%'}"></div>
-  </div>
-  <audio #audio>
-    <source #source src="" type="audio/mp3">
-  </audio>
 </app-window>

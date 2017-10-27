@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
-import { AfterContentInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { AfterContentInit, Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
+import * as moment from 'moment';
 
 import { HTTP_PREFIX } from '../../env';
 import { WindowComponent } from '../../platform/window/window.component';
@@ -10,11 +11,12 @@ import { WindowInstance } from '../../platform/window/window-instance';
   templateUrl: './mp3-player.component.html',
   styleUrls: ['./mp3-player.component.css']
 })
-export class Mp3PlayerComponent implements AfterContentInit, OnInit, WindowInstance {
+export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, WindowInstance {
   static appName = 'MP3Player';
   static iconClass = 'fa-headphones';
 
   @ViewChild('audio') audioElementRef: ElementRef;
+  @ViewChild('currentTime') currentTimeElementRef: ElementRef;
   @ViewChild('progressBar') progressElementRef: ElementRef;
   @ViewChild('source') sourceElementRef: ElementRef;
   @ViewChild(WindowComponent) windowComponent: WindowComponent;
@@ -26,20 +28,18 @@ export class Mp3PlayerComponent implements AfterContentInit, OnInit, WindowInsta
   music: any = {};
   musics: any[] = [];
   progress = 0;
-
-  get isPaused(): boolean {
-    return this.audioElement.paused;
-  }
+  seeking = false;
 
   titleStyle = {
-    background: 'rgba(0, 0, 0, 0.9)',
+    background: this.contentStyle.background,
     border: 'none',
-    color: '#007ad8'
+    color: 'inherit'
   };
 
+  private currentTimeInterval: any;
   private audioElement: any;
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private renderer: Renderer2) {
   }
 
   next(): void {
@@ -49,12 +49,17 @@ export class Mp3PlayerComponent implements AfterContentInit, OnInit, WindowInsta
       newIndex = 0;
     }
 
+    const paused = this.audioElement.paused;
+
     this.loadMusic(this.musics[newIndex]);
-    this.play();
+
+    if (!paused) {
+      this.play();
+    }
   }
 
   play(): void {
-    if (this.isPaused) {
+    if (this.audioElement.paused) {
       this.audioElement.play();
     } else {
       this.audioElement.pause();
@@ -68,19 +73,46 @@ export class Mp3PlayerComponent implements AfterContentInit, OnInit, WindowInsta
       newIndex = this.musics.length - 1;
     }
 
+    const paused = this.audioElement.paused;
+
     this.loadMusic(this.musics[newIndex]);
-    this.play();
+
+    if (!paused) {
+      this.play();
+    }
   }
 
-  setCurrentTime(event: MouseEvent) {
+  /**
+   * @param {number} value 0 -> 1
+   */
+  private setCurrentTime(value: number) {
+    const duration = this.audioElement.duration;
+    this.audioElement.currentTime = Math.min(Math.round(value * duration), duration - 1);
+  }
+
+  startSeek(downEvent: MouseEvent): void {
     const progressBarWidth = this.progressElementRef.nativeElement.clientWidth;
-    this.audioElement.currentTime = Math.round(event.offsetX / progressBarWidth * this.audioElement.duration);
+    const dx = downEvent.offsetX - downEvent.clientX;
+
+    this.seeking = true;
+    this.setCurrentTime(downEvent.offsetX / progressBarWidth);
+
+    const cancelMouseMove: () => void = this.renderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
+      this.setCurrentTime((moveEvent.clientX + dx) / progressBarWidth);
+    });
+
+    const cancelMouseUp: () => void = this.renderer.listen('window', 'mouseup', () => {
+      this.seeking = false;
+      cancelMouseMove();
+      cancelMouseUp();
+    });
   }
 
   private loadMusic(music: any): void {
     this.sourceElementRef.nativeElement.src = music.audio;
     this.audioElement.load();
     this.music = music;
+    this.music.readableDuration = moment.utc(this.music.duration * 1000).format('mm:ss');
     this.progress = 0;
   }
 
@@ -92,6 +124,22 @@ export class Mp3PlayerComponent implements AfterContentInit, OnInit, WindowInsta
     this.audioElement.addEventListener('timeupdate', () => {
       this.progress = Math.round(this.audioElement.currentTime / this.audioElement.duration * 10000) / 100;
     });
+
+    let lastCurrentTimeSeconds = 0;
+
+    this.currentTimeInterval = setInterval(() => {
+      const currentTimeSeconds = Math.round(this.audioElement.currentTime);
+
+      if (lastCurrentTimeSeconds !== currentTimeSeconds) {
+        const currentTimeElem = this.currentTimeElementRef.nativeElement;
+        currentTimeElem.innerText = moment.utc(currentTimeSeconds * 1000).format('mm:ss');
+        lastCurrentTimeSeconds = currentTimeSeconds;
+      }
+    }, 100);
+  }
+
+  ngOnDestroy() {
+    clearInterval(this.currentTimeInterval);
   }
 
   async ngOnInit(): Promise<any> {
