@@ -1,5 +1,6 @@
 * {
   user-select: none;
+  cursor: default;
 }
 
 .player {
@@ -38,8 +39,17 @@
 
 .button {
   display: inline-block;
-  line-height: 80px;
-  vertical-align: top;
+  vertical-align: middle;
+  margin-left: 15px;
+  margin-right: 15px;
+}
+
+.button + .button {
+  margin-left: 0;
+}
+
+.button:hover {
+  color: white;
 }
 
 .button:active, .button.checked {
@@ -48,12 +58,12 @@
 
 .random-button, .repeat-button {
   font-size: 15px;
-  margin: 1px 15px 0;
+  margin-top: 1px;
 }
 
 .play-button {
   font-size: 60px;
-  margin: 0 15px;
+  line-height: 80px;
 }
 
 .prev-button, .next-button {
@@ -100,7 +110,6 @@
   line-height: 28px;
   text-align: center;
   margin: 0 15px;
-  cursor: default;
 }
 
 audio {
