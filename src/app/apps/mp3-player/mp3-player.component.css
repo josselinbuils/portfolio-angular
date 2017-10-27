@@ -31,10 +31,19 @@
 }
 
 .music-preview {
-  flex: 0 0 115px;
+  flex: 0 0 100px;
   height: 100px;
-  background: no-repeat;
+  margin-right: 15px;
+  background-repeat: no-repeat;
   background-size: 100px;
+}
+
+.default-preview {
+  background: white;
+  font-size: 80px;
+  text-align: center;
+  line-height: 100px;
+  color: black;
 }
 
 .button {

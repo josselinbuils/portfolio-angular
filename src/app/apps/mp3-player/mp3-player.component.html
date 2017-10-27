@@ -19,9 +19,9 @@
             <i class="fa fa-repeat" aria-hidden="true"></i>
           </div>
         </div>
-        <div class="music-info">{{music.artist_name}} - {{music.name}}</div>
-      </div>
-      <div class="music-preview" [ngStyle]="{'background-image': 'url(' + music.image + ')'}"></div>
+        <div class="music-info">{{music.artist_name}}<span *ngIf="music.name"> - </span>{{music.name}}</div>
+  </div>
+      <div class="music-preview" [ngClass]="{'default-preview fa fa-music': !music.image}" [ngStyle]="{'background-image': 'url(' + music.image + ')'}"></div>
     </div>
     <div class="flex">
       <div #currentTime class="current-time">00:00</div>
