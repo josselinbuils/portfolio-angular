@@ -119,7 +119,10 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
   ngAfterContentInit(): void {
     this.audioElement = this.audioElementRef.nativeElement;
 
-    this.audioElement.addEventListener('ended', () => this.next());
+    this.audioElement.addEventListener('ended', () => {
+      this.next();
+      this.play();
+    });
 
     this.audioElement.addEventListener('timeupdate', () => {
       this.progress = Math.round(this.audioElement.currentTime / this.audioElement.duration * 10000) / 100;
