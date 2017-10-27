@@ -25,6 +25,7 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
     background: 'rgba(0, 0, 0, 0.9)'
   };
 
+  audioElement: any;
   music: any = {};
   musics: any[] = [];
   progress = 0;
@@ -37,7 +38,6 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
   };
 
   private currentTimeInterval: any;
-  private audioElement: any;
 
   constructor(private http: HttpClient, private renderer: Renderer2) {
   }
