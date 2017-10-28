@@ -17,7 +17,7 @@ export class WindowComponent implements AfterContentInit {
   @ViewChild('content') contentElementRef: ElementRef;
   @ViewChild('window') windowElementRef: ElementRef;
 
-  @Input() contentStyle: any;
+  @Input() background: string;
   @Input() height: number;
   @Input() keepContentRatio = false;
   @Input() maxHeight: number;
@@ -25,7 +25,7 @@ export class WindowComponent implements AfterContentInit {
   @Input() minHeight = 100;
   @Input() minWidth = 100;
   @Input() resizable = true;
-  @Input() titleStyle: any;
+  @Input() titleColor: string;
   @Input() width: number;
   @Input() windowTitle: string;
 

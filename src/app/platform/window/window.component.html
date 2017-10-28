@@ -1,6 +1,6 @@
 <div #window class="window" [ngClass]="{active: active, animate: animate, minimized: minimized}" (mousedown)="select()"
-     [ngStyle]="{'z-index': zIndex}">
-  <div class="titlebar" [ngStyle]="titleStyle" (mousedown)="startMove($event)" (dblclick)="maximize()">
+     [ngStyle]="{background: background, 'z-index': zIndex}">
+  <div class="titlebar" [ngStyle]="{color: titleColor}" (mousedown)="startMove($event)" (dblclick)="maximize()">
     <div class="buttons">
       <div class="button close" (click)="close()">
         <i class="fa fa-close" aria-hidden="true"></i>
@@ -14,7 +14,7 @@
     </div>
     <span class="title">{{windowTitle}}</span>
   </div>
-  <div #content class="content" [ngStyle]="contentStyle">
+  <div #content class="content">
     <ng-content></ng-content>
   </div>
   <div *ngIf="resizable" class="resize" (mousedown)="startResize($event)"></div>

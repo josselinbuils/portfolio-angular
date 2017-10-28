@@ -48,7 +48,7 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
   @ViewChild(WindowComponent) windowComponent: WindowComponent;
 
   caretIndex = 0;
-  contentStyle = {background: 'rgba(30, 30, 30, 0.9)'};
+  contentStyle: any = {};
   prefix = 'user$';
   userInput = '';
   scrollTop: number;
@@ -80,14 +80,6 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
 
         case 'clear':
           this.clear();
-          break;
-
-        case 'flip':
-          if (!this.contentStyle['transform']) {
-            this.contentStyle['transform'] = 'rotate3d(0, 1, 0, 180deg)';
-          } else {
-            delete this.contentStyle['transform'];
-          }
           break;
 
         case 'teravia':

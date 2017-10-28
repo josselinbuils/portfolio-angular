@@ -1,3 +1,3 @@
-<app-window [windowTitle]="title" [minWidth]="400" [minHeight]="350" [contentStyle]="{overflow: 'hidden'}">
+<app-window [windowTitle]="title" background="#fff59c" titleColor="black" [minWidth]="400" [minHeight]="350">
   <textarea [(ngModel)]="notes" (ngModelChange)="saveNotes()"></textarea>
 </app-window>

@@ -1,4 +1,4 @@
-<app-window [width]="350" [height]="150" [titleStyle]="titleStyle" [contentStyle]="contentStyle" [resizable]="false">
+<app-window [width]="350" [height]="150" background="rgba(0, 0, 0, 0.9)" [resizable]="false">
   <div class="player" [ngClass]="{seeking: seeking}">
     <div class="flex">
       <div class="left">
@@ -20,8 +20,9 @@
           </div>
         </div>
         <div class="music-info">{{music.artist_name}}<span *ngIf="music.name"> - </span>{{music.name}}</div>
-  </div>
-      <div class="music-preview" [ngClass]="{'default-preview fa fa-music': !music.image}" [ngStyle]="{'background-image': 'url(' + music.image + ')'}"></div>
+      </div>
+      <div class="music-preview" [ngClass]="{'default-preview fa fa-music': !music.image}"
+           [ngStyle]="{'background-image': 'url(' + music.image + ')'}"></div>
     </div>
     <div class="flex">
       <div #currentTime class="current-time">00:00</div>

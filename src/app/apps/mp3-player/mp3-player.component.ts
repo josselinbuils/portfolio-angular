@@ -21,10 +21,6 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
   @ViewChild('source') sourceElementRef: ElementRef;
   @ViewChild(WindowComponent) windowComponent: WindowComponent;
 
-  contentStyle = {
-    background: 'rgba(0, 0, 0, 0.9)'
-  };
-
   audioElement: any;
   music: any = {};
   musics: any[] = [];
@@ -32,12 +28,6 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
   random = false;
   repeat = false;
   seeking = false;
-
-  titleStyle = {
-    background: this.contentStyle.background,
-    border: 'none',
-    color: 'inherit'
-  };
 
   private currentTimeInterval: any;
 

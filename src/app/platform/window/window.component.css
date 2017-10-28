@@ -26,19 +26,12 @@
 }
 
 .titlebar {
-  background: #f0f0f0;
   height: 22px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.2);;
   border-top-left-radius: 6px;
   border-top-right-radius: 6px;
   text-align: center;
-  color: #656565;
   font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
   font-size: .9em;
-}
-
-.window.active .titlebar {
-  color: #1b1b1b;
 }
 
 
@@ -53,7 +46,6 @@
   flex-grow: 1;
   overflow: auto;
   position: relative;
-  background: white;
   user-select: none;
 }
 
