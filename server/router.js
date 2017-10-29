@@ -5,6 +5,7 @@ const serveStatic = require('serve-static');
 const {
   ENV_DEV, HTTP_DEFAULT_PREFIX, HTTP_INTERNAL_ERROR, HTTP_NOT_FOUND, PUBLIC_DIR
 } = require('./constants.json');
+const DependenciesRoutes = require('./api/dependencies/dependencies.routes');
 const JamendoRoutes = require('./api/jamendo/jamendo.routes');
 const Logger = require('./logger');
 const RedditRoutes = require('./api/reddit/reddit.routes');
@@ -33,6 +34,7 @@ module.exports = class Router {
     router.use(serveStatic(CLIENT_PATH));
     router.use(bodyParser.json());
 
+    DependenciesRoutes.init(router);
     JamendoRoutes.init(router);
     RedditRoutes.init(router);
 
