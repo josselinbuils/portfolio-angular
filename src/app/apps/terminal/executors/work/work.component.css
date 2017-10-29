@@ -2,20 +2,22 @@
   display: block;
 }
 
-.card {
-  border: 1px solid #c5c5c5;
-  border-radius: 6px;
-  padding: 5px 7px;
-  margin: 10px 0;
+p {
+  white-space: normal;
+  margin: 0;
 }
 
 .description {
-  margin-top: 10px;
+  margin: 1ch 0 0 1ch;
   text-align: justify;
 }
 
 .description, .location {
   color: #c5c5c5;
+}
+
+.entry {
+  margin: 1ch 0;
 }
 
 .period {

@@ -11,6 +11,7 @@ p {
 .command {
   display: inline-block;
   width: 12ch;
+  margin-left: 1ch;
 }
 
 .description {
