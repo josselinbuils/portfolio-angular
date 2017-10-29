@@ -31,7 +31,6 @@ import { WorkComponent } from './executors/work/work.component';
   ],
   imports: [
     BrowserModule,
-    // FormsModule,
     HttpClientModule
   ]
 })
