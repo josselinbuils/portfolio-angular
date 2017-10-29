@@ -1,5 +1,5 @@
 <div *ngFor="let task of tasks" class="task" (click)="run(task)" (contextmenu)="openContextMenu(task, $event)"
-     [ngClass]="{active: task.instance && task.instance.windowComponent.active}" id="{{task.id}}">
+     [ngClass]="{active: task.instance && task.instance.windowComponent.active}" [id]="task.id">
   <i class="fa" [ngClass]="task.iconClass" aria-hidden="true"></i>
   <div class="running" [hidden]="!task.instance"></div>
 </div>

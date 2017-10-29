@@ -123,9 +123,8 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
   }
 
   private loadMusic(music: any): void {
-    this.sourceElementRef.nativeElement.src = music.audio;
-    this.audioElement.load();
     this.music = music;
+    this.audioElement.load();
     this.music.readableDuration = moment.utc(this.music.duration * 1000).format('mm:ss');
     this.progress = 0;
   }
@@ -162,14 +161,12 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
   }
 
   async ngOnInit(): Promise<any> {
+
     this.musics = <any[]> await this.http
       .get(`${HTTP_PREFIX}/api/jamendo/tracks`)
       .first()
       .toPromise();
 
-    this.music = this.musics[0];
-    this.loadMusic(this.music);
-
-    console.log(this.music);
+    this.loadMusic(this.musics[0]);
   }
 }

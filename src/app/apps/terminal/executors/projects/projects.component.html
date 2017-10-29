@@ -1,5 +1,5 @@
 <p class="loading" *ngIf="!repositories">Loading...</p>
-<a class="card" *ngFor="let repos of repositories" href="{{repos.url}}" target="_blank">
+<a class="card" *ngFor="let repos of repositories" [href]="repos.url" target="_blank">
   <p>{{repos.name}}<span class="language">{{repos.language}}</span></p>
   <div class="preview">
     <img [src]="repos.imageURL" *ngIf="repos.imageURL" />

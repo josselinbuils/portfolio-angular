@@ -34,7 +34,7 @@
       <div class="duration">{{music.readableDuration || '00:00'}}</div>
     </div>
     <audio #audio>
-      <source #source src="" type="audio/mp3">
+      <source #source *ngIf="music.audio" [src]="music.audio" type="audio/mp3">
     </audio>
   </div>
 </app-window>
