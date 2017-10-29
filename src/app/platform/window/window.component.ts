@@ -25,6 +25,7 @@ export class WindowComponent implements AfterContentInit {
   @Input() minHeight = 100;
   @Input() minWidth = 100;
   @Input() resizable = true;
+  @Input() titleBackground: string;
   @Input() titleColor: string;
   @Input() width: number;
   @Input() windowTitle: string;

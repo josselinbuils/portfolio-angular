@@ -1,6 +1,7 @@
 <div #window class="window" [ngClass]="{active: active, animate: animate, minimized: minimized}" (mousedown)="select()"
      [ngStyle]="{background: background, 'z-index': zIndex}">
-  <div class="titlebar" [ngStyle]="{color: titleColor}" (mousedown)="startMove($event)" (dblclick)="maximize()">
+  <div class="titlebar" [ngStyle]="{background: titleBackground, color: titleColor}" (mousedown)="startMove($event)"
+       (dblclick)="maximize()">
     <div class="buttons">
       <div class="button close" (click)="close()">
         <i class="fa fa-close" aria-hidden="true"></i>
