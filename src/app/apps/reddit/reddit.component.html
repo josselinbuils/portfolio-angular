@@ -42,9 +42,9 @@
               <div>
                 <span>submitted {{link.since}} by u/{{link.author}}</span>
                 <span *ngIf="link.showSubreddit">
-                on <a (click)="load('/r/' + link.subreddit + '/hot')">r/{{link.subreddit}}</a>
-              </span>
-                <span class="right">{{link.domain}}</span>
+                  on <a (click)="load('/r/' + link.subreddit + '/hot')">r/{{link.subreddit}}</a>
+                </span>
+                <span class="domain">{{link.domain}}</span>
               </div>
               <div>
                 <a [href]="'https://www.reddit.com' + link.permalink" target="_blank">

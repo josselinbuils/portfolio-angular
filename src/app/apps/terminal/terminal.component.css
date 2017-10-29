@@ -1,3 +1,12 @@
+div + .user-input {
+  margin-top: 2px;
+}
+
+p {
+  white-space: normal;
+  margin: 0;
+}
+
 .terminal {
   font-family: "Courier New", Courier, monospace;
   font-size: .8em;
@@ -24,8 +33,4 @@
 
 .user-input .input {
   white-space: pre;
-}
-
-div + .user-input {
-  margin-top: 2px;
 }

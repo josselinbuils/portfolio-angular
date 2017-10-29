@@ -11,6 +11,13 @@
   user-select: none;
 }
 
+.icon {
+  display: inline-block;
+  width: 25px;
+  text-align: center;
+  padding-left: 3px;
+}
+
 .item {
   padding: 3px 10px 3px 0;
   list-style: none;
@@ -29,13 +36,6 @@
 
 .item:hover {
   background: #444444;
-}
-
-.icon {
-  display: inline-block;
-  width: 25px;
-  text-align: center;
-  padding-left: 3px;
 }
 
 .title {

@@ -1,40 +1,9 @@
 @import '~font-awesome/css/font-awesome.css';
 
 body {
-  background: #efefef;
   color: #efefef;
 }
 
 a, a:hover, a:focus, a:active {
   color: #efefef !important;
-}
-
-p {
-  white-space: normal;
-  margin: 0;
-}
-
-.card {
-  border: 1px solid #c5c5c5;
-  border-radius: 6px;
-  padding: 5px 7px;
-  margin: 10px 0;
-}
-
-.card-header {
-  border-bottom: 1px solid #c5c5c5;
-  margin: -5px -7px 5px -7px;
-  padding: 5px 7px;
-}
-
-.light {
-  color: #c5c5c5;
-}
-
-.right {
-  float: right;
-}
-
-.flex {
-  display: flex;
 }

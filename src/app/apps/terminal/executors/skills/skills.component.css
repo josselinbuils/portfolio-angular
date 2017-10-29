@@ -2,14 +2,15 @@
   display: block;
 }
 
+p {
+  white-space: normal;
+  margin: 5px;
+}
+
 .green {
   color: #6A8759;
 }
 
 .orange {
   color: orange;
-}
-
-p {
-  margin: 5px;
 }

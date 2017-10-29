@@ -1,106 +1,10 @@
-.reddit {
-  font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  overflow: hidden;
-  display: flex;
-}
-
-.sidebar {
-  flex: 0 0 180px;
-  overflow-y: auto;
-}
-
-.logo {
-  text-align: center;
-  color: #ff4501;
-  font-size: 100px;
-}
-
-ul {
-  padding-left: 15px;
-}
-
-.menu {
-  color: #7b7b7b;
-  font-size: .9em;
-}
-
-.menu ul {
-  font-size: .9em;
-}
-
-.body {
-  overflow-y: scroll;
-  flex-grow: 1;
-}
-
-li {
-  list-style-type: none;
-}
-
-.path {
-  color: #ff4501;
-  margin: 0;
-  padding: 5px 15px;
-  font-size: 1.5em;
-}
-
-.path span {
-  float: right;
-  line-height: 3em;
-  font-size: 0.5em;
-}
-
-.links {
-  color: black;
-}
-
-.link {
-  display: flex;
-}
-
-.link.stickied {
-  background: #cee3f8;
-  border-radius: 4px;
-}
-
-.link-score {
-  flex: 0 0 80px;
-  text-align: center;
-  color: #7b7b7b;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-}
-
-.link-info {
-  padding: 10px 10px 10px 0;
-  flex-grow: 1;
-}
-
-.link-thumbnail {
-  flex: 0 0 100px;
-  margin: 10px 15px 10px 0;
-  background: no-repeat center;
-  background-size: 100px;
-}
-
-.link-thumbnail img {
-  display: block;
-  max-width: 80px;
-}
-
-.link-details {
-  color: #7b7b7b;
-  font-size: .7em;
-}
-
-.fa-comment-o {
-  margin-right: 3px;
+@keyframes sk-bounce {
+  0%, 100% {
+    transform: scale(0.0);
+  }
+  50% {
+    transform: scale(1.0);
+  }
 }
 
 a {
@@ -116,13 +20,21 @@ a, a:hover, a:focus, a:active {
   color: inherit !important;
 }
 
-.spinner {
-  width: 40px;
-  height: 40px;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+li {
+  list-style-type: none;
+}
+
+ul {
+  padding-left: 15px;
+}
+
+.body {
+  overflow-y: scroll;
+  flex-grow: 1;
+}
+
+.domain {
+  float: right;
 }
 
 .double-bounce1, .double-bounce2 {
@@ -141,11 +53,103 @@ a, a:hover, a:focus, a:active {
   animation-delay: -1.0s;
 }
 
-@keyframes sk-bounce {
-  0%, 100% {
-    transform: scale(0.0);
-  }
-  50% {
-    transform: scale(1.0);
-  }
+.fa-comment-o {
+  margin-right: 3px;
+}
+
+.link {
+  display: flex;
+}
+
+.link.stickied {
+  background: #cee3f8;
+  border-radius: 4px;
+}
+
+.link-details {
+  color: #7b7b7b;
+  font-size: .7em;
+}
+
+.link-info {
+  padding: 10px 10px 10px 0;
+  flex-grow: 1;
+}
+
+.link-score {
+  flex: 0 0 80px;
+  text-align: center;
+  color: #7b7b7b;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+.link-thumbnail {
+  flex: 0 0 100px;
+  margin: 10px 15px 10px 0;
+  background: no-repeat center;
+  background-size: 100px;
+}
+
+.link-thumbnail img {
+  display: block;
+  max-width: 80px;
+}
+
+.links {
+  color: black;
+}
+
+.logo {
+  text-align: center;
+  color: #ff4501;
+  font-size: 100px;
+}
+
+.menu {
+  color: #7b7b7b;
+  font-size: .9em;
+}
+
+.menu ul {
+  font-size: .9em;
+}
+
+.path {
+  color: #ff4501;
+  margin: 0;
+  padding: 5px 15px;
+  font-size: 1.5em;
+}
+
+.path span {
+  float: right;
+  line-height: 3em;
+  font-size: 0.5em;
+}
+
+.reddit {
+  font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  overflow: hidden;
+  display: flex;
+}
+
+.sidebar {
+  flex: 0 0 180px;
+  overflow-y: auto;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }

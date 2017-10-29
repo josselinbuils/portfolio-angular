@@ -1,58 +1,3 @@
-.window {
-  position: fixed;
-  border-radius: 6px; /* Needed by box shadow */
-  box-shadow: 0 0 10px #1f1f1f;
-  display: flex;
-  flex-direction: column;
-  perspective: 300px;
-  opacity: .9;
-}
-
-.window.active {
-  opacity: 1;
-}
-
-.window.minimized {
-  opacity: 0;
-}
-
-.window.animate {
-  transition: all .2s ease-in-out;
-}
-
-.title {
-  line-height: 23px;
-  cursor: default;
-}
-
-.titlebar {
-  height: 22px;
-  border-top-left-radius: 6px;
-  border-top-right-radius: 6px;
-  text-align: center;
-  font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
-  font-size: .9em;
-}
-
-
-.titlebar, .titlebar * {
-  user-select: none;
-  cursor: default;
-}
-
-.content {
-  border-bottom-left-radius: 6px;
-  border-bottom-right-radius: 6px;
-  flex-grow: 1;
-  overflow: auto;
-  position: relative;
-  user-select: none;
-}
-
-.window.active .content {
-  user-select: inherit;
-}
-
 .buttons {
   position: absolute;
   top: 0;
@@ -88,12 +33,21 @@
   background: #e20000;
 }
 
-.minimize:hover, .maximize:hover {
-  background: #007ad8;
+.content {
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+  flex-grow: 1;
+  overflow: auto;
+  position: relative;
+  user-select: none;
 }
 
 .disabled {
   display: none;
+}
+
+.minimize:hover, .maximize:hover {
+  background: #007ad8;
 }
 
 .resize {
@@ -104,4 +58,49 @@
   bottom: -2px;
   cursor: nwse-resize;
   user-select: none;
+}
+
+.title {
+  line-height: 23px;
+  cursor: default;
+}
+
+.titlebar {
+  height: 22px;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  text-align: center;
+  font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+  font-size: .9em;
+}
+
+.titlebar, .titlebar * {
+  user-select: none;
+  cursor: default;
+}
+
+.window {
+  position: fixed;
+  border-radius: 6px; /* Needed by box shadow */
+  box-shadow: 0 0 10px #1f1f1f;
+  display: flex;
+  flex-direction: column;
+  perspective: 300px;
+  opacity: .9;
+}
+
+.window.active {
+  opacity: 1;
+}
+
+.window.minimized {
+  opacity: 0;
+}
+
+.window.animate {
+  transition: all .2s ease-in-out;
+}
+
+.window.active .content {
+  user-select: inherit;
 }

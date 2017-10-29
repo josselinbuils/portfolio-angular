@@ -9,6 +9,15 @@
   z-index: 999;
 }
 
+.running {
+  background: #007ad8;
+  position: absolute;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+}
+
 .task {
   height: 60px;
   line-height: 60px;
@@ -23,13 +32,4 @@
 
 .task.active {
   background: #333333;
-}
-
-.running {
-  background: #007ad8;
-  position: absolute;
-  right: 0;
-  left: 0;
-  bottom: 0;
-  height: 3px;
 }

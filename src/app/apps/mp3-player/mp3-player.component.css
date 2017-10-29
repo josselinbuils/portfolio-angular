@@ -3,47 +3,23 @@
   cursor: default;
 }
 
-.player {
-  font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
-  font-size: .6em;
+audio {
+  display: none;
 }
 
-.left {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  text-align: center;
+.bar {
+  width: 0;
+  background: #efefef;
+  position: relative;
 }
 
-.music-info {
-  text-overflow: ellipsis;
-  width: 205px;
-  white-space: nowrap;
-  overflow: hidden;
-  display: block;
-  margin: 0 auto;
-  user-select: text;
+.bar-container {
+  background: #3c3c3c;
 }
 
-.seeking .music-info {
-  user-select: none;
-}
-
-.music-preview {
-  flex: 0 0 100px;
-  height: 100px;
-  margin-right: 15px;
-  background-repeat: no-repeat;
-  background-size: 100px;
-}
-
-.default-preview {
-  background: white;
-  font-size: 80px;
-  text-align: center;
-  line-height: 100px;
-  color: black;
+.bar-container, .bar {
+  height: 4px;
+  border-radius: 2px;
 }
 
 .button {
@@ -65,14 +41,58 @@
   color: #007ad8;
 }
 
-.random-button, .repeat-button {
-  font-size: 15px;
-  margin-top: 1px;
+.current-time, .duration {
+  line-height: 28px;
+  text-align: center;
+  margin: 0 15px;
+}
+
+.default-preview {
+  background: white;
+  font-size: 80px;
+  text-align: center;
+  line-height: 100px;
+  color: black;
+}
+
+.flex {
+  display: flex;
+}
+
+.left {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: center;
+}
+
+.music-info {
+  text-overflow: ellipsis;
+  width: 205px;
+  white-space: nowrap;
+  overflow: hidden;
+  display: block;
+  margin: 0 auto;
+  user-select: text;
+}
+
+.music-preview {
+  flex: 0 0 100px;
+  height: 100px;
+  margin-right: 15px;
+  background-repeat: no-repeat;
+  background-size: 100px;
 }
 
 .play-button {
   font-size: 60px;
   line-height: 80px;
+}
+
+.player {
+  font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+  font-size: .6em;
 }
 
 .prev-button, .next-button {
@@ -83,21 +103,6 @@
   margin: 6px -5px;
   padding: 6px 0;
   flex-grow: 1;
-}
-
-.bar-container {
-  background: #3c3c3c;
-}
-
-.bar-container, .bar {
-  height: 4px;
-  border-radius: 2px;
-}
-
-.bar {
-  width: 0;
-  background: #efefef;
-  position: relative;
 }
 
 .progress-bar:hover .bar, .seeking .bar {
@@ -115,12 +120,11 @@
   right: -5px;
 }
 
-.current-time, .duration {
-  line-height: 28px;
-  text-align: center;
-  margin: 0 15px;
+.random-button, .repeat-button {
+  font-size: 15px;
+  margin-top: 1px;
 }
 
-audio {
-  display: none;
+.seeking .music-info {
+  user-select: none;
 }

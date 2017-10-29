@@ -2,3 +2,8 @@
   display: block;
   margin: 2px 0;
 }
+
+p {
+  white-space: normal;
+  margin: 0;
+}

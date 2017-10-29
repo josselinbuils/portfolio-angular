@@ -15,9 +15,6 @@ export class HelpComponent implements Executor {
     command: 'skills',
     description: 'my main skills'
   }, {
-    command: 'teravia',
-    description: 'a small html5 game'
-  }, {
     command: 'work',
     description: 'my work experience'
   }];
