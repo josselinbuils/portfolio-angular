@@ -56,7 +56,7 @@ export class WindowComponent implements AfterContentInit {
   }
 
   canBeMaximized(): boolean {
-    return !this.maxWidth && !this.maxHeight;
+    return this.resizable || !!(this.maxWidth && this.maxHeight);
   }
 
   close(): void {
@@ -91,9 +91,19 @@ export class WindowComponent implements AfterContentInit {
     this.animate = true;
 
     setTimeout(() => {
-      if (this.maximized) {
+      if (this.maxWidth && this.maxHeight) {
+        const size = this.getSize();
+
+        if (size.width === this.maxWidth && size.height === this.maxHeight) {
+          const {width, height} = this.lastDisplayProperties.maximize;
+          this.setSize(width, height);
+        } else {
+          this.lastDisplayProperties.maximize = this.getSize();
+          this.setSize(this.maxWidth, this.maxHeight);
+        }
+      } else if (this.maximized) {
         const {left, top, width, height} = this.lastDisplayProperties.maximize;
-        this.setSize(width, height);
+        this.setSize(width, height, true);
         this.setPosition(left, top);
         this.maximized = false;
       } else {
@@ -259,8 +269,11 @@ export class WindowComponent implements AfterContentInit {
       }
 
       if (this.contentRatio) {
+        const size = this.getSize();
         const contentSize = this.getContentSize();
-        height = Math.round(contentSize.width / this.contentRatio) + this.getSize().height - contentSize.height;
+        const dx = size.width - contentSize.width;
+        const dy = size.height - contentSize.height;
+        height = Math.round((width - dx) / this.contentRatio) + dy;
       }
     }
 

@@ -42,10 +42,6 @@
   user-select: none;
 }
 
-.disabled {
-  display: none;
-}
-
 .minimize:hover, .maximize:hover {
   background: #007ad8;
 }
