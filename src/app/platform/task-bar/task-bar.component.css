@@ -9,6 +9,26 @@
   z-index: 999;
 }
 
+.fa-gamepad {
+  transform: translateY(-1px);
+}
+
+.fa-headphones {
+  transform: translateY(2px);
+}
+
+.fa-reddit-alien {
+  transform: translateY(2px);
+}
+
+.fa-sticky-note {
+  transform: translateY(1px);
+}
+
+.fa-terminal {
+  transform: translateY(-1px);
+}
+
 .running {
   background: #007ad8;
   position: absolute;
