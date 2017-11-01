@@ -31,7 +31,8 @@ module.exports = class JamendoController {
 };
 
 function validateConfig() {
-  if (!jamendo.clientId) {
+  console.log(jamendo);
+  if (!jamendo || !jamendo.clientId) {
     throw Error('Invalid configuration: jamendo');
   }
 }

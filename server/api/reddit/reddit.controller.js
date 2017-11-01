@@ -38,7 +38,7 @@ function handle(res, promise) {
 }
 
 function validateConfig() {
-  if ([reddit.clientId, reddit.clientSecret, reddit.username, reddit.password].some(field => !field)) {
+  if (!reddit || [reddit.clientId, reddit.clientSecret, reddit.username, reddit.password].some(field => !field)) {
     throw Error('Invalid configuration: reddit');
   }
 }
