@@ -64,7 +64,7 @@ export class TaskBarComponent {
 
   openContextMenu(task: Task, event: MouseEvent): void {
     const taskBarElement = this.viewContainerRef.element.nativeElement;
-    const taskElement = DOMUtils.getParent(<HTMLElement> event.target, '.task');
+    const taskElement = DOMUtils.closest(<HTMLElement> event.target, '.task');
 
     const left = taskBarElement.getBoundingClientRect().right;
     const top = taskElement.getBoundingClientRect().top;

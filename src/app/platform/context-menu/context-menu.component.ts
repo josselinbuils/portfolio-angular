@@ -59,7 +59,7 @@ export class ContextMenuComponent {
       return;
     }
 
-    const isContextMenuChild = !!DOMUtils.getParent(<HTMLElement> event.target, '.context-menu');
+    const isContextMenuChild = !!DOMUtils.closest(<HTMLElement> event.target, '.context-menu');
 
     if (!isContextMenuChild) {
       this.hideMenu();

@@ -3,6 +3,7 @@ import {
 } from '@angular/core';
 
 import { MOUSE_BUTTON } from '../../constants';
+import { DOMUtils } from '../dom-utils';
 import { WindowManagerService } from './window-manager.service';
 
 const ANIMATION_DURATION = 200;
@@ -156,7 +157,7 @@ export class WindowComponent implements AfterContentInit {
 
     downEvent.preventDefault();
 
-    if (this.maximized || (<HTMLElement> downEvent.target).className.indexOf('maximize') !== -1) {
+    if (this.maximized || DOMUtils.closest(<HTMLElement> downEvent.target, '.button')) {
       return;
     }
 
