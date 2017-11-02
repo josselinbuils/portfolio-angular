@@ -69,7 +69,7 @@ export class WindowComponent implements AfterContentInit {
 
         this.minimized = true;
         this.setSize(0, 0, true);
-        this.setPosition(60, this.minimizedTopPosition, true);
+        this.setPosition(60, this.minimizedTopPosition);
 
         setTimeout(() => {
           this.animate = false;
@@ -79,7 +79,7 @@ export class WindowComponent implements AfterContentInit {
     }
   }
 
-  maximize(): void {
+  maximize(animationDelay: number = ANIMATION_DURATION): void {
 
     if (!this.resizable) {
       return;
@@ -88,19 +88,9 @@ export class WindowComponent implements AfterContentInit {
     this.animate = true;
 
     setTimeout(() => {
-      if (this.maxWidth && this.maxHeight) {
-        const size = this.getSize();
-
-        if (size.width === this.maxWidth && size.height === this.maxHeight) {
-          const {width, height} = this.lastDisplayProperties.maximize;
-          this.setSize(width, height);
-        } else {
-          this.lastDisplayProperties.maximize = this.getSize();
-          this.setSize(this.maxWidth, this.maxHeight);
-        }
-      } else if (this.maximized) {
+      if (this.maximized) {
         const {left, top, width, height} = this.lastDisplayProperties.maximize;
-        this.setSize(width, height, true);
+        this.setSize(width, height);
         this.setPosition(left, top);
         this.maximized = false;
       } else {
@@ -110,7 +100,7 @@ export class WindowComponent implements AfterContentInit {
         this.maximized = true;
       }
 
-      setTimeout(() => this.animate = false, ANIMATION_DURATION + DOM_UPDATE_DELAY);
+      setTimeout(() => this.animate = false, animationDelay + DOM_UPDATE_DELAY);
     }, DOM_UPDATE_DELAY);
   }
 
@@ -134,7 +124,7 @@ export class WindowComponent implements AfterContentInit {
         const {left, top, width, height} = this.lastDisplayProperties.minimize;
 
         this.minimized = false;
-        this.setSize(width, height, true);
+        this.setSize(width, height);
         this.setPosition(left, top, true);
 
         setTimeout(() => {
@@ -153,17 +143,22 @@ export class WindowComponent implements AfterContentInit {
 
     downEvent.preventDefault();
 
-    if (this.maximized || DOMUtils.closest(<HTMLElement> downEvent.target, '.button')) {
+    if (DOMUtils.closest(<HTMLElement> downEvent.target, '.button')) {
       return;
     }
 
     const windowBoundingRect: any = this.window.getBoundingClientRect();
     const dx: number = windowBoundingRect.left - downEvent.clientX;
     const dy: number = windowBoundingRect.top - downEvent.clientY;
+    let maximized = this.maximized;
 
     this.setSelectable(false);
 
     const cancelMouseMove: () => void = this.renderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
+      if (maximized) {
+        maximized = false;
+        this.maximize(50);
+      }
       this.setPosition(moveEvent.clientX + dx, moveEvent.clientY + dy);
     });
 
@@ -208,6 +203,7 @@ export class WindowComponent implements AfterContentInit {
   private setPosition(x: number, y: number, force: boolean = false): void {
 
     if (!force) {
+      // This cannot be done when showing again a minimized window because its dimensions are null
       const xMin = -this.getSize().width + 90;
       const yMin = -1;
       const xMax = window.innerWidth - 30;
