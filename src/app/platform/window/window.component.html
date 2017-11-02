@@ -9,7 +9,7 @@
       <div class="button minimize" (click)="minimize()">
         <i class="fa fa-minus" aria-hidden="true"></i>
       </div>
-      <div class="button maximize" [hidden]="!canBeMaximized()" (click)="maximize()">
+      <div class="button maximize" [hidden]="!resizable" (click)="maximize()">
         <i class="fa fa-plus" aria-hidden="true"></i>
       </div>
     </div>

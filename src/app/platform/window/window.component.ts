@@ -56,10 +56,6 @@ export class WindowComponent implements AfterContentInit {
   constructor(private renderer: Renderer2, private windowManagerService: WindowManagerService) {
   }
 
-  canBeMaximized(): boolean {
-    return this.resizable || !!(this.maxWidth && this.maxHeight);
-  }
-
   close(): void {
     this.windowManagerService.closeWindow(this.id);
   }
@@ -85,7 +81,7 @@ export class WindowComponent implements AfterContentInit {
 
   maximize(): void {
 
-    if (!this.resizable || !this.canBeMaximized()) {
+    if (!this.resizable) {
       return;
     }
 
