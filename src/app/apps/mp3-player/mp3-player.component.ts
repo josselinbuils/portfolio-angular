@@ -6,6 +6,17 @@ import { HTTP_PREFIX } from '../../env';
 import { WindowComponent } from '../../platform/window/window.component';
 import { WindowInstance } from '../../platform/window/window-instance';
 
+const size = {
+  min: {
+    width: 350,
+    height: 150
+  },
+  max: {
+    width: 600,
+    height: 400
+  }
+};
+
 @Component({
   selector: 'app-mp3-player',
   templateUrl: './mp3-player.component.html',
@@ -28,6 +39,8 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
   random = false;
   repeat = false;
   seeking = false;
+  showPlaylist = false;
+  size: { width: number, height: number } = size.min;
 
   private currentTimeInterval: any;
 
@@ -96,14 +109,6 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
     }
   }
 
-  /**
-   * @param {number} value 0 -> 1
-   */
-  private setCurrentTime(value: number) {
-    const duration = this.audioElement.duration;
-    this.audioElement.currentTime = Math.min(Math.round(value * duration), duration - 1);
-  }
-
   startSeek(downEvent: MouseEvent): void {
     const progressBarWidth = this.progressElementRef.nativeElement.clientWidth;
     const dx = downEvent.offsetX - downEvent.clientX;
@@ -122,11 +127,24 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
     });
   }
 
+  togglePlaylist(): void {
+    this.showPlaylist = !this.showPlaylist;
+    this.size = this.showPlaylist ? size.max : size.min;
+  }
+
   private loadMusic(music: any): void {
     this.music = music;
     this.audioElement.load();
     this.music.readableDuration = moment.utc(this.music.duration * 1000).format('mm:ss');
     this.progress = 0;
+  }
+
+  /**
+   * @param {number} value 0 -> 1
+   */
+  private setCurrentTime(value: number) {
+    const duration = this.audioElement.duration;
+    this.audioElement.currentTime = Math.min(Math.round(value * duration), duration - 1);
   }
 
   ngAfterContentInit(): void {

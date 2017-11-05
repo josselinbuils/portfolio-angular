@@ -1,40 +1,57 @@
-<app-window [width]="350" [height]="150" background="rgba(0, 0, 0, 0.9)" [resizable]="false">
-  <div class="player" [ngClass]="{seeking: seeking}">
-    <div class="flex">
-      <div class="left">
-        <div class="controls">
-          <div class="button random-button" [ngClass]="{checked: random}" (click)="random = !random">
-            <i class="fa fa-random" aria-hidden="true"></i>
-          </div>
-          <div class="button prev-button" (click)="prev()">
-            <i class="fa fa-step-backward" aria-hidden="true"></i>
-          </div>
-          <div class="button play-button" (click)="play()">
-            <i class="fa" [ngClass]="audioElement.paused ? 'fa-play-circle' : 'fa-pause-circle'" aria-hidden="true"></i>
-          </div>
-          <div class="button next-button" (click)="next()">
-            <i class="fa fa-step-forward" aria-hidden="true"></i>
-          </div>
-          <div class="button repeat-button" [ngClass]="{checked: repeat}" (click)="repeat = !repeat">
-            <i class="fa fa-repeat" aria-hidden="true"></i>
-          </div>
-        </div>
-        <div class="music-info">{{music.artist_name}}<span *ngIf="music.name"> - </span>{{music.name}}</div>
-      </div>
-      <div class="music-preview" [ngClass]="{'default-preview fa fa-music': !music.image}"
+<app-window [width]="size.width" [height]="size.height" background="rgba(0, 0, 0, 0.9)" [resizable]="false">
+  <div class="player" [ngClass]="{seeking: seeking, max: showPlaylist}">
+    <div class="playlist">
+      <div></div>
+    </div>
+    <div class="nav-bar">
+      <div class="music-preview-max" [ngClass]="{'default-preview fa fa-music': !music.image}"
            [ngStyle]="{'background-image': 'url(' + music.image + ')'}"></div>
-    </div>
-    <div class="flex">
-      <div #currentTime class="current-time">00:00</div>
-      <div #progressBar class="progress-bar" (mousedown)="startSeek($event)">
-        <div class="bar-container">
-          <div class="bar" [ngStyle]="{width: progress + '%'}"></div>
+      <div class="music-info-max">
+        <div>{{music.artist_name}}</div>
+        <div>{{music.name}}</div>
+      </div>
+      <div class="right">
+        <div class="flex">
+          <div class="left">
+            <div class="controls">
+              <div class="button random-button" [ngClass]="{checked: random}" (click)="random = !random">
+                <i class="fa fa-random" aria-hidden="true"></i>
+              </div>
+              <div class="button prev-button" (click)="prev()">
+                <i class="fa fa-step-backward" aria-hidden="true"></i>
+              </div>
+              <div class="button play-button" (click)="play()">
+                <i class="fa" [ngClass]="audioElement.paused ? 'fa-play-circle' : 'fa-pause-circle'"
+                   aria-hidden="true"></i>
+              </div>
+              <div class="button next-button" (click)="next()">
+                <i class="fa fa-step-forward" aria-hidden="true"></i>
+              </div>
+              <div class="button repeat-button" [ngClass]="{checked: repeat}" (click)="repeat = !repeat">
+                <i class="fa fa-repeat" aria-hidden="true"></i>
+              </div>
+            </div>
+            <div class="music-info-min">{{music.artist_name}}<span *ngIf="music.name"> - </span>{{music.name}}</div>
+          </div>
+          <div class="music-preview-min" [ngClass]="{'default-preview fa fa-music': !music.image}"
+               [ngStyle]="{'background-image': 'url(' + music.image + ')'}"></div>
+        </div>
+        <div class="flex">
+          <div #currentTime class="current-time">00:00</div>
+          <div #progressBar class="progress-bar" (mousedown)="startSeek($event)">
+            <div class="bar-container">
+              <div class="bar" [ngStyle]="{width: progress + '%'}"></div>
+            </div>
+          </div>
+          <div class="duration">{{music.readableDuration || '00:00'}}</div>
+          <div class="button playlist-button" [ngClass]="{checked: showPlaylist}" (click)="togglePlaylist()">
+            <i class="fa fa-list" aria-hidden="true"></i>
+          </div>
         </div>
       </div>
-      <div class="duration">{{music.readableDuration || '00:00'}}</div>
     </div>
-    <audio #audio>
-      <source #source *ngIf="music.audio" [src]="music.audio" type="audio/mp3">
-    </audio>
   </div>
+  <audio #audio>
+    <source #source *ngIf="music.audio" [src]="music.audio" type="audio/mp3">
+  </audio>
 </app-window>

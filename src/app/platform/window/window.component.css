@@ -2,11 +2,11 @@
   position: absolute;
   top: 0;
   left: 0;
-  height: 23px;
+  height: 22px;
 }
 
 .button {
-  width: 23px;
+  width: 22px;
   height: 100%;
   float: left;
 }
@@ -18,7 +18,7 @@
 .button i {
   margin-top: 1px;
   font-size: 14px;
-  line-height: 23px;
+  line-height: 22px;
 }
 
 .close {
@@ -57,7 +57,7 @@
 }
 
 .title {
-  line-height: 23px;
+  line-height: 22px;
   cursor: default;
 }
 

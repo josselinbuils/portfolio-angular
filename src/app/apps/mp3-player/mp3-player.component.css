@@ -41,10 +41,13 @@ audio {
   color: #007ad8;
 }
 
+.current-time {
+  margin: 0 10px 0 15px;
+}
+
 .current-time, .duration {
   line-height: 28px;
   text-align: center;
-  margin: 0 15px;
 }
 
 .default-preview {
@@ -53,6 +56,10 @@ audio {
   text-align: center;
   line-height: 100px;
   color: black;
+}
+
+.duration {
+  margin: 0 10px;
 }
 
 .flex {
@@ -67,8 +74,61 @@ audio {
   text-align: center;
 }
 
-.music-info {
+.max .controls {
+  margin-right: 24px;
+}
+
+.max .current-time, .max .duration {
+  line-height: 16px;
+}
+
+.max .music-info-max {
+  flex-basis: 100px;
+  margin-left: 10px;
+}
+
+.max .music-info-min {
+  flex-basis: 0;
+}
+
+.max .music-preview-max {
+  flex-basis: 54px;
+  margin-left: 15px;
+  opacity: 1;
+}
+
+.max .music-preview-min {
+  flex-basis: 0;
+  height: 42px;
+  margin: 0;
+  opacity: 0;
+}
+
+.max .nav-bar {
+  margin-bottom: 9px;
+}
+
+.max .play-button {
+  font-size: 40px;
+  line-height: 42px;
+}
+
+.max .playlist {
+  flex-grow: 1;
+}
+
+.max .playlist-button {
+  line-height: 16px;
+}
+
+.max .progress-bar {
+  margin: 0;
+}
+
+.music-info-min {
   text-overflow: ellipsis;
+  flex: 0 0 20px;
+  line-height: 20px;
   width: 205px;
   white-space: nowrap;
   overflow: hidden;
@@ -77,12 +137,39 @@ audio {
   user-select: text;
 }
 
-.music-preview {
+.controls, .music-info-min, .music-info-max, .music-preview-max, .music-preview-min, .play-button, .playlist {
+  transition: all .4s ease-in-out;
+}
+
+.music-info-max {
+  flex: 0 0 0;
+  height: 54px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+.music-preview-max {
+  flex: 0 0 0;
+  height: 54px;
+  background-repeat: no-repeat;
+  background-size: 54px;
+  opacity: 0;
+}
+
+.music-preview-min {
   flex: 0 0 100px;
   height: 100px;
   margin-right: 15px;
   background-repeat: no-repeat;
   background-size: 100px;
+  opacity: 1;
+}
+
+.nav-bar {
+  display: flex;
+  flex: 0 0 58px;
 }
 
 .play-button {
@@ -93,6 +180,24 @@ audio {
 .player {
   font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
   font-size: .6em;
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.playlist {
+  flex: 0 0 0;
+}
+
+.playlist-button {
+  font-size: 14px;
+  flex: 0 0 1ch;
+  line-height: 28px;
+  margin-left: 0;
 }
 
 .prev-button, .next-button {
@@ -100,7 +205,7 @@ audio {
 }
 
 .progress-bar {
-  margin: 6px -5px;
+  margin: 6px 0;
   padding: 6px 0;
   flex-grow: 1;
 }
@@ -125,6 +230,11 @@ audio {
   margin-top: 1px;
 }
 
-.seeking .music-info {
+.right {
+  flex-grow: 1;
+}
+
+.seeking .music-info-min {
   user-select: none;
 }
+

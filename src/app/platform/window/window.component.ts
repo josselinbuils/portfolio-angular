@@ -19,17 +19,22 @@ export class WindowComponent implements AfterContentInit {
   @ViewChild('window') windowElementRef: ElementRef;
 
   @Input() background: string;
-  @Input() height: number;
+
+  @Input()
+  set height(height: number) {
+    this._height = height;
+
+    if (this.contentInitialized) {
+      this.startAnimation().ready(() => this.setSize(this._width, height));
+    }
+  }
+
   @Input() keepContentRatio = false;
   @Input() maxHeight: number;
   @Input() maxWidth: number;
   @Input() minHeight = 100;
   @Input() minWidth = 100;
   @Input() resizable = true;
-  @Input() titleBackground: string;
-  @Input() titleColor: string;
-  @Input() width: number;
-  @Input() windowTitle: string;
 
   @Input()
   set scrollTop(value: number) {
@@ -37,6 +42,20 @@ export class WindowComponent implements AfterContentInit {
       this.content.scrollTop = value;
     }
   }
+
+  @Input() titleBackground: string;
+  @Input() titleColor: string;
+
+  @Input()
+  set width(width: number) {
+    this._width = width;
+
+    if (this.contentInitialized) {
+      this.startAnimation().ready(() => this.setSize(width, this._height));
+    }
+  }
+
+  @Input() windowTitle: string;
 
   active = false;
   animate = false;
@@ -46,7 +65,10 @@ export class WindowComponent implements AfterContentInit {
   visible = true;
   zIndex: number;
 
+  private _height: number;
+  private _width: number;
   private content: HTMLElement;
+  private contentInitialized = false;
   private contentRatio: number;
   private lastDisplayProperties: any = {};
   private maximized = false;
@@ -62,20 +84,14 @@ export class WindowComponent implements AfterContentInit {
 
   hide() {
     if (this.visible) {
-      this.animate = true;
-
-      setTimeout(() => {
-        this.lastDisplayProperties.minimize = this.window.getBoundingClientRect();
-
-        this.minimized = true;
-        this.setSize(0, 0, true);
-        this.setPosition(60, this.minimizedTopPosition);
-
-        setTimeout(() => {
-          this.animate = false;
-          this.visible = false;
-        }, ANIMATION_DURATION + DOM_UPDATE_DELAY);
-      }, DOM_UPDATE_DELAY);
+      this.startAnimation()
+        .ready(() => {
+          this.lastDisplayProperties.minimize = this.window.getBoundingClientRect();
+          this.minimized = true;
+          this.setSize(0, 0, true);
+          this.setPosition(60, this.minimizedTopPosition);
+        })
+        .finished(() => this.visible = false);
     }
   }
 
@@ -85,9 +101,7 @@ export class WindowComponent implements AfterContentInit {
       return;
     }
 
-    this.animate = true;
-
-    setTimeout(() => {
+    this.startAnimation().ready(() => {
       if (this.maximized) {
         const {left, top, width, height} = this.lastDisplayProperties.maximize;
         this.setSize(width, height);
@@ -99,9 +113,7 @@ export class WindowComponent implements AfterContentInit {
         this.setPosition(59, -1);
         this.maximized = true;
       }
-
-      setTimeout(() => this.animate = false, animationDelay + DOM_UPDATE_DELAY);
-    }, DOM_UPDATE_DELAY);
+    });
   }
 
   minimize(): void {
@@ -118,20 +130,14 @@ export class WindowComponent implements AfterContentInit {
 
   show() {
     if (!this.visible && this.lastDisplayProperties.minimize) {
-      this.animate = true;
-
-      setTimeout(() => {
-        const {left, top, width, height} = this.lastDisplayProperties.minimize;
-
-        this.minimized = false;
-        this.setSize(width, height);
-        this.setPosition(left, top, true);
-
-        setTimeout(() => {
-          this.animate = false;
-          this.visible = true;
-        }, ANIMATION_DURATION + DOM_UPDATE_DELAY);
-      }, DOM_UPDATE_DELAY);
+      this.startAnimation()
+        .ready(() => {
+          const {left, top, width, height} = this.lastDisplayProperties.minimize;
+          this.minimized = false;
+          this.setSize(width, height);
+          this.setPosition(left, top, true);
+        })
+        .finished(() => this.visible = true);
     }
   }
 
@@ -200,6 +206,26 @@ export class WindowComponent implements AfterContentInit {
     });
   }
 
+  private getContentSize(): { width: number, height: number } {
+    return {
+      width: this.content.clientWidth,
+      height: this.content.clientHeight
+    };
+  }
+
+  private getSize(): { width: number, height: number } {
+    return {
+      width: this.window.clientWidth,
+      height: this.window.clientHeight
+    };
+  }
+
+  private setMaxSize(): void {
+    const maxWidth = window.innerWidth - 58;
+    const maxHeight = window.innerHeight + 2;
+    this.setSize(maxWidth, maxHeight, true);
+  }
+
   private setPosition(x: number, y: number, force: boolean = false): void {
 
     if (!force) {
@@ -225,26 +251,6 @@ export class WindowComponent implements AfterContentInit {
       this.renderer.setStyle(this.window, 'user-select', 'none');
       this.renderer.setStyle(this.content, 'pointer-events', 'none');
     }
-  }
-
-  private getContentSize(): { width: number, height: number } {
-    return {
-      width: this.content.clientWidth,
-      height: this.content.clientHeight
-    };
-  }
-
-  private getSize(): { width: number, height: number } {
-    return {
-      width: this.window.clientWidth,
-      height: this.window.clientHeight
-    };
-  }
-
-  private setMaxSize(): void {
-    const maxWidth = window.innerWidth - 58;
-    const maxHeight = window.innerHeight + 2;
-    this.setSize(maxWidth, maxHeight, true);
   }
 
   private setSize(width: number, height: number, force: boolean = false): void {
@@ -278,6 +284,41 @@ export class WindowComponent implements AfterContentInit {
     this.renderer.setStyle(this.window, property, value);
   }
 
+  private startAnimation(animationDuration: number = ANIMATION_DURATION): WindowAnimation {
+    let finished: () => void;
+    let ready: () => void;
+
+    const windowAnimation = {
+      finished: (finishedCallback: () => void) => {
+        finished = finishedCallback;
+        return windowAnimation;
+      },
+      ready: (readyCallback: () => void) => {
+        ready = readyCallback;
+        return windowAnimation;
+      }
+    };
+
+    this.animate = true;
+
+    setTimeout(() => {
+      if (typeof ready === 'function') {
+        ready();
+      }
+
+      setTimeout(() => {
+        this.animate = false;
+
+        if (typeof finished === 'function') {
+          finished();
+        }
+      }, animationDuration + DOM_UPDATE_DELAY);
+
+    }, DOM_UPDATE_DELAY);
+
+    return windowAnimation;
+  }
+
   @HostListener('window:resize')
   resizeHandler(): void {
     if (this.maximized) {
@@ -286,12 +327,17 @@ export class WindowComponent implements AfterContentInit {
   }
 
   ngAfterContentInit(): void {
+    let size: any = {};
+
     this.content = this.contentElementRef.nativeElement;
     this.window = this.windowElementRef.nativeElement;
 
-    let size = this.getSize();
-    const width = this.width || size.width;
-    const height = this.height || size.height;
+    if (!this._width || !this._height) {
+      size = this.getSize();
+    }
+
+    const width = this._width || size.width;
+    const height = this._height || size.height;
 
     this.setSize(width, height);
 
@@ -305,5 +351,12 @@ export class WindowComponent implements AfterContentInit {
       const contentSize = this.getContentSize();
       this.contentRatio = contentSize.width / contentSize.height;
     }
+
+    this.contentInitialized = true;
   }
+}
+
+interface WindowAnimation {
+  finished: (finishedCallback: () => void) => WindowAnimation;
+  ready: (readyCallback: () => void) => WindowAnimation;
 }
