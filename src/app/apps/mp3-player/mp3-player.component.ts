@@ -8,11 +8,11 @@ import { WindowInstance } from '../../platform/window/window-instance';
 
 const size = {
   min: {
-    width: 350,
+    width: 330,
     height: 150
   },
   max: {
-    width: 600,
+    width: 700,
     height: 400
   }
 };
@@ -20,7 +20,7 @@ const size = {
 @Component({
   selector: 'app-mp3-player',
   templateUrl: './mp3-player.component.html',
-  styleUrls: ['./mp3-player.component.css']
+  styleUrls: ['./mp3-player.component.scss']
 })
 export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, WindowInstance {
   static appName = 'MP3Player';
@@ -39,8 +39,8 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
   random = false;
   repeat = false;
   seeking = false;
-  showPlaylist = false;
-  size: { width: number, height: number } = size.min;
+  showPlaylist = true;
+  size: { width: number, height: number } = this.showPlaylist ? size.max : size.min;
 
   private currentTimeInterval: any;
 
@@ -135,7 +135,6 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
   private loadMusic(music: any): void {
     this.music = music;
     this.audioElement.load();
-    this.music.readableDuration = moment.utc(this.music.duration * 1000).format('mm:ss');
     this.progress = 0;
   }
 
@@ -184,6 +183,8 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
       .get(`${HTTP_PREFIX}/api/jamendo/tracks`)
       .first()
       .toPromise();
+
+    this.musics.forEach(music => music.readableDuration = moment.utc(music.duration * 1000).format('mm:ss'));
 
     this.loadMusic(this.musics[0]);
   }

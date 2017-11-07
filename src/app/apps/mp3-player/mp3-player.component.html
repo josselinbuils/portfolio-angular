@@ -1,56 +1,96 @@
-<app-window [width]="size.width" [height]="size.height" background="rgba(0, 0, 0, 0.9)" [resizable]="false">
-  <div class="player" [ngClass]="{seeking: seeking, max: showPlaylist}">
+<app-window [minWidth]="size.width" [minHeight]="size.height" [width]="size.width" [height]="size.height"
+            background="rgba(0, 0, 0, 0.9)" [resizable]="showPlaylist">
+
+  <!-- Min template -->
+  <div class="player min" [ngClass]="{seeking: seeking}" *ngIf="!showPlaylist">
+    <div class="flex">
+      <div class="left">
+        <ng-container *ngTemplateOutlet="controls"></ng-container>
+      </div>
+      <div class="music-preview" [ngClass]="{'default-preview fa fa-music': !music.image}"
+           [ngStyle]="{'background-image': 'url(' + music.image + ')'}"></div>
+    </div>
+    <div class="music-info">{{music.artist_name}}<span *ngIf="music.name"> - </span>{{music.name}}</div>
+    <ng-container *ngTemplateOutlet="time"></ng-container>
+  </div>
+
+  <!-- Max template -->
+  <div class="player max" [ngClass]="{seeking: seeking}" *ngIf="showPlaylist">
     <div class="playlist">
-      <div></div>
+      <table>
+        <thead>
+        <tr>
+          <th class="col-preview" scope="col"></th>
+          <th scope="col">Title</th>
+          <th scope="col">Artist</th>
+          <th scope="col">Album</th>
+          <th class="col-release" scope="col">Release</th>
+          <th scope="col">Duration</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let music of musics">
+          <td>
+            <div class="inline-music-preview" [ngStyle]="{'background-image': 'url(' + music.image + ')'}"></div>
+          </td>
+          <td>{{music.name}}</td>
+          <td>{{music.artist_name}}</td>
+          <td>{{music.album_name}}</td>
+          <td>{{music.releasedate}}</td>
+          <td>{{music.readableDuration}}</td>
+        </tr>
+        </tbody>
+      </table>
     </div>
     <div class="nav-bar">
-      <div class="music-preview-max" [ngClass]="{'default-preview fa fa-music': !music.image}"
+      <div class="music-preview" [ngClass]="{'default-preview fa fa-music': !music.image}"
            [ngStyle]="{'background-image': 'url(' + music.image + ')'}"></div>
-      <div class="music-info-max">
+      <div class="music-info">
         <div>{{music.artist_name}}</div>
         <div>{{music.name}}</div>
       </div>
       <div class="right">
-        <div class="flex">
-          <div class="left">
-            <div class="controls">
-              <div class="button random-button" [ngClass]="{checked: random}" (click)="random = !random">
-                <i class="fa fa-random" aria-hidden="true"></i>
-              </div>
-              <div class="button prev-button" (click)="prev()">
-                <i class="fa fa-step-backward" aria-hidden="true"></i>
-              </div>
-              <div class="button play-button" (click)="play()">
-                <i class="fa" [ngClass]="audioElement.paused ? 'fa-play-circle' : 'fa-pause-circle'"
-                   aria-hidden="true"></i>
-              </div>
-              <div class="button next-button" (click)="next()">
-                <i class="fa fa-step-forward" aria-hidden="true"></i>
-              </div>
-              <div class="button repeat-button" [ngClass]="{checked: repeat}" (click)="repeat = !repeat">
-                <i class="fa fa-repeat" aria-hidden="true"></i>
-              </div>
-            </div>
-            <div class="music-info-min">{{music.artist_name}}<span *ngIf="music.name"> - </span>{{music.name}}</div>
-          </div>
-          <div class="music-preview-min" [ngClass]="{'default-preview fa fa-music': !music.image}"
-               [ngStyle]="{'background-image': 'url(' + music.image + ')'}"></div>
-        </div>
-        <div class="flex">
-          <div #currentTime class="current-time">00:00</div>
-          <div #progressBar class="progress-bar" (mousedown)="startSeek($event)">
-            <div class="bar-container">
-              <div class="bar" [ngStyle]="{width: progress + '%'}"></div>
-            </div>
-          </div>
-          <div class="duration">{{music.readableDuration || '00:00'}}</div>
-          <div class="button playlist-button" [ngClass]="{checked: showPlaylist}" (click)="togglePlaylist()">
-            <i class="fa fa-list" aria-hidden="true"></i>
-          </div>
-        </div>
+        <ng-container *ngTemplateOutlet="controls"></ng-container>
+        <ng-container *ngTemplateOutlet="time"></ng-container>
       </div>
     </div>
   </div>
+
+  <ng-template #controls>
+    <div class="controls">
+      <div class="button random-button" [ngClass]="{checked: random}" (click)="random = !random">
+        <i class="fa fa-random" aria-hidden="true"></i>
+      </div>
+      <div class="button prev-button" (click)="prev()">
+        <i class="fa fa-step-backward" aria-hidden="true"></i>
+      </div>
+      <div class="button play-button" (click)="play()">
+        <i class="fa" [ngClass]="audioElement.paused ? 'fa-play-circle' : 'fa-pause-circle'" aria-hidden="true"></i>
+      </div>
+      <div class="button next-button" (click)="next()">
+        <i class="fa fa-step-forward" aria-hidden="true"></i>
+      </div>
+      <div class="button repeat-button" [ngClass]="{checked: repeat}" (click)="repeat = !repeat">
+        <i class="fa fa-repeat" aria-hidden="true"></i>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template #time>
+    <div class="time">
+      <div #currentTime class="current-time">00:00</div>
+      <div #progressBar class="progress-bar" (mousedown)="startSeek($event)">
+        <div class="bar-container">
+          <div class="bar" [ngStyle]="{width: progress + '%'}"></div>
+        </div>
+      </div>
+      <div class="duration">{{music.readableDuration || '00:00'}}</div>
+      <div class="button playlist-button" [ngClass]="{checked: showPlaylist}" (click)="togglePlaylist()">
+        <i class="fa fa-list" aria-hidden="true"></i>
+      </div>
+    </div>
+  </ng-template>
+
   <audio #audio>
     <source #source *ngIf="music.audio" [src]="music.audio" type="audio/mp3">
   </audio>
