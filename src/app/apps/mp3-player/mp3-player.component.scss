@@ -122,10 +122,24 @@ audio {
     }
 
     td {
-      user-select: text;
+      position: relative;
+      height: 38px;
+      padding: 0;
+
+      span {
+        @extend .text-ellipsis;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        line-height: 38px;
+        user-select: text;
+        padding-right: 15px;
+      }
     }
 
-    td, th {
+    th {
       padding: 3px 15px 3px 0;
     }
 
@@ -133,12 +147,24 @@ audio {
       text-align: left;
     }
 
+    .col-album {
+      width: 20%;
+    }
+
+    .col-artist {
+      width: 20%;
+    }
+
+    .col-duration {
+      width: 11%;
+    }
+
     .col-preview {
       width: 32px;
     }
 
     .col-release {
-      width: 10ch;
+      width: 15%;
     }
 
     .inline-music-preview {

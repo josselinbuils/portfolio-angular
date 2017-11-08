@@ -22,10 +22,10 @@
         <tr>
           <th class="col-preview" scope="col"></th>
           <th scope="col">Title</th>
-          <th scope="col">Artist</th>
-          <th scope="col">Album</th>
+          <th class="col-artist" scope="col">Artist</th>
+          <th class="col-album" scope="col">Album</th>
           <th class="col-release" scope="col">Release</th>
-          <th scope="col">Duration</th>
+          <th class="col-duration" scope="col">Duration</th>
         </tr>
         </thead>
         <tbody>
@@ -33,11 +33,11 @@
           <td>
             <div class="inline-music-preview" [ngStyle]="{'background-image': 'url(' + music.image + ')'}"></div>
           </td>
-          <td>{{music.name}}</td>
-          <td>{{music.artist_name}}</td>
-          <td>{{music.album_name}}</td>
-          <td>{{music.releasedate}}</td>
-          <td>{{music.readableDuration}}</td>
+          <td><span>{{music.name}}</span></td>
+          <td><span>{{music.artist_name}}</span></td>
+          <td><span>{{music.album_name}}</span></td>
+          <td><span>{{music.releasedate}}</span></td>
+          <td><span>{{music.readableDuration}}</span></td>
         </tr>
         </tbody>
       </table>
