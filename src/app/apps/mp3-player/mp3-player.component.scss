@@ -165,7 +165,7 @@ audio {
       }
 
       tr {
-        border-top: 1px solid $secondary-color;
+        border-bottom: 1px solid $secondary-color;
         color: $text-color;
 
         &.active {
@@ -179,10 +179,6 @@ audio {
               display: inherit;
             }
           }
-        }
-
-        &:first-child {
-          border: none;
         }
 
         &:hover .inline-music-preview {
