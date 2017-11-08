@@ -1,3 +1,8 @@
+$primary-color: #007ad8;
+$secondary-color: #3c3c3c;
+$text-color: #efefef;
+$text-hover-color: white;
+
 * {
   user-select: none;
   cursor: default;
@@ -14,7 +19,7 @@ audio {
 }
 
 .bar-container {
-  background: #3c3c3c;
+  background: $secondary-color;
 }
 
 .bar-container, .bar {
@@ -34,11 +39,11 @@ audio {
 }
 
 .button:hover {
-  color: white;
+  color: $text-hover-color;
 }
 
 .button:active, .button.checked {
-  color: #007ad8;
+  color: $primary-color;
 }
 
 .controls {
@@ -56,9 +61,7 @@ audio {
 
 .default-preview {
   background: white;
-  font-size: 80px;
   text-align: center;
-  line-height: 100px;
   color: black;
 }
 
@@ -81,6 +84,11 @@ audio {
 
   .current-time, .duration {
     line-height: 16px;
+  }
+
+  .default-preview {
+    font-size: 50px;
+    line-height: 62px;
   }
 
   .music-info {
@@ -117,61 +125,123 @@ audio {
     overflow-x: hidden;
     margin: 5px 15px 15px 15px;
 
-    table {
-      width: 100%;
+    &::-webkit-scrollbar {
+      width: 8px;
     }
 
-    td {
-      position: relative;
-      height: 38px;
-      padding: 0;
+    &::-webkit-scrollbar-thumb {
+      background: $secondary-color;
+      border-radius: 5px;
+    }
 
-      span {
+    &::-webkit-scrollbar-track {
+      border-radius: 5px;
+    }
+
+    table {
+      width: calc(100% - 10px);
+      border-collapse: collapse;
+      table-layout: fixed;
+
+      td {
         @extend .text-ellipsis;
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        line-height: 38px;
+        position: relative;
+        height: 46px;
         user-select: text;
         padding-right: 15px;
       }
-    }
 
-    th {
-      padding: 3px 15px 3px 0;
-    }
+      td:last-child, th:last-child {
+        text-align: right;
+        padding-right: 0;
+      }
 
-    th {
-      text-align: left;
-    }
+      th {
+        padding: 3px 15px 3px 0;
+      }
 
-    .col-album {
-      width: 20%;
-    }
+      th {
+        text-align: left;
+      }
 
-    .col-artist {
-      width: 20%;
-    }
+      tr {
+        border-top: 1px solid $secondary-color;
+        color: $text-color;
 
-    .col-duration {
-      width: 11%;
-    }
+        &.active {
+          color: $primary-color;
 
-    .col-preview {
-      width: 32px;
-    }
+          .inline-music-preview {
+            background-color: transparent;
+            background-image: none !important;
 
-    .col-release {
-      width: 15%;
-    }
+            i {
+              display: inherit;
+            }
+          }
+        }
 
-    .inline-music-preview {
-      width: 32px;
-      height: 32px;
-      background-size: 32px;
-      background-repeat: no-repeat;
+        &:first-child {
+          border: none;
+        }
+
+        &:hover .inline-music-preview {
+          background-color: transparent;
+          background-image: none !important;
+
+          i {
+            display: inherit;
+          }
+
+          i:active {
+            color: $primary-color;
+          }
+
+          i:hover:not(:active) {
+            color: lighten($text-color, 10%);
+          }
+        }
+
+        &.active:hover .inline-music-preview {
+          i:hover:not(:active) {
+            color: lighten($primary-color, 10%);
+          }
+        }
+
+        .col-album {
+          width: 20%;
+        }
+
+        .col-artist {
+          width: 20%;
+        }
+
+        .col-duration {
+          width: 9%;
+        }
+
+        .col-preview {
+          width: 32px;
+        }
+
+        .col-release {
+          width: 15%;
+        }
+
+        .inline-music-preview {
+          width: 32px;
+          height: 32px;
+          background-size: 32px;
+          background-repeat: no-repeat;
+          text-align: center;
+
+          i {
+            display: none;
+            line-height: 32px;
+            font-size: 32px;
+          }
+        }
+      }
     }
   }
 
@@ -191,10 +261,30 @@ audio {
     width: 90%;
     max-width: 700px;
     margin: 0 auto;
+    position: relative;
+
+    a {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+      font-size: 0.8em;
+      line-height: 1em;
+      bottom: -10px;
+      margin-left: -11px;
+      color: $secondary-color !important;
+      cursor: pointer;
+      text-decoration: none;
+    }
   }
 }
 
 .min {
+  .default-preview {
+    font-size: 80px;
+    line-height: 100px;
+  }
+
   .music-info {
     flex: 0 0 20px;
     line-height: 20px;
@@ -212,12 +302,16 @@ audio {
   }
 
   .play-button {
-    font-size: 60px;
+    font-size: 50px;
     line-height: 80px;
   }
 
   .playlist-button {
     line-height: 28px;
+  }
+
+  .time a {
+    display: none;
   }
 }
 
@@ -256,12 +350,12 @@ audio {
 }
 
 .progress-bar:hover .bar, .seeking .bar {
-  background: #007ad8;
+  background: $primary-color;
 }
 
 .progress-bar:hover .bar:after, .seeking .bar:after {
   content: "";
-  background: #007ad8;
+  background: $primary-color;
   width: 10px;
   height: 10px;
   border-radius: 5px;
