@@ -18,34 +18,55 @@
 
   <!-- Max template -->
   <div class="player max" [ngClass]="{seeking: seeking}" *ngIf="showPlaylist">
-    <div class="playlist">
-      <table>
-        <thead>
-        <tr>
-          <th class="col-preview" scope="col"></th>
-          <th scope="col">Title</th>
-          <th class="col-artist" scope="col">Artist</th>
-          <th class="col-album" scope="col">Album</th>
-          <th class="col-release" scope="col">Release</th>
-          <th class="col-duration" scope="col">Duration</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr *ngFor="let music of musics" [ngClass]="{active: music === currentMusic}" (dblclick)="playMusic(music)">
-          <td>
-            <div class="inline-music-preview" [ngStyle]="{'background-image': 'url(' + music.image + ')'}">
-              <i [ngClass]="music === currentMusic && !audioElement.paused ? 'fa-pause-circle' : 'fa-play-circle'"
-                 class="fa" aria-hidden="true" (click)="playMusic(music)"></i>
-            </div>
-          </td>
-          <td>{{music.name}}</td>
-          <td>{{music.artist_name}}</td>
-          <td>{{music.album_name}}</td>
-          <td>{{music.releasedate}}</td>
-          <td>{{music.readableDuration}}</td>
-        </tr>
-        </tbody>
-      </table>
+    <div class="body">
+      <div class="sidebar">
+        <div class="logo">
+          <i aria-hidden="true" class="fa fa-headphones"></i>
+        </div>
+        <div class="item" *ngFor="let item of items" (click)="loadMusicList(item.path)"
+             [ngClass]="{active: item.path === currentPath, title: item.items}">
+          {{item.name}}
+          <div class="sub-item" *ngFor="let subItem of item.items" (click)="loadMusicList(subItem.path)"
+               [ngClass]="{active: subItem.path === currentPath}">
+            {{subItem.name}}
+          </div>
+        </div>
+        <a class="brand" href="https://www.jamendo.com" target="_blank">powered by jamendo</a>
+      </div>
+      <div class="playlist">
+        <table class="header">
+          <thead>
+          <tr>
+            <th class="col-preview" scope="col"></th>
+            <th scope="col">Title</th>
+            <th class="col-artist" scope="col">Artist</th>
+            <th class="col-album" scope="col">Album</th>
+            <th class="col-release" scope="col">Release</th>
+            <th class="col-duration" scope="col">Duration</th>
+          </tr>
+          </thead>
+        </table>
+        <div class="overflow">
+          <table>
+            <tbody>
+            <tr *ngFor="let music of musicList" [ngClass]="{active: music === currentMusic}"
+                (dblclick)="playMusic(music)">
+              <td class="col-preview">
+                <div class="inline-music-preview" [ngStyle]="{'background-image': 'url(' + music.image + ')'}">
+                  <i [ngClass]="music === currentMusic && !audioElement.paused ? 'fa-pause-circle' : 'fa-play-circle'"
+                     class="fa" aria-hidden="true" (click)="playMusic(music)"></i>
+                </div>
+              </td>
+              <td>{{music.name}}</td>
+              <td class="col-artist">{{music.artist_name}}</td>
+              <td class="col-album">{{music.album_name}}</td>
+              <td class="col-release">{{music.releasedate}}</td>
+              <td class="col-duration">{{music.readableDuration}}</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
     <div class="nav-bar">
       <div class="music-preview" [ngClass]="{'default-preview fa fa-music': !currentMusic.image}"
@@ -93,7 +114,6 @@
       <div class="button playlist-button" [ngClass]="{checked: showPlaylist}" (click)="togglePlaylist()">
         <i class="fa fa-list" aria-hidden="true"></i>
       </div>
-      <a href="https://www.jamendo.com" target="_blank">powered by jamendo</a>
     </div>
   </ng-template>
 

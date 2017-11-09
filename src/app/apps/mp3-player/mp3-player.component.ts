@@ -12,8 +12,8 @@ const size = {
     height: 150
   },
   max: {
-    width: 700,
-    height: 400
+    width: 950,
+    height: 530
   }
 };
 
@@ -34,7 +34,29 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
 
   audioElement: any;
   currentMusic: any = {};
-  musics: any[] = [];
+  currentPath: string;
+
+  items: any[] = [
+    {name: 'Top 50', path: '/tracks'},
+    {
+      name: 'Genres',
+      items: [
+        {name: 'Classical', path: '/tracks/classical'},
+        {name: 'Dance', path: '/tracks/dance'},
+        {name: 'Electronic', path: '/tracks/electronic'},
+        {name: 'Folk', path: '/tracks/folk'},
+        {name: 'House', path: '/tracks/house'},
+        {name: 'Metal', path: '/tracks/metal'},
+        {name: 'Pop', path: '/tracks/pop'},
+        {name: 'Reggae', path: '/tracks/reggae'},
+        {name: 'Rock', path: '/tracks/rock'},
+        {name: 'Soundtrack', path: '/tracks/soundtrack'}
+      ]
+    }
+  ];
+
+  musicList: any[] = [];
+  playlist: any[] = [];
   progress = 0;
   random = false;
   repeat = false;
@@ -47,21 +69,40 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
   constructor(private http: HttpClient, private renderer: Renderer2) {
   }
 
+  async loadMusicList(path): Promise<any> {
+
+    if (!path) {
+      return;
+    }
+
+    this.currentPath = path;
+    this.musicList = [];
+
+    this.musicList = <any[]> await this.http
+      .get(`${HTTP_PREFIX}/api/jamendo${path}`)
+      .first()
+      .toPromise();
+
+    this.musicList.forEach(music => {
+      return music.readableDuration = moment.utc(music.duration * 1000).format('mm:ss');
+    });
+  }
+
   next(): void {
 
     if (this.random) {
       return this.rand();
     }
 
-    let newIndex = this.musics.indexOf(this.currentMusic) + 1;
+    let newIndex = this.playlist.indexOf(this.currentMusic) + 1;
 
-    if (newIndex >= this.musics.length) {
+    if (newIndex >= this.playlist.length) {
       newIndex = 0;
     }
 
     const paused = this.audioElement.paused;
 
-    this.loadMusic(this.musics[newIndex]);
+    this.loadMusic(this.playlist[newIndex]);
 
     if (!paused) {
       this.play();
@@ -89,15 +130,15 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
       return this.rand();
     }
 
-    let newIndex = this.musics.indexOf(this.currentMusic) - 1;
+    let newIndex = this.playlist.indexOf(this.currentMusic) - 1;
 
     if (newIndex < 0) {
-      newIndex = this.musics.length - 1;
+      newIndex = this.playlist.length - 1;
     }
 
     const paused = this.audioElement.paused;
 
-    this.loadMusic(this.musics[newIndex]);
+    this.loadMusic(this.playlist[newIndex]);
 
     if (!paused) {
       this.play();
@@ -105,11 +146,11 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
   }
 
   rand(): void {
-    const newIndex = Math.round(this.musics.length * Math.random());
+    const newIndex = Math.round(this.playlist.length * Math.random());
 
     const paused = this.audioElement.paused;
 
-    this.loadMusic(this.musics[newIndex]);
+    this.loadMusic(this.playlist[newIndex]);
 
     if (!paused) {
       this.play();
@@ -140,6 +181,11 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
   }
 
   private loadMusic(music: any): void {
+
+    if (!this.playlist.includes(music)) {
+      this.playlist = this.musicList.slice();
+    }
+
     this.currentMusic = music;
     this.audioElement.load();
     this.progress = 0;
@@ -184,15 +230,8 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
     clearInterval(this.currentTimeInterval);
   }
 
-  async ngOnInit(): Promise<any> {
-
-    this.musics = <any[]> await this.http
-      .get(`${HTTP_PREFIX}/api/jamendo/tracks`)
-      .first()
-      .toPromise();
-
-    this.musics.forEach(music => music.readableDuration = moment.utc(music.duration * 1000).format('mm:ss'));
-
-    this.loadMusic(this.musics[0]);
+  async ngOnInit() {
+    await this.loadMusicList(this.items[0].path);
+    this.loadMusic(this.musicList[0]);
   }
 }

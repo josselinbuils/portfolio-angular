@@ -21,7 +21,7 @@ module.exports = class Router {
     const router = express.Router();
 
     router.use((req, res, next) => {
-      Logger.info(`${req.method} ${req.url}`);
+      Logger.info(`<- ${req.method} ${req.url}`);
 
       if (ENV === ENV_DEV) {
         res.header('Access-Control-Allow-Origin', '*');

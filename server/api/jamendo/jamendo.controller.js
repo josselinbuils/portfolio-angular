@@ -6,29 +6,57 @@ const Logger = require('../../logger');
 
 validateConfig();
 
+const baseUrl = `https://api.jamendo.com/v3.0/tracks/?client_id=${jamendo.clientId}&format=json`;
+
 module.exports = class JamendoController {
+
   static getTracks(req, res) {
-    request({
-      url: `https://api.jamendo.com/v3.0/tracks/?client_id=${jamendo.clientId}&format=json&limit=50&order=popularity_total`,
+    const tag = req.params.tag;
+
+    const options = {limit: 50};
+
+    if (tag) {
+      options.tags = tag;
+      options.boost = 'popularity_total';
+    } else {
+      options.order = 'popularity_total';
+    }
+
+    get('/tracks', options)
+      .then(results => res.json(results))
+      .catch(error => {
+        Logger.error(error.stack);
+        res.status(HTTP_INTERNAL_ERROR).end();
+      });
+  }
+};
+
+function get(path, options = {}) {
+  return new Promise((resolve, reject) => {
+
+    const req = {
+      url: Object.keys(options).reduce(
+        (url, key) => `${url}&${key}=${options[key]}`,
+        `https://api.jamendo.com/v3.0${path}/?client_id=${jamendo.clientId}&format=json`
+      ),
       json: true
-    }).then(
-      data => {
+    };
+
+    Logger.info(`-> GET ${req.url}`);
+
+    request(req)
+      .then(data => {
         const headers = data.headers;
 
         if (headers.status === 'success') {
-          res.json(data.results);
+          resolve(data.results);
         } else {
-          Logger.error(`Jamendo API error: code ${headers.code}: ${headers.error_message}`);
-          res.status(HTTP_INTERNAL_ERROR).end();
+          reject(Error(`Jamendo API error: code ${headers.code}: ${headers.error_message}`));
         }
-      },
-      error => {
-        Logger.error(error);
-        res.status(HTTP_INTERNAL_ERROR).end();
-      }
-    );
-  }
-};
+      })
+      .catch(reject);
+  });
+}
 
 function validateConfig() {
   if (!jamendo || !jamendo.clientId) {
