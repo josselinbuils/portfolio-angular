@@ -8,6 +8,7 @@ import { WindowManagerService } from './window-manager.service';
 
 const ANIMATION_DURATION = 200;
 const DOM_UPDATE_DELAY = 10;
+const LEFT_OFFSET = 60;
 
 @Component({
   selector: 'app-window',
@@ -110,7 +111,7 @@ export class WindowComponent implements AfterContentInit {
       } else {
         this.lastDisplayProperties.maximize = this.window.getBoundingClientRect();
         this.setMaxSize();
-        this.setPosition(59, -1);
+        this.setPosition(LEFT_OFFSET, 0);
         this.maximized = true;
       }
     });
@@ -221,8 +222,8 @@ export class WindowComponent implements AfterContentInit {
   }
 
   private setMaxSize(): void {
-    const maxWidth = window.innerWidth - 58;
-    const maxHeight = window.innerHeight + 2;
+    const maxWidth = window.innerWidth - LEFT_OFFSET;
+    const maxHeight = window.innerHeight;
     this.setSize(maxWidth, maxHeight, true);
   }
 
