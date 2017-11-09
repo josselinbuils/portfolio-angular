@@ -72,8 +72,8 @@
       <div class="music-preview" [ngClass]="{'default-preview fa fa-music': !currentMusic.image}"
            [ngStyle]="{'background-image': 'url(' + currentMusic.image + ')'}"></div>
       <div class="music-info">
-        <div>{{currentMusic.artist_name}}</div>
-        <div>{{currentMusic.name}}</div>
+        <div class="name">{{currentMusic.name}}</div>
+        <div class="artist">{{currentMusic.artist_name}}</div>
       </div>
       <div class="right">
         <ng-container *ngTemplateOutlet="controls"></ng-container>

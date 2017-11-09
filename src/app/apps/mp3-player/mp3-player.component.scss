@@ -44,8 +44,17 @@ audio {
       height: 62px;
       display: flex;
       flex-direction: column;
-      justify-content: space-around;
+      justify-content: space-evenly;
       margin-left: 15px;
+
+      .name, .artist {
+        @extend .text-ellipsis;
+        user-select: text;
+      }
+
+      .artist {
+        font-size: .8em;
+      }
     }
 
     .music-preview {
