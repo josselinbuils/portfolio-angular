@@ -13,7 +13,7 @@ const LEFT_OFFSET = 60;
 @Component({
   selector: 'app-window',
   templateUrl: './window.component.html',
-  styleUrls: ['./window.component.css']
+  styleUrls: ['./window.component.scss']
 })
 export class WindowComponent implements AfterContentInit {
   @ViewChild('content') contentElementRef: ElementRef;
@@ -102,19 +102,19 @@ export class WindowComponent implements AfterContentInit {
       return;
     }
 
-    this.startAnimation().ready(() => {
-      if (this.maximized) {
-        const {left, top, width, height} = this.lastDisplayProperties.maximize;
-        this.setSize(width, height);
-        this.setPosition(left, top);
-        this.maximized = false;
-      } else {
-        this.lastDisplayProperties.maximize = this.window.getBoundingClientRect();
-        this.setMaxSize();
-        this.setPosition(LEFT_OFFSET, 0);
-        this.maximized = true;
-      }
-    });
+    this.startAnimation(animationDelay)
+      .ready(() => {
+        if (this.maximized) {
+          const {left, top, width, height} = this.lastDisplayProperties.maximize;
+          this.setSize(width, height);
+          this.setPosition(left, top);
+        } else {
+          this.lastDisplayProperties.maximize = this.window.getBoundingClientRect();
+          this.setMaxSize();
+          this.setPosition(LEFT_OFFSET, 0);
+        }
+      })
+      .finished(() => this.maximized = !this.maximized);
   }
 
   minimize(): void {
