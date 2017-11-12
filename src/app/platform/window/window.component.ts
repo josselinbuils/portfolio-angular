@@ -61,6 +61,7 @@ export class WindowComponent implements AfterContentInit {
   active = false;
   animate = false;
   id: number;
+  maximized = false;
   minimized = false;
   parentRef: ComponentRef<{}>;
   visible = true;
@@ -72,7 +73,6 @@ export class WindowComponent implements AfterContentInit {
   private contentInitialized = false;
   private contentRatio: number;
   private lastDisplayProperties: any = {};
-  private maximized = false;
   private minimizedTopPosition: number;
   private window: HTMLElement;
 
