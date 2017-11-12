@@ -1,5 +1,5 @@
-<app-window [minWidth]="size.width" [minHeight]="size.height" [width]="size.width" [height]="size.height"
-            background="rgba(0, 0, 0, 0.9)" [resizable]="showPlaylist">
+<app-window [windowTitle]="title" [minWidth]="size.width" [minHeight]="size.height" [width]="size.width"
+            [height]="size.height" background="rgba(0, 0, 0, 0.9)" [resizable]="showPlaylist">
 
   <!-- Min template -->
   <div class="player min" [ngClass]="{seeking: seeking}" *ngIf="!showPlaylist">

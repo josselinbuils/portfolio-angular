@@ -64,6 +64,10 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
   showPlaylist = true;
   size: { width: number, height: number } = this.showPlaylist ? size.max : size.min;
 
+  get title(): string {
+    return this.showPlaylist ? Mp3PlayerComponent.appName : '';
+  }
+
   private currentTimeInterval: any;
 
   constructor(private http: HttpClient, private renderer: Renderer2) {
