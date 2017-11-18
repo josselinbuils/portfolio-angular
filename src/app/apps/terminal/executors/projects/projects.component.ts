@@ -1,20 +1,20 @@
-import {Component, OnInit} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
+import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import * as moment from 'moment';
 import 'rxjs/add/operator/first';
 import 'rxjs/add/operator/toPromise';
 
 const projects = [
-  'MALVApi', 'MALViewer', 'MYOBotHub', 'MYOBotSite', 'pathFinding', 'pizzaDay', 'portfolio', 'reverseProxy', 'robot',
-  'teravia', 'youbiSMS'
+  'malv-api', 'mal-viewer', 'myo-bot-hub', 'myo-bot-site', 'path-finding', 'pizza-day', 'portfolio', 'reverse-proxy',
+  'robot', 'teravia', 'youbi-sms'
 ];
 
 const previews = {
-  pathFinding: {image: 'pathFinding.jpg'},
-  MYOBotHub: {image: 'MYOBotHub.jpg'},
-  MYOBotSite: {image: 'MYOBotSite.jpg'},
-  teravia: {image: 'teravia.jpg'},
-  youbiSMS: {image: 'youbiSMS.jpg'}
+  'path-finding': {image: 'path-finding.jpg'},
+  'myo-bot-hub': {image: 'myo-bot-hub.jpg'},
+  'myo-bot-site': {image: 'myo-bot-site.jpg'},
+  'teravia': {image: 'teravia.jpg'},
+  'youbi-sms': {image: 'youbi-sms.jpg'}
 };
 
 @Component({
