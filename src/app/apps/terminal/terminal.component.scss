@@ -1,0 +1,39 @@
+@import 'terminal.constants';
+
+.terminal {
+  font-family: "Courier New", Courier, monospace;
+  font-size: .8em;
+  white-space: nowrap;
+  padding: 5px 10px;
+  color: $text-color;
+
+  div + .user-input {
+    margin-top: 2px;
+  }
+
+  p {
+    white-space: normal;
+    margin: 0;
+  }
+
+  .user-input {
+    margin-bottom: 3px;
+    position: relative;
+
+    .caret {
+      background: #4d4d4d;
+      position: absolute;
+      top: 0;
+      width: 1.1ch;
+      height: 100%;
+    }
+
+    .input {
+      white-space: pre;
+    }
+
+    .prefix {
+      margin-right: 1ch;
+    }
+  }
+}

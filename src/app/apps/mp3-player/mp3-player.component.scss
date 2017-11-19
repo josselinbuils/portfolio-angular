@@ -1,7 +1,6 @@
 $primary-color: #007ad8;
 $secondary-color: #3c3c3c;
 $text-color: #efefef;
-$text-hover-color: white;
 
 * {
   user-select: none;
@@ -23,6 +22,7 @@ audio {
   bottom: 0;
   left: 0;
   overflow: hidden;
+  color: $text-color;
 
   &.max {
     .body {
@@ -274,8 +274,8 @@ audio {
 
   &.min {
     .default-preview {
-      font-size: 80px;
-      line-height: 100px;
+      font-size: 56px;
+      line-height: 70px;
     }
 
     .music-info {
@@ -339,7 +339,7 @@ audio {
   }
 
   .button:hover {
-    color: $text-hover-color;
+    color: lighten($text-color, 15%);
   }
 
   .button:active, .button.checked {

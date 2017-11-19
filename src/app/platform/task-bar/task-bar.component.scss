@@ -1,0 +1,64 @@
+@import '../platform.constants';
+
+:host {
+  display: block;
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 60px;
+  background: $background-color;
+  z-index: 999;
+  color: $text-color;
+}
+
+.task {
+  height: 60px;
+  line-height: 60px;
+  font-size: 32px;
+  text-align: center;
+  position: relative;
+
+  &.active {
+    background: lighten($background-color, 20%);
+  }
+
+  &.active:hover {
+    background: lighten($background-color, 25%);
+  }
+
+  &:hover {
+    background: lighten($background-color, 15%);
+  }
+
+  .fa {
+    .fa-gamepad {
+      transform: translateY(-1px);
+    }
+
+    .fa-headphones {
+      transform: translateY(2px);
+    }
+
+    .fa-reddit-alien {
+      transform: translateY(2px);
+    }
+
+    .fa-sticky-note {
+      transform: translateY(1px);
+    }
+
+    .fa-terminal {
+      transform: translateY(-1px);
+    }
+  }
+
+  .running {
+    background: $primary-color;
+    position: absolute;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    height: 3px;
+  }
+}

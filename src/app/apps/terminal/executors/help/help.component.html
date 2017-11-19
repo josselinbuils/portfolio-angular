@@ -1,4 +1,6 @@
-<p>Available commands:</p>
-<p *ngFor="let command of commands">
-  <span class="command">{{command.command}}</span><span class="description">{{command.description}}</span>
-</p>
+<div class="card">
+  <div class="header">Available commands</div>
+  <div>
+    <p *ngFor="let command of commands">{{command.command}}<span class="description">{{command.description}}</span></p>
+  </div>
+</div>

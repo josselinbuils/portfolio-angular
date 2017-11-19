@@ -9,7 +9,7 @@ import { WindowInstance } from '../../platform/window/window-instance';
 @Component({
   selector: 'app-reddit',
   templateUrl: './reddit.component.html',
-  styleUrls: ['./reddit.component.css']
+  styleUrls: ['./reddit.component.scss']
 })
 export class RedditComponent implements OnInit, WindowInstance {
   static appName = 'Reddit';

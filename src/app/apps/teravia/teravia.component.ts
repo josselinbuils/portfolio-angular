@@ -5,7 +5,7 @@ import { WindowInstance } from '../../platform/window/window-instance';
 @Component({
   selector: 'app-teravia',
   templateUrl: './teravia.component.html',
-  styleUrls: ['./teravia.component.css']
+  styleUrls: ['./teravia.component.scss']
 })
 export class TeraviaComponent implements WindowInstance {
   static appName = 'Teravia';

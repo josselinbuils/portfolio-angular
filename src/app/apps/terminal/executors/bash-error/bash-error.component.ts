@@ -9,7 +9,7 @@ const commands = [
 @Component({
   selector: 'app-bash-error',
   templateUrl: './bash-error.component.html',
-  styleUrls: ['./bash-error.component.css']
+  styleUrls: ['./bash-error.component.scss']
 })
 export class BashErrorComponent implements Executor, OnInit {
   args: string[];

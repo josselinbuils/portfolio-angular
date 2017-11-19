@@ -1,3 +1,5 @@
+@import '../platform.constants';
+
 .window {
   position: fixed;
   display: flex;
@@ -84,7 +86,7 @@
         }
 
         &.minimize:hover, &.maximize:hover {
-          background: #007ad8;
+          background: $primary-color;
         }
 
         &:hover {

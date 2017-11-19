@@ -8,27 +8,27 @@ img {
   height: 269px;
 }
 
-p {
-  white-space: normal;
-  margin: 0;
-}
-
-.help {
-  color: #c5c5c5;
-}
-
 .info {
   margin: 0 35px;
   display: flex;
   flex-direction: column;
   justify-content: space-around;
-}
 
-.resume {
-  font-size: 3em;
-  max-width: 22ch;
-}
+  p {
+    white-space: normal;
+    margin: 0;
+  }
 
-.social {
-  font-size: 1.7em;
+  .help {
+    color: #c5c5c5;
+  }
+
+  .resume {
+    font-size: 3em;
+    max-width: 22ch;
+  }
+
+  .social {
+    font-size: 1.7em;
+  }
 }

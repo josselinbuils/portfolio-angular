@@ -1,3 +1,5 @@
+@import '../executor';
+
 :host {
   display: block;
 }
@@ -7,6 +9,10 @@ p {
   margin: 0;
 }
 
+.card {
+  width: 30ch;
+}
+
 .command {
   display: inline-block;
   width: 12ch;
@@ -14,5 +20,7 @@ p {
 }
 
 .description {
-  color: #c5c5c5;
+  color: $secondary-color;
+  float: right;
+  width: 19ch;
 }

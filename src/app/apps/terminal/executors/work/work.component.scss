@@ -1,3 +1,5 @@
+@import '../executor';
+
 :host {
   display: block;
 }
@@ -8,16 +10,12 @@ p {
 }
 
 .description {
-  margin-left: 1ch;
+  margin-top: 10px;
   text-align: justify;
 }
 
 .description, .location {
-  color: #c5c5c5;
-}
-
-.entry {
-  margin: 5px 0 0 1ch;
+  color: $secondary-color;
 }
 
 .period {

@@ -15,7 +15,7 @@ import { WindowManagerService } from '../window/window-manager.service';
 @Component({
   selector: 'app-task-bar',
   templateUrl: './task-bar.component.html',
-  styleUrls: ['./task-bar.component.css']
+  styleUrls: ['./task-bar.component.scss']
 })
 export class TaskBarComponent {
 

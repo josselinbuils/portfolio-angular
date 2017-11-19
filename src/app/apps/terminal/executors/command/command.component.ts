@@ -4,7 +4,7 @@ import { Executor } from '../executor';
 @Component({
   selector: 'app-command',
   templateUrl: './command.component.html',
-  styleUrls: ['./command.component.css']
+  styleUrls: ['./command.component.scss']
 })
 export class CommandComponent implements Executor, OnInit {
   args: string[];

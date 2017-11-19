@@ -1,8 +1,8 @@
 iframe {
   position: absolute;
   user-select: none;
-}
 
-iframe.inactive {
-  pointer-events: none;
+  &.inactive {
+    pointer-events: none;
+  }
 }

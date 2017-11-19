@@ -36,7 +36,7 @@ const executors = {
 @Component({
   selector: 'app-terminal',
   templateUrl: './terminal.component.html',
-  styleUrls: ['./terminal.component.css']
+  styleUrls: ['./terminal.component.scss']
 })
 export class TerminalComponent implements AfterContentInit, OnInit, WindowInstance {
   static appName = 'Terminal';

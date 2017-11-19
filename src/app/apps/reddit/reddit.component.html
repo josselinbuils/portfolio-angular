@@ -33,7 +33,7 @@
           <div class="link-score">
             <span>{{link.score}}</span>
           </div>
-          <a [href]="link.url" target="_blank" class="link-thumbnail" *ngIf="link.previewUrl"
+          <a class="link-thumbnail" [href]="link.url" target="_blank" *ngIf="link.previewUrl"
              [ngStyle]="{'background-image': 'url(' + link.previewUrl + ')'}">
           </a>
           <div class="link-info">

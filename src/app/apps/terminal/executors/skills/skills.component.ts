@@ -4,7 +4,7 @@ import { Executor } from '../executor';
 @Component({
   selector: 'app-skills',
   templateUrl: './skills.component.html',
-  styleUrls: ['./skills.component.css']
+  styleUrls: ['./skills.component.scss']
 })
 export class SkillsComponent implements Executor {
   args: string[];
