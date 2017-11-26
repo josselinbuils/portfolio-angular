@@ -14,9 +14,9 @@
   "dependencies": {
     "@angular/animations": "^5.0.2",
     "@angular/cli": "1.5.2",
-    "@angular/compiler-cli": "^5.0.2",
     "@angular/common": "^5.0.2",
     "@angular/compiler": "^5.0.2",
+    "@angular/compiler-cli": "^5.0.2",
     "@angular/core": "^5.0.2",
     "@angular/forms": "^5.0.2",
     "@angular/http": "^5.0.2",
@@ -30,6 +30,7 @@
     "express-content-length-validator": "^1.0.0",
     "font-awesome": "^4.7.0",
     "helmet": "^3.9.0",
+    "lodash": "^4.17.4",
     "moment": "^2.19.2",
     "request": "^2.83.0",
     "request-promise-native": "^1.0.5",
@@ -42,6 +43,7 @@
   "devDependencies": {
     "@types/jasmine": "~2.8.2",
     "@types/jasminewd2": "~2.0.3",
+    "@types/lodash": "^4.14.85",
     "@types/node": "~8.0.53",
     "codelyzer": "~4.0.1",
     "jasmine-core": "~2.8.0",

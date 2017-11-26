@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, ViewChild } from '@angular/core';
+import { get } from 'lodash';
 import * as moment from 'moment';
 
 import { HTTP_PREFIX } from '../../env';
@@ -39,10 +40,7 @@ export class RedditComponent implements OnInit, WindowInstance {
     this.data.forEach(link => {
       link.since = moment(link.created_utc * 1000).fromNow();
       link.showSubreddit = path.indexOf('/r/') !== 0 || path.split('/')[2] === 'popular';
-
-      if (link.preview && link.preview.enabled) {
-        link.previewUrl = link.preview.images[0].resolutions[0].url;
-      }
+      link.previewUrl = get(link, 'preview.images[0].resolutions[1].url');
     });
   }
 

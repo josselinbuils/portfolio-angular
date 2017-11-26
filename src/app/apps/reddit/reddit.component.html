@@ -29,12 +29,12 @@
         <div class="double-bounce2"></div>
       </div>
       <div class="links">
-        <div class="link" *ngFor="let link of data" [ngClass]="{stickied: link.stickied}">
+        <div class="link" *ngFor="let link of data" [ngClass]="{'has-preview': link.previewUrl, stickied: link.stickied}">
           <div class="link-score">
             <span>{{link.score}}</span>
           </div>
-          <a class="link-thumbnail" [href]="link.url" target="_blank" *ngIf="link.previewUrl"
-             [ngStyle]="{'background-image': 'url(' + link.previewUrl + ')'}">
+          <a class="link-thumbnail" [href]="link.url" [ngStyle]="{'background-image': 'url(' + link.previewUrl + ')'}"
+             target="_blank">
           </a>
           <div class="link-info">
             <a class="link-title" [href]="link.url" target="_blank">{{link.title}}</a>

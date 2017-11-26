@@ -31,6 +31,23 @@
       .link {
         display: flex;
 
+        &.has-preview {
+          min-height: 120px;
+
+          .link-thumbnail {
+            flex: 0 0 150px;
+            margin: 10px 15px 10px 0;
+            background: no-repeat center;
+            background-size: cover;
+            display: block;
+
+            img {
+              display: block;
+              max-width: 80px;
+            }
+          }
+        }
+
         &.stickied {
           background: #cee3f8;
           border-radius: 4px;
@@ -64,15 +81,7 @@
         }
 
         .link-thumbnail {
-          flex: 0 0 100px;
-          margin: 10px 15px 10px 0;
-          background: no-repeat center;
-          background-size: 100px;
-
-          img {
-            display: block;
-            max-width: 80px;
-          }
+          display: none;
         }
       }
     }
