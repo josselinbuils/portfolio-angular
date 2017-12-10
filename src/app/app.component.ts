@@ -3,7 +3,7 @@ import {
 } from '@angular/core';
 
 import { MOUSE_BUTTON } from './constants';
-import { DicomViewerComponent } from './apps/dicom-viewer/dicom-viewer.component';
+import { TerminalComponent } from './apps/terminal/terminal.component';
 import { WindowManagerService } from './platform/window/window-manager.service';
 
 @Component({
@@ -64,7 +64,7 @@ export class AppComponent implements AfterContentInit {
 
   ngAfterContentInit() {
     this.windowManagerService.setViewContainerRef(this.windowsViewContainerRef);
-    this.windowManagerService.openWindow(DicomViewerComponent);
+    this.windowManagerService.openWindow(TerminalComponent);
     this.selection = this.selectionElementRef.nativeElement;
   }
 }
