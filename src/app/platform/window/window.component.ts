@@ -1,5 +1,5 @@
 import {
-  AfterContentInit, Component, ComponentRef, ElementRef, HostListener, Input, Renderer2, ViewChild
+  AfterContentInit, Component, ComponentRef, ElementRef, EventEmitter, HostListener, Input, Output, Renderer2, ViewChild
 } from '@angular/core';
 
 import { MOUSE_BUTTON } from '../../constants';
@@ -57,6 +57,8 @@ export class WindowComponent implements AfterContentInit {
   }
 
   @Input() windowTitle: string;
+
+  @Output() resize = new EventEmitter<{ width: number, height: number }>();
 
   active = false;
   animate = false;
@@ -279,6 +281,8 @@ export class WindowComponent implements AfterContentInit {
 
     this.setStyle('width', width + 'px');
     this.setStyle('height', height + 'px');
+
+    this.resize.emit({width, height});
   }
 
   private setStyle(property: string, value: any): void {

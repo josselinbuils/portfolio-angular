@@ -6,6 +6,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { AppComponent } from './app.component';
 import { ContextMenuComponent } from './platform/context-menu/context-menu.component';
 import { ContextMenuService } from './platform/context-menu/context-menu.service';
+import { DicomViewerComponent } from './apps/dicom-viewer/dicom-viewer.component';
 import { Mp3PlayerComponent } from './apps/mp3-player/mp3-player.component';
 import { NotesComponent } from './apps/notes/notes.component';
 import { RedditComponent } from './apps/reddit/reddit.component';
@@ -20,15 +21,18 @@ import { WindowManagerService } from './platform/window/window-manager.service';
   declarations: [
     AppComponent,
     ContextMenuComponent,
+    DicomViewerComponent,
     Mp3PlayerComponent,
     NotesComponent,
     RedditComponent,
     TaskBarComponent,
     TeraviaComponent,
     TerminalComponent,
-    WindowComponent
+    WindowComponent,
+    DicomViewerComponent
   ],
   entryComponents: [
+    DicomViewerComponent,
     Mp3PlayerComponent,
     NotesComponent,
     RedditComponent,

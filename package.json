@@ -26,6 +26,7 @@
     "@angular/router": "^5.0.2",
     "body-parser": "^1.18.2",
     "core-js": "^2.5.1",
+    "dicom-parser": "^1.7.6",
     "express": "^4.16.2",
     "express-content-length-validator": "^1.0.0",
     "font-awesome": "^4.7.0",
