@@ -3,7 +3,7 @@ import { AfterContentInit, Component, ElementRef, Renderer2, ViewChild } from '@
 import { parseDicom, sharedCopy } from 'dicom-parser';
 import 'rxjs/add/operator/toPromise';
 
-import { MOUSE_BUTTON, PHOTOMETRIC_INTERPRETATION, PIXEL_REPRESENTATION } from '../../constants';
+import { MOUSE_BUTTON, PIXEL_REPRESENTATION } from '../../constants';
 import { WindowInstance } from '../../platform/window/window-instance';
 import { WindowComponent } from '../../platform/window/window.component';
 
@@ -51,7 +51,7 @@ export class DicomViewerComponent implements AfterContentInit, WindowInstance {
   onResize(size: { width: number, height: number }) {
     const gl = this.gl;
 
-    size.height -= 30;
+    size.height -= 42;
 
     this.renderer.setAttribute(this.canvasElementRef.nativeElement, 'width', size.width.toString());
     this.renderer.setAttribute(this.canvasElementRef.nativeElement, 'height', size.height.toString());
@@ -124,54 +124,14 @@ export class DicomViewerComponent implements AfterContentInit, WindowInstance {
     downEvent.preventDefault();
 
     const cancelMouseMove = this.renderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
-      const {columns, pixelData, rows} = this.dicomProperties;
-      const windowLevel = this.windowLevel - moveEvent.movementY * 2;
-      const windowWidth = this.windowWidth + moveEvent.movementX * 2;
-      this.image = new ImageData(this.applyWindowing(pixelData, windowLevel, windowWidth), columns, rows);
+      this.windowLevel = this.windowLevel - moveEvent.movementY * 2;
+      this.windowWidth = this.windowWidth + moveEvent.movementX * 2;
     });
 
     const cancelMouseUp: () => void = this.renderer.listen('window', 'mouseup', () => {
       cancelMouseMove();
       cancelMouseUp();
     });
-  }
-
-  private applyWindowing(rawData: number[], windowLevel: number, windowWidth: number): Uint8ClampedArray {
-    const t = performance.now();
-    const {columns, photometricInterpretation, pixelData, rescaleIntercept, rescaleSlope, rows} = this.dicomProperties;
-    const imageData = new Uint8ClampedArray(rows * columns * 4);
-    const leftLimit = Math.floor(windowLevel - windowWidth / 2);
-    const rightLimit = Math.ceil(windowLevel + windowWidth / 2);
-
-    for (let i = 0; i < pixelData.length; i++) {
-      const dataIndex = i * 4;
-      const rawValue = pixelData[i];
-      let rgbValue = 0;
-
-      if (rawValue > rightLimit) {
-        rgbValue = 255;
-      } else if (rawValue > leftLimit) {
-        rgbValue = Math.floor((rawValue - leftLimit) / windowWidth * 255);
-      }
-
-      // rgb
-      imageData[dataIndex] = imageData[dataIndex + 1] = imageData[dataIndex + 2] = rgbValue;
-      // alpha
-      imageData[dataIndex + 3] = 255;
-    }
-
-    if (photometricInterpretation === PHOTOMETRIC_INTERPRETATION.MONOCHROME1) {
-      for (let i = 0; i < pixelData.length; i++) {
-        const dataIndex = i * 4;
-        imageData[dataIndex] = imageData[dataIndex + 1] = imageData[dataIndex + 2] = 255 - imageData[dataIndex];
-      }
-    }
-
-    this.windowLevel = windowLevel;
-    this.windowWidth = windowWidth;
-    this.renderDurations.push(performance.now() - t);
-
-    return imageData;
   }
 
   private createShaders(): { fragmentShader: WebGLShader, vertexShader: WebGLShader } {
@@ -201,11 +161,30 @@ export class DicomViewerComponent implements AfterContentInit, WindowInstance {
       // our texture
       uniform sampler2D u_image;
 
+      uniform float windowWidth;
+      uniform float windowLevel;
+
       // the texCoords passed in from the vertex shader.
       varying vec2 v_texCoord;
 
+      float leftLimit = windowLevel - windowWidth / 2.0;
+      float rightLimit = windowLevel + windowWidth / 2.0;
+
+      int rescaleSlope = 1;
+      float rescaleIntercept = -1024.0;
+
       void main() {
-         gl_FragColor = texture2D(u_image, v_texCoord);
+        vec4 texture = texture2D(u_image, v_texCoord);
+        float rawValue = texture[1] * 256.0 * 256.0 + texture[2] * 256.0 + rescaleIntercept;
+        float rgbValue = 0.0;
+
+        if (rawValue > rightLimit) {
+          rgbValue = 1.0;
+        } else if (rawValue > leftLimit) {
+          rgbValue = (rawValue - leftLimit) / windowWidth;
+        }
+
+        gl_FragColor = vec4(rgbValue, rgbValue, rgbValue, 1.0);
       }
     `;
 
@@ -287,10 +266,6 @@ export class DicomViewerComponent implements AfterContentInit, WindowInstance {
           : new Int16Array(pixelData.buffer);
       }
 
-      for (let i = 0; i < pixelData.length; i++) {
-        pixelData[i] = Math.round(pixelData[i] * rescaleSlope + rescaleIntercept);
-      }
-
       return {
         bitsAllocated,
         columns,
@@ -311,7 +286,9 @@ export class DicomViewerComponent implements AfterContentInit, WindowInstance {
     }
   }
 
-  private render(image: any, deltaX: number, deltaY: number, width: number, height: number) {
+  private render(image: any, deltaX: number, deltaY: number, width: number, height: number, windowWidth: number,
+                 windowLevel: number) {
+
     const gl = this.gl;
 
     if (!gl) {
@@ -323,6 +300,8 @@ export class DicomViewerComponent implements AfterContentInit, WindowInstance {
     this.lastTime = t;
 
     // Look up uniform locations
+    const windowWidthLocation = gl.getUniformLocation(this.program, 'windowWidth');
+    const windowLevelLocation = gl.getUniformLocation(this.program, 'windowLevel');
     const u_imageLoc = gl.getUniformLocation(this.program, 'u_image');
     const u_matrixLoc = gl.getUniformLocation(this.program, 'u_matrix');
 
@@ -335,11 +314,15 @@ export class DicomViewerComponent implements AfterContentInit, WindowInstance {
     const clipWidth = width / gl.canvas.width * 2;
     const clipHeight = height / gl.canvas.height * -2;
 
+    gl.uniform1f(windowWidthLocation, windowWidth);
+    gl.uniform1f(windowLevelLocation, windowLevel);
+
     // Build a matrix that will stretch our unit quad to our desired size and location
     gl.uniformMatrix3fv(u_matrixLoc, false, [clipWidth, 0, 0, 0, clipHeight, 0, clipX, clipY, 1]);
 
     // Draw the rectangle.
     gl.drawArrays(gl.TRIANGLES, 0, 6);
+    this.renderDurations.push(performance.now() - t);
   }
 
   private startRender(): void {
@@ -349,7 +332,7 @@ export class DicomViewerComponent implements AfterContentInit, WindowInstance {
       if (this.windowComponent.active) {
         const height = Math.round(rows * this.baseZoom * this.userZoom);
         const width = Math.round(columns * this.baseZoom * this.userZoom);
-        this.render(this.image, this.deltaX, this.deltaY, width, height);
+        this.render(this.image, this.deltaX, this.deltaY, width, height, this.windowWidth, this.windowLevel);
       }
       requestAnimationFrame(render);
     };
@@ -366,7 +349,22 @@ export class DicomViewerComponent implements AfterContentInit, WindowInstance {
 
     this.baseZoom = this.gl.canvas.height / rows;
 
-    this.image = new ImageData(this.applyWindowing(pixelData, windowLevel, windowWidth), columns, rows);
+    this.windowLevel = windowLevel;
+    this.windowWidth = windowWidth;
+
+    const imageDataLength = columns * rows * 4;
+    const imageData = new Uint8ClampedArray(imageDataLength);
+
+    for (let i = 0; i < imageDataLength; i++) {
+      const dataIndex = i * 4;
+      const rawValue = pixelData[i];
+      imageData[dataIndex] = 0;
+      imageData[dataIndex + 1] = (rawValue >> 8) & 0xff; // High bit
+      imageData[dataIndex + 2] = rawValue & 0xff; // Low bit
+      imageData[dataIndex + 3] = 255;
+    }
+
+    this.image = new ImageData(imageData, columns, rows);
     this.startRender();
 
     setInterval(() => {
@@ -380,7 +378,7 @@ export class DicomViewerComponent implements AfterContentInit, WindowInstance {
       }
 
       if (this.renderDurations.length > 0) {
-        this.meanRenderTime = Math.round(this.renderDurations.reduce((sum, d) => sum + d, 0) / this.renderDurations.length);
+        this.meanRenderTime = this.renderDurations.reduce((sum, d) => sum + d, 0) / this.renderDurations.length;
         this.renderDurations = [];
       } else {
         this.meanRenderTime = 0;

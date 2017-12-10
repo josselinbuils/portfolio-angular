@@ -1,18 +1,19 @@
-<app-window [windowTitle]="title" background="black" titleColor="white" [minWidth]="850" [minHeight]="500"
+<app-window [windowTitle]="title" background="black" titleColor="white" [minWidth]="800" [minHeight]="540"
             (resize)="onResize($event)">
-  <canvas #canvas (mousedown)="startTool($event)"></canvas>
-  <div class="overlay overlay-top-left">
-    <p>{{dicomProperties ? dicomProperties.patientName : ''}}</p>
-  </div>
-  <div class="overlay overlay-top-right">
-    <p>framerate: {{fps ? fps + 'fps' : '-'}}</p>
-    <p>render: {{meanRenderTime ? meanRenderTime + 'ms' : '-'}}</p>
-  </div>
-  <div class="overlay overlay-bottom-right">
-    <p>zoom: {{baseZoom * userZoom | number: '1.2-2'}}</p>
-  </div>
-  <div class="overlay overlay-bottom-left">
-    <p>WW: {{windowWidth}}</p>
-    <p>WL: {{windowLevel}}</p>
+  <div class="container">
+    <canvas #canvas (mousedown)="startTool($event)"></canvas>
+    <div class="overlay overlay-top-left">
+      <p>{{dicomProperties ? dicomProperties.patientName : ''}}</p>
+    </div>
+    <div class="overlay overlay-top-right">
+      <p>framerate: {{fps ? fps + 'fps' : '-'}}</p>
+    </div>
+    <div class="overlay overlay-bottom-right">
+      <p>zoom: {{baseZoom * userZoom | number: '1.2-2'}}</p>
+    </div>
+    <div class="overlay overlay-bottom-left">
+      <p>WW: {{windowWidth}}</p>
+      <p>WL: {{windowLevel}}</p>
+    </div>
   </div>
 </app-window>
