@@ -3,13 +3,16 @@ import { AfterContentInit, Component, ElementRef, Renderer2, ViewChild } from '@
 import { parseDicom, sharedCopy } from 'dicom-parser';
 import 'rxjs/add/operator/toPromise';
 
-import { MOUSE_BUTTON, PIXEL_REPRESENTATION } from '../../constants';
+import { Int16FragmentShader } from './shaders/fragment/int16';
+import { MOUSE_BUTTON, PHOTOMETRIC_INTERPRETATION, PIXEL_REPRESENTATION } from '../../constants';
 import { WindowInstance } from '../../platform/window/window-instance';
 import { WindowComponent } from '../../platform/window/window.component';
+import { VertexShader } from './shaders/vertex';
 
 const DELTA_LIMIT = 0.02;
 const ZOOM_LIMIT = 0.07;
 const ZOOM_SENSIBILITY = 3;
+const WINDOWING_SENSIBILITY = 5;
 
 @Component({
   selector: 'app-dicom-viewer',
@@ -87,12 +90,16 @@ export class DicomViewerComponent implements AfterContentInit, WindowInstance {
   }
 
   startTool(downEvent: MouseEvent): void {
-    if (downEvent.button === MOUSE_BUTTON.LEFT) {
-      this.startWindowing(downEvent);
-    } else if (downEvent.button === MOUSE_BUTTON.MIDDLE) {
-      this.startPan(downEvent);
-    } else if (downEvent.button === MOUSE_BUTTON.RIGHT) {
-      this.startZoom(downEvent);
+    switch (downEvent.button) {
+      case MOUSE_BUTTON.LEFT:
+        this.startWindowing(downEvent);
+        break;
+      case MOUSE_BUTTON.MIDDLE:
+        this.startPan(downEvent);
+        break;
+      case MOUSE_BUTTON.RIGHT:
+        this.startZoom(downEvent);
+        break;
     }
   }
 
@@ -124,8 +131,8 @@ export class DicomViewerComponent implements AfterContentInit, WindowInstance {
     downEvent.preventDefault();
 
     const cancelMouseMove = this.renderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
-      this.windowLevel = this.windowLevel - moveEvent.movementY * 2;
-      this.windowWidth = this.windowWidth + moveEvent.movementX * 2;
+      this.windowLevel = this.windowLevel - moveEvent.movementY * WINDOWING_SENSIBILITY;
+      this.windowWidth = this.windowWidth + moveEvent.movementX * WINDOWING_SENSIBILITY;
     });
 
     const cancelMouseUp: () => void = this.renderer.listen('window', 'mouseup', () => {
@@ -134,77 +141,7 @@ export class DicomViewerComponent implements AfterContentInit, WindowInstance {
     });
   }
 
-  private createShaders(): { fragmentShader: WebGLShader, vertexShader: WebGLShader } {
-    const gl = this.gl;
-
-    const vertexShaderSrc = `
-      attribute vec2 a_position;
-
-      uniform vec2 u_resolution;
-      uniform mat3 u_matrix;
-
-      varying vec2 v_texCoord;
-
-      void main() {
-         gl_Position = vec4(u_matrix * vec3(a_position, 1), 1);
-         v_texCoord = a_position;
-      }
-    `;
-
-    const vertexShader = gl.createShader(gl.VERTEX_SHADER);
-    gl.shaderSource(vertexShader, vertexShaderSrc);
-    gl.compileShader(vertexShader);
-
-    const fragmentShaderSrc = `
-      precision mediump float;
-
-      // our texture
-      uniform sampler2D u_image;
-
-      uniform float windowWidth;
-      uniform float windowLevel;
-
-      // the texCoords passed in from the vertex shader.
-      varying vec2 v_texCoord;
-
-      float leftLimit = windowLevel - windowWidth / 2.0;
-      float rightLimit = windowLevel + windowWidth / 2.0;
-
-      int rescaleSlope = 1;
-      float rescaleIntercept = -1024.0;
-
-      void main() {
-        vec4 texture = texture2D(u_image, v_texCoord);
-        float rawValue = texture[1] * 256.0 * 256.0 + texture[2] * 256.0 + rescaleIntercept;
-        float rgbValue = 0.0;
-
-        if (rawValue > rightLimit) {
-          rgbValue = 1.0;
-        } else if (rawValue > leftLimit) {
-          rgbValue = (rawValue - leftLimit) / windowWidth;
-        }
-
-        gl_FragColor = vec4(rgbValue, rgbValue, rgbValue, 1.0);
-      }
-    `;
-
-    const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
-    gl.shaderSource(fragmentShader, fragmentShaderSrc);
-    gl.compileShader(fragmentShader);
-
-    return {fragmentShader, vertexShader};
-  }
-
-  private async getDicomData(): Promise<Uint8Array> {
-    try {
-      return new Uint8Array(await this.http.get('/assets/dicom/CT-MONO2-16-ankle', {responseType: 'arraybuffer'}).toPromise());
-    } catch (e) {
-      console.error(e);
-      throw new Error('Unable to retrieve DICOM file');
-    }
-  }
-
-  private initRenderer() {
+  private createProgram(): WebGLProgram {
     const gl = this.gl;
     const program = gl.createProgram();
 
@@ -217,6 +154,100 @@ export class DicomViewerComponent implements AfterContentInit, WindowInstance {
     gl.linkProgram(program);
     gl.useProgram(program);
 
+    return program;
+  }
+
+  private createShaders(): { fragmentShader: WebGLShader, vertexShader: WebGLShader } {
+    const gl = this.gl;
+
+    const vertexShader = gl.createShader(gl.VERTEX_SHADER);
+    gl.shaderSource(vertexShader, VertexShader.src);
+    gl.compileShader(vertexShader);
+
+    const {imageFormat} = this.dicomProperties;
+    const fragmentShaderClass = this.getFragmentShaderClass(imageFormat);
+
+    const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+    gl.shaderSource(fragmentShader, fragmentShaderClass.src);
+    gl.compileShader(fragmentShader);
+
+    return {fragmentShader, vertexShader};
+  }
+
+  private createTexture(): WebGLTexture {
+    const gl = this.gl;
+    const texture = gl.createTexture();
+
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+
+    // Set the parameters so we can render any size image.
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
+    const textureFormat = {
+      uint8: gl.LUMINANCE,
+      int8: gl.LUMINANCE_ALPHA,
+      uint16: gl.LUMINANCE_ALPHA,
+      int16: gl.RGB,
+      rgb: gl.RGB
+    };
+
+    const {columns, imageFormat, pixelData, rows} = this.dicomProperties;
+    const format = textureFormat[imageFormat];
+    const fragmentShaderClass = this.getFragmentShaderClass(imageFormat);
+    const imageData = this.getFragmentShaderClass(imageFormat).formatImageData(pixelData, columns, rows);
+
+    // Upload the image into the texture.
+    gl.texImage2D(gl.TEXTURE_2D, 0, format, columns, rows, 0, format, gl.UNSIGNED_BYTE, imageData);
+
+    return texture;
+  }
+
+  private async getDicomData(): Promise<Uint8Array> {
+    try {
+      return new Uint8Array(await this.http.get('/assets/dicom/CT-MONO2-16-ankle', {responseType: 'arraybuffer'}).toPromise());
+    } catch (e) {
+      console.error(e);
+      throw new Error('Unable to retrieve DICOM file');
+    }
+  }
+
+  private getFragmentShaderClass(imageFormat: string): any {
+
+    const fragmentShaderClass = {
+      int16: Int16FragmentShader
+    };
+
+    if (!fragmentShaderClass[imageFormat]) {
+      throw new Error(`No fragment shader available for image format ${imageFormat}`);
+    }
+
+    return fragmentShaderClass[imageFormat];
+  }
+
+  private getImageFormat(bitsAllocated: number, photometricInterpretation: string, pixelRepresentation: number): string {
+    let format = '';
+
+    if (photometricInterpretation === PHOTOMETRIC_INTERPRETATION.RGB) {
+      format = 'rgb';
+    } else if (photometricInterpretation.indexOf('MONOCHROME') === 0) {
+      if (pixelRepresentation === PIXEL_REPRESENTATION.UNSIGNED) {
+        format += 'u';
+      }
+      format += 'int' + (bitsAllocated <= 8 ? '8' : '16');
+    } else {
+      throw new Error('Unsupported photometric interpretation');
+    }
+
+    return format;
+  }
+
+  private initRenderer() {
+    const gl = this.gl;
+    const program = this.createProgram();
+
     // Look up where the vertex data needs to go.
     const positionLocation = gl.getAttribLocation(program, 'a_position');
 
@@ -228,15 +259,6 @@ export class DicomViewerComponent implements AfterContentInit, WindowInstance {
     ]), gl.STATIC_DRAW);
     gl.enableVertexAttribArray(positionLocation);
     gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
-
-    const texture = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-
-    // Set the parameters so we can render any size image.
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
   }
 
   private parseDicom(rawDicomData: Uint8Array): any {
@@ -256,19 +278,21 @@ export class DicomViewerComponent implements AfterContentInit, WindowInstance {
       const pixelDataElement = dataset.elements.x7fe00010;
       let pixelData = sharedCopy(rawDicomData, pixelDataElement.dataOffset, pixelDataElement.length);
 
-      if (bitsAllocated <= 8) {
-        pixelData = pixelRepresentation === PIXEL_REPRESENTATION.UNSIGNED
-          ? new Uint8Array(pixelData.buffer)
-          : new Int8Array(pixelData.buffer);
-      } else if (bitsAllocated <= 16) {
-        pixelData = pixelRepresentation === PIXEL_REPRESENTATION.UNSIGNED
-          ? new Uint16Array(pixelData.buffer)
-          : new Int16Array(pixelData.buffer);
-      }
+      const imageFormat = this.getImageFormat(bitsAllocated, photometricInterpretation, pixelRepresentation);
+
+      const arrayType = {
+        int8: Int8Array,
+        int16: Int16Array,
+        uint8: Uint8Array,
+        uint16: Uint16Array
+      };
+
+      pixelData = new arrayType[imageFormat](pixelData.buffer);
 
       return {
         bitsAllocated,
         columns,
+        imageFormat,
         patientName,
         photometricInterpretation,
         pixelData,
@@ -286,27 +310,30 @@ export class DicomViewerComponent implements AfterContentInit, WindowInstance {
     }
   }
 
-  private render(image: any, deltaX: number, deltaY: number, width: number, height: number, windowWidth: number,
-                 windowLevel: number) {
+  private render(texture: WebGLTexture, deltaX: number, deltaY: number, width: number, height: number,
+                 windowWidth: number, windowLevel: number) {
 
     const gl = this.gl;
-
-    if (!gl) {
-      return;
-    }
-
     const t = performance.now();
+
     this.frameDurations.push(t - this.lastTime);
     this.lastTime = t;
 
+    const {rescaleIntercept, rescaleSlope} = this.dicomProperties;
+
     // Look up uniform locations
-    const windowWidthLocation = gl.getUniformLocation(this.program, 'windowWidth');
+    const rescaleInterceptLocation = gl.getUniformLocation(this.program, 'rescaleIntercept');
+    const rescaleSlopeLocation = gl.getUniformLocation(this.program, 'rescaleSlope');
     const windowLevelLocation = gl.getUniformLocation(this.program, 'windowLevel');
+    const windowWidthLocation = gl.getUniformLocation(this.program, 'windowWidth');
+
+    gl.uniform1f(rescaleInterceptLocation, rescaleIntercept);
+    gl.uniform1f(rescaleSlopeLocation, rescaleSlope);
+    gl.uniform1f(windowWidthLocation, windowWidth);
+    gl.uniform1f(windowLevelLocation, windowLevel);
+
     const u_imageLoc = gl.getUniformLocation(this.program, 'u_image');
     const u_matrixLoc = gl.getUniformLocation(this.program, 'u_matrix');
-
-    // Upload the image into the texture.
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
 
     // Convert dst pixel coordinates to clip space coordinates
     const clipX = (0.5 - width / gl.canvas.width / 2 + deltaX) * 2 - 1;
@@ -314,25 +341,21 @@ export class DicomViewerComponent implements AfterContentInit, WindowInstance {
     const clipWidth = width / gl.canvas.width * 2;
     const clipHeight = height / gl.canvas.height * -2;
 
-    gl.uniform1f(windowWidthLocation, windowWidth);
-    gl.uniform1f(windowLevelLocation, windowLevel);
-
     // Build a matrix that will stretch our unit quad to our desired size and location
     gl.uniformMatrix3fv(u_matrixLoc, false, [clipWidth, 0, 0, 0, clipHeight, 0, clipX, clipY, 1]);
 
     // Draw the rectangle.
     gl.drawArrays(gl.TRIANGLES, 0, 6);
-    this.renderDurations.push(performance.now() - t);
   }
 
-  private startRender(): void {
+  private startRender(texture: WebGLTexture): void {
     const {columns, rows} = this.dicomProperties;
 
     const render = () => {
       if (this.windowComponent.active) {
         const height = Math.round(rows * this.baseZoom * this.userZoom);
         const width = Math.round(columns * this.baseZoom * this.userZoom);
-        this.render(this.image, this.deltaX, this.deltaY, width, height, this.windowWidth, this.windowLevel);
+        this.render(texture, this.deltaX, this.deltaY, width, height, this.windowWidth, this.windowLevel);
       }
       requestAnimationFrame(render);
     };
@@ -352,23 +375,10 @@ export class DicomViewerComponent implements AfterContentInit, WindowInstance {
     this.windowLevel = windowLevel;
     this.windowWidth = windowWidth;
 
-    const imageDataLength = columns * rows * 4;
-    const imageData = new Uint8ClampedArray(imageDataLength);
-
-    for (let i = 0; i < imageDataLength; i++) {
-      const dataIndex = i * 4;
-      const rawValue = pixelData[i];
-      imageData[dataIndex] = 0;
-      imageData[dataIndex + 1] = (rawValue >> 8) & 0xff; // High bit
-      imageData[dataIndex + 2] = rawValue & 0xff; // Low bit
-      imageData[dataIndex + 3] = 255;
-    }
-
-    this.image = new ImageData(imageData, columns, rows);
-    this.startRender();
+    const texture = this.createTexture();
+    this.startRender(texture);
 
     setInterval(() => {
-
       if (this.frameDurations.length > 0) {
         const meanFrameDuration = this.frameDurations.reduce((sum, d) => sum + d, 0) / this.frameDurations.length;
         this.fps = Math.round(1000 / meanFrameDuration);
@@ -376,14 +386,6 @@ export class DicomViewerComponent implements AfterContentInit, WindowInstance {
       } else {
         this.fps = 0;
       }
-
-      if (this.renderDurations.length > 0) {
-        this.meanRenderTime = this.renderDurations.reduce((sum, d) => sum + d, 0) / this.renderDurations.length;
-        this.renderDurations = [];
-      } else {
-        this.meanRenderTime = 0;
-      }
-
     }, 500);
   }
 }
