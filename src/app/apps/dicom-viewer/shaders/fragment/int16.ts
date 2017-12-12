@@ -29,6 +29,9 @@ export class Int16FragmentShader {
       // Apply windowing
       intensity = (intensity - windowLevel - 0.5) / windowWidth + 0.5;
 
+      // Clamp intensity
+      intensity = clamp(intensity, 0.0, 1.0);
+
       gl_FragColor = vec4(intensity, intensity, intensity, 1.0);
     }
   `;
