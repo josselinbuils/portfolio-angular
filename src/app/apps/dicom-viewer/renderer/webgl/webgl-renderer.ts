@@ -130,9 +130,9 @@ export class WebGLRenderer implements Renderer {
 
     const textureFormat = {
       uint8: gl.LUMINANCE,
-      int8: gl.LUMINANCE_ALPHA,
+      int8: gl.LUMINANCE,
       uint16: gl.LUMINANCE_ALPHA,
-      int16: gl.RGB,
+      int16: gl.LUMINANCE_ALPHA,
       rgb: gl.RGB
     };
 

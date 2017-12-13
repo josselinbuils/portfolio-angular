@@ -18,10 +18,7 @@ export class Int16FragmentShader {
       vec4 texture = texture2D(u_image, v_texCoord);
 
       // Compute pixel raw value
-      float intensity = (float(texture[0]) * 256.0 + float(texture[1])) * 256.0;
-
-      // Apply sign
-      intensity *= (float(texture[2]) * 256.0 - 1.0);
+      float intensity = (float(texture[0]) * 256.0 + float(texture[1])) * 256.0 - 32767.0;
 
       // Apply rescale slope and intercept
       intensity = intensity * rescaleSlope + rescaleIntercept;
@@ -37,24 +34,16 @@ export class Int16FragmentShader {
   `;
 
   static formatImageData(pixelData: Uint16Array, width: number, height: number): Uint8Array {
-    const nbChannels = 3;
+    const nbChannels = 2;
     const imageDataLength = width * height * nbChannels;
     const imageData = new Uint8Array(imageDataLength);
 
     let dataIndex = 0;
 
     for (let i = 0; i < imageDataLength; i++) {
-      let rawValue = pixelData[i];
-      let sign = 2;
-
-      if (rawValue < 0) {
-        rawValue *= -1;
-        sign = 0;
-      }
-
+      const rawValue = pixelData[i] + 32767;
       imageData[dataIndex++] = rawValue >> 8; // High bit
       imageData[dataIndex++] = rawValue & 0xff; // Low bit
-      imageData[dataIndex++] = sign; // Sign
     }
 
     return imageData;
