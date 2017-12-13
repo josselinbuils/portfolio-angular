@@ -14,7 +14,7 @@ import { CanvasRenderer } from './renderer/canvas/canvas-renderer';
 import { Renderer } from './renderer/renderer';
 import { WebGLRenderer } from './renderer/webgl/webgl-renderer';
 
-const DATASET: string = 'CT-MONO2-16-brain';
+const DATASET: string = 'CT-MONO2-16-ankle';
 const DELTA_LIMIT: number = 0.02;
 const MIN_WINDOW_WIDTH: number = 1;
 const ZOOM_LIMIT: number = 0.07;
