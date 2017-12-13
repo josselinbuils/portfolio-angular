@@ -44,10 +44,17 @@ export class Int16FragmentShader {
     let dataIndex = 0;
 
     for (let i = 0; i < imageDataLength; i++) {
-      const rawValue = Math.abs(pixelData[i]);
+      let rawValue = pixelData[i];
+      let sign = 2;
+
+      if (rawValue < 0) {
+        rawValue *= -1;
+        sign = 0;
+      }
+
       imageData[dataIndex++] = rawValue >> 8; // High bit
       imageData[dataIndex++] = rawValue & 0xff; // Low bit
-      imageData[dataIndex++] = pixelData[i] > 0 ? 2 : 0; // Sign
+      imageData[dataIndex++] = sign; // Sign
     }
 
     return imageData;

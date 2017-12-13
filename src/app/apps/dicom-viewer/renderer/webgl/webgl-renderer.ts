@@ -139,7 +139,7 @@ export class WebGLRenderer implements Renderer {
     const {height, imageFormat, pixelData, width} = image;
     const format = textureFormat[imageFormat];
     const fragmentShaderClass = this.getFragmentShaderClass(imageFormat);
-    const imageData = this.getFragmentShaderClass(imageFormat).formatImageData(pixelData, width, height);
+    const imageData = fragmentShaderClass.formatImageData(pixelData, width, height);
 
     // Upload the image into the texture.
     gl.texImage2D(gl.TEXTURE_2D, 0, format, width, height, 0, format, gl.UNSIGNED_BYTE, imageData);

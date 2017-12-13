@@ -35,6 +35,7 @@ export class DicomViewerComponent implements AfterContentInit, WindowInstance {
   fps = 0;
   image: Image;
   meanRenderDuration: number;
+  rendererType: string;
   title = DicomViewerComponent.appName;
   viewport: Viewport;
 
@@ -221,7 +222,7 @@ export class DicomViewerComponent implements AfterContentInit, WindowInstance {
     const {width, height} = this.dicomProperties;
 
     const render = () => {
-      // if (this.windowComponent.active) {
+      if (this.windowComponent.active) {
 
         const t = performance.now();
         this.frameDurations.push(t - this.lastTime);
@@ -230,7 +231,7 @@ export class DicomViewerComponent implements AfterContentInit, WindowInstance {
         this.renderer.render(this.viewport);
 
         this.renderDurations.push(performance.now() - t);
-      // }
+      }
       requestAnimationFrame(render);
     };
 
@@ -250,8 +251,15 @@ export class DicomViewerComponent implements AfterContentInit, WindowInstance {
 
     this.image = image;
     this.viewport = new Viewport({image, windowLevel, windowWidth});
-    this.renderer = !(<any> window).canvasRenderer ? new CanvasRenderer(canvas) : new WebGLRenderer(canvas);
-    (<any> window).canvasRenderer = true;
+
+    if (!(<any> window).canvasRenderer) {
+      this.renderer = new CanvasRenderer(canvas);
+      this.rendererType = 'canvas';
+      (<any> window).canvasRenderer = true;
+    } else {
+      this.renderer = new WebGLRenderer(canvas);
+      this.rendererType = 'webgl';
+    }
 
     this.onResize({
       width: canvas.clientWidth,

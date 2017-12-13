@@ -6,11 +6,12 @@
       <p>{{dicomProperties ? dicomProperties.patientName : ''}}</p>
     </div>
     <div class="overlay overlay-top-right">
+      <p>renderer: {{rendererType}}</p>
       <p>framerate: {{fps ? fps + 'fps' : '-'}}</p>
-      <p>render: {{meanRenderDuration | number: '1.2-2'}}ms</p>
+      <p>render time: {{meanRenderDuration | number: '1.2-2'}}ms</p>
     </div>
     <div class="overlay overlay-bottom-right">
-      <p>zoom: {{(viewport || {}).height / (image || {}).height  * (viewport || {}).zoom | number: '1.2-2'}}</p>
+      <p>zoom: {{(viewport || {}).height / (image || {}).height * (viewport || {}).zoom | number: '1.2-2'}}</p>
     </div>
     <div class="overlay overlay-bottom-left">
       <p>WW: {{(viewport || {}).windowWidth}}</p>
