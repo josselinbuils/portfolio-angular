@@ -2,17 +2,17 @@ export class Image {
 
   height: number;
   imageFormat: string;
-  pixelData: number[];
+  pixelData: Int8Array | Uint8Array | Int16Array | Uint16Array;
   rescaleIntercept: number;
   rescaleSlope: number;
   width: number;
 
-  constructor(config) {
-    this.height = config.height || null;
-    this.imageFormat = config.imageFormat || null;
-    this.pixelData = config.pixelData || null;
-    this.rescaleIntercept = config.rescaleIntercept || null;
-    this.rescaleSlope = config.rescaleSlope || null;
-    this.width = config.width || null;
+  constructor(config: any) {
+    this.height = config.height;
+    this.imageFormat = config.imageFormat;
+    this.pixelData = config.pixelData;
+    this.rescaleIntercept = config.rescaleIntercept;
+    this.rescaleSlope = config.rescaleSlope;
+    this.width = config.width;
   }
 }

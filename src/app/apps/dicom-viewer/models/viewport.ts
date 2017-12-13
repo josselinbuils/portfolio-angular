@@ -11,14 +11,14 @@ export class Viewport {
   windowWidth: number;
   zoom: number;
 
-  constructor(config) {
+  constructor(config: any) {
     this.deltaX = config.deltaX || 0;
     this.deltaY = config.deltaY || 0;
-    this.height = config.height || null;
-    this.image = config.image || null;
-    this.width = config.width || null;
-    this.windowLevel = config.windowLevel || null;
-    this.windowWidth = config.windowWidth || null;
+    this.height = config.height;
+    this.image = config.image;
+    this.width = config.width;
+    this.windowLevel = config.windowLevel;
+    this.windowWidth = config.windowWidth;
     this.zoom = config.zoom || 1;
   }
 }
