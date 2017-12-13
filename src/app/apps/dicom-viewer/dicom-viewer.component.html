@@ -7,13 +7,14 @@
     </div>
     <div class="overlay overlay-top-right">
       <p>framerate: {{fps ? fps + 'fps' : '-'}}</p>
+      <p>render: {{meanRenderDuration | number: '1.2-2'}}ms</p>
     </div>
     <div class="overlay overlay-bottom-right">
-      <p>zoom: {{baseZoom * userZoom | number: '1.2-2'}}</p>
+      <p>zoom: {{(viewport || {}).height / (image || {}).height  * (viewport || {}).zoom | number: '1.2-2'}}</p>
     </div>
     <div class="overlay overlay-bottom-left">
-      <p>WW: {{windowWidth}}</p>
-      <p>WL: {{windowLevel}}</p>
+      <p>WW: {{(viewport || {}).windowWidth}}</p>
+      <p>WL: {{(viewport || {}).windowLevel}}</p>
     </div>
   </div>
 </app-window>
