@@ -77,7 +77,6 @@
       }
     ],
     "new-parens": true,
-    "newline-before-return": true,
     "no-arg": true,
     "no-boolean-literal-compare": true,
     "no-conditional-assignment": true,
