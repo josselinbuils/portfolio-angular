@@ -78,7 +78,7 @@ export class DicomViewerComponent implements AfterContentInit, WindowInstance {
         uint8: Uint8Array,
         uint16: Uint16Array,
       };
-      imageData = new arrayType[imageFormat](pixelData.buffer);
+      imageData = new arrayType[imageFormat](pixelData.buffer, pixelData.byteOffset);
     }
 
     const image: Image = new Image({
@@ -88,9 +88,10 @@ export class DicomViewerComponent implements AfterContentInit, WindowInstance {
     this.image = image;
     this.viewport = new Viewport({image, windowLevel, windowWidth});
 
+    const windowNativeElement: HTMLElement = this.windowComponent.windowElementRef.nativeElement;
     this.onResize({
-      width: canvas.clientWidth,
-      height: canvas.clientHeight,
+      width: windowNativeElement.clientWidth,
+      height: windowNativeElement.clientHeight,
     });
 
     this.startRender();
@@ -119,6 +120,8 @@ export class DicomViewerComponent implements AfterContentInit, WindowInstance {
   onResize(size: { width: number; height: number }): void {
     const viewRenderer: Renderer2 = this.viewRenderer;
     const viewport: Viewport = this.viewport;
+
+    console.log(size);
 
     size.height -= 42;
 
