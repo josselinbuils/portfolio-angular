@@ -11,7 +11,6 @@ export class CanvasRenderer implements Renderer {
   }
 
   destroy(): void {
-    // Non implemented
   }
 
   render(viewport: Viewport): void {

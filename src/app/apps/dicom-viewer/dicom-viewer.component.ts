@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { AfterContentInit, Component, ElementRef, OnDestroy, Renderer2, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, Renderer2, ViewChild } from '@angular/core';
 import { parseDicom, sharedCopy } from 'dicom-parser';
 import 'rxjs/add/operator/toPromise';
 
@@ -14,7 +14,10 @@ import { CanvasRenderer } from './renderer/canvas/canvas-renderer';
 import { Renderer } from './renderer/renderer';
 import { WebGLRenderer } from './renderer/webgl/webgl-renderer';
 
-const DATASET: string = 'TG18-CH-2k-01';
+const DATASETS: string[] = [
+  'CT-MONO2-8-abdo', 'CT-MONO2-16-ankle', 'CT-MONO2-16-brain', 'CT-MONO2-16-ort', 'TG18-CH-2k-01', 'TG18-MM-2k-01',
+  'US-RGB-8-epicard',
+];
 const DELTA_LIMIT: number = 0.02;
 const MIN_WINDOW_WIDTH: number = 1;
 const ZOOM_LIMIT: number = 0.07;
@@ -26,19 +29,23 @@ const WINDOWING_SENSIBILITY: number = 5;
   templateUrl: './dicom-viewer.component.html',
   styleUrls: ['./dicom-viewer.component.scss'],
 })
-export class DicomViewerComponent implements AfterContentInit, OnDestroy, WindowInstance {
+export class DicomViewerComponent implements OnDestroy, WindowInstance {
   static appName = 'DICOM Viewer';
   static iconClass = 'fa-heartbeat';
 
-  @ViewChild('canvas') canvasElementRef: ElementRef;
+  @ViewChild('viewportElement') viewportElementRef: ElementRef;
   @ViewChild(WindowComponent) windowComponent: WindowComponent;
 
-  canvas: HTMLElement;
+  canvas: HTMLCanvasElement;
+  dataset: string = DATASETS[0];
+  datasets = DATASETS;
   dicomProperties: any = {};
   fps = 0;
   image: Image;
+  loading: boolean = false;
   meanRenderDuration: number;
-  rendererType: string;
+  rendererType: string = 'canvas';
+  showConfig: boolean = true;
   title = DicomViewerComponent.appName;
   viewport: Viewport;
 
@@ -48,12 +55,62 @@ export class DicomViewerComponent implements AfterContentInit, OnDestroy, Window
   private renderer: Renderer;
 
   constructor(private http: HttpClient, private viewRenderer: Renderer2) {
+    setInterval(() => {
+      if (this.frameDurations.length > 0) {
+        const meanFrameDuration: number = this.frameDurations
+          .reduce((sum: number, d: number) => sum + d, 0) / this.frameDurations.length;
+        this.fps = Math.round(1000 / meanFrameDuration);
+        this.frameDurations = [];
+      } else {
+        this.fps = 0;
+      }
+
+      if (this.renderDurations.length > 0) {
+        this.meanRenderDuration = this.renderDurations
+          .reduce((sum: number, d: number) => sum + d, 0) / this.renderDurations.length;
+        this.renderDurations = [];
+      } else {
+        this.meanRenderDuration = 0;
+      }
+    }, 500);
   }
 
-  async ngAfterContentInit(): Promise<any> {
-    const canvas: HTMLCanvasElement = this.canvasElementRef.nativeElement;
+  back(): void {
+    if (this.renderer) {
+      this.renderer.destroy();
+      delete this.renderer;
+    }
+    this.viewRenderer.removeChild(this.viewportElementRef.nativeElement, this.canvas);
+    this.showConfig = true;
+  }
 
-    this.dicomProperties = getDicomProperties(await this.getDicomData());
+  ngOnDestroy(): void {
+    this.renderer.destroy();
+  }
+
+  onResize(size: { width: number; height: number }): void {
+    const viewRenderer: Renderer2 = this.viewRenderer;
+    const viewport: Viewport = this.viewport;
+
+    size.height -= 42;
+
+    if (viewRenderer && viewport) {
+      viewRenderer.setAttribute(this.canvas, 'width', size.width.toString());
+      viewRenderer.setAttribute(this.canvas, 'height', size.height.toString());
+
+      viewport.width = size.width;
+      viewport.height = size.height;
+
+      if (this.renderer) {
+        this.renderer.resize(viewport);
+      }
+    }
+  }
+
+  async start(): Promise<void> {
+    this.showConfig = false;
+    this.loading = true;
+    this.dicomProperties = getDicomProperties(await this.getDicomData(this.dataset));
 
     const {
       height, imageFormat, pixelData, pixelRepresentation, rescaleIntercept, rescaleSlope, width, windowLevel,
@@ -62,14 +119,15 @@ export class DicomViewerComponent implements AfterContentInit, OnDestroy, Window
 
     console.log(this.dicomProperties);
 
-    if (!(<any> window).canvasRenderer) {
-      this.renderer = new CanvasRenderer(canvas);
-      this.rendererType = 'canvas';
-      (<any> window).canvasRenderer = true;
-    } else {
-      this.renderer = new WebGLRenderer(canvas);
-      this.rendererType = 'webgl';
-    }
+    const renderer: any = {
+      canvas: CanvasRenderer,
+      webgl: WebGLRenderer,
+    };
+
+    this.canvas = this.viewRenderer.createElement('canvas');
+    this.viewRenderer.appendChild(this.viewportElementRef.nativeElement, this.canvas);
+    this.viewRenderer.listen(this.canvas, 'mousedown', this.startTool.bind(this));
+    this.renderer = new renderer[this.rendererType](this.canvas);
 
     let imageData: Uint8Array = pixelData;
 
@@ -91,61 +149,20 @@ export class DicomViewerComponent implements AfterContentInit, OnDestroy, Window
     this.viewport = new Viewport({image, windowLevel, windowWidth});
 
     const windowNativeElement: HTMLElement = this.windowComponent.windowElementRef.nativeElement;
+
     this.onResize({
       width: windowNativeElement.clientWidth,
       height: windowNativeElement.clientHeight,
     });
 
+    this.loading = false;
     this.startRender();
-
-    setInterval(() => {
-
-      if (this.frameDurations.length > 0) {
-        const meanFrameDuration: number = this.frameDurations
-          .reduce((sum: number, d: number) => sum + d, 0) / this.frameDurations.length;
-        this.fps = Math.round(1000 / meanFrameDuration);
-        this.frameDurations = [];
-      } else {
-        this.fps = 0;
-      }
-
-      if (this.renderDurations.length > 0) {
-        this.meanRenderDuration = this.renderDurations
-          .reduce((sum: number, d: number) => sum + d, 0) / this.renderDurations.length;
-        this.renderDurations = [];
-      } else {
-        this.meanRenderDuration = 0;
-      }
-    }, 500);
-  }
-
-  ngOnDestroy(): void {
-    this.renderer.destroy();
-  }
-
-  onResize(size: { width: number; height: number }): void {
-    const viewRenderer: Renderer2 = this.viewRenderer;
-    const viewport: Viewport = this.viewport;
-
-    size.height -= 42;
-
-    if (viewRenderer && viewport) {
-      viewRenderer.setAttribute(this.canvasElementRef.nativeElement, 'width', size.width.toString());
-      viewRenderer.setAttribute(this.canvasElementRef.nativeElement, 'height', size.height.toString());
-
-      viewport.width = size.width;
-      viewport.height = size.height;
-
-      if (this.renderer) {
-        this.renderer.resize(viewport);
-      }
-    }
   }
 
   startPan(downEvent: MouseEvent): void {
     downEvent.preventDefault();
 
-    const canvas: HTMLCanvasElement = this.canvasElementRef.nativeElement;
+    const canvas: HTMLCanvasElement = this.canvas;
     const viewport: Viewport = this.viewport;
     const startX: number = downEvent.clientX - viewport.deltaX * canvas.clientWidth;
     const startY: number = downEvent.clientY - viewport.deltaY * canvas.clientHeight;
@@ -183,14 +200,14 @@ export class DicomViewerComponent implements AfterContentInit, OnDestroy, Window
   startZoom(downEvent: MouseEvent): void {
     downEvent.preventDefault();
 
-    const canvas: HTMLCanvasElement = this.canvasElementRef.nativeElement;
     const viewport: Viewport = this.viewport;
     const startY: number = downEvent.clientY;
     const startZoom: number = viewport.zoom;
 
     const cancelMouseMove: () => void = this.viewRenderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
 
-      viewport.zoom = Math.max(startZoom - (moveEvent.clientY - startY) * ZOOM_SENSIBILITY / canvas.clientHeight, 0.5);
+      viewport.zoom = startZoom - (moveEvent.clientY - startY) * ZOOM_SENSIBILITY / this.canvas.clientHeight;
+      viewport.zoom = Math.max(viewport.zoom, 0.5);
 
       if (Math.abs(viewport.zoom - 1) < ZOOM_LIMIT) {
         viewport.zoom = 1;
@@ -220,10 +237,10 @@ export class DicomViewerComponent implements AfterContentInit, OnDestroy, Window
     });
   }
 
-  private async getDicomData(): Promise<Uint8Array> {
+  private async getDicomData(dataset: string): Promise<Uint8Array> {
     try {
       const dicomData: ArrayBuffer = await this.http
-        .get(`/assets/dicom/${DATASET}`, {responseType: 'arraybuffer'})
+        .get(`/assets/dicom/${dataset}`, {responseType: 'arraybuffer'})
         .toPromise();
 
       return new Uint8Array(dicomData);
@@ -238,6 +255,11 @@ export class DicomViewerComponent implements AfterContentInit, OnDestroy, Window
     const {width, height} = this.dicomProperties;
 
     const render: () => void = (): void => {
+
+      if (!this.renderer) {
+        return;
+      }
+
       if (this.windowComponent.active) {
 
         const t: number = performance.now();
