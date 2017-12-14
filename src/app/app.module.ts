@@ -4,18 +4,18 @@ import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AppComponent } from './app.component';
-import { ContextMenuComponent } from './platform/context-menu/context-menu.component';
-import { ContextMenuService } from './platform/context-menu/context-menu.service';
 import { DicomViewerComponent } from './apps/dicom-viewer/dicom-viewer.component';
 import { Mp3PlayerComponent } from './apps/mp3-player/mp3-player.component';
 import { NotesComponent } from './apps/notes/notes.component';
 import { RedditComponent } from './apps/reddit/reddit.component';
-import { TaskBarComponent } from './platform/task-bar/task-bar.component';
 import { TeraviaComponent } from './apps/teravia/teravia.component';
 import { TerminalComponent } from './apps/terminal/terminal.component';
 import { TerminalModule } from './apps/terminal/terminal.module';
-import { WindowComponent } from './platform/window/window.component';
+import { ContextMenuComponent } from './platform/context-menu/context-menu.component';
+import { ContextMenuService } from './platform/context-menu/context-menu.service';
+import { TaskBarComponent } from './platform/task-bar/task-bar.component';
 import { WindowManagerService } from './platform/window/window-manager.service';
+import { WindowComponent } from './platform/window/window.component';
 
 @NgModule({
   declarations: [
@@ -29,7 +29,7 @@ import { WindowManagerService } from './platform/window/window-manager.service';
     TeraviaComponent,
     TerminalComponent,
     WindowComponent,
-    DicomViewerComponent
+    DicomViewerComponent,
   ],
   entryComponents: [
     DicomViewerComponent,
@@ -37,16 +37,16 @@ import { WindowManagerService } from './platform/window/window-manager.service';
     NotesComponent,
     RedditComponent,
     TeraviaComponent,
-    TerminalComponent
+    TerminalComponent,
   ],
   imports: [
     BrowserModule,
     FormsModule,
     HttpClientModule,
-    TerminalModule
+    TerminalModule,
   ],
   providers: [ContextMenuService, WindowManagerService],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
 export class AppModule {
 }
