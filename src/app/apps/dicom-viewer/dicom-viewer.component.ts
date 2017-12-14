@@ -85,7 +85,9 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   }
 
   ngOnDestroy(): void {
-    this.renderer.destroy();
+    if (this.renderer) {
+      this.renderer.destroy();
+    }
   }
 
   onResize(size: { width: number; height: number }): void {
@@ -116,8 +118,6 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       height, imageFormat, pixelData, pixelRepresentation, rescaleIntercept, rescaleSlope, width, windowLevel,
       windowWidth,
     } = this.dicomProperties;
-
-    console.log(this.dicomProperties);
 
     const renderer: any = {
       canvas: CanvasRenderer,
@@ -200,12 +200,12 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   startZoom(downEvent: MouseEvent): void {
     downEvent.preventDefault();
 
+    const isMacOS: boolean = navigator.platform.indexOf('Mac') !== -1;
     const viewport: Viewport = this.viewport;
     const startY: number = downEvent.clientY;
     const startZoom: number = viewport.zoom;
 
     const cancelMouseMove: () => void = this.viewRenderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
-
       viewport.zoom = startZoom - (moveEvent.clientY - startY) * ZOOM_SENSIBILITY / this.canvas.clientHeight;
       viewport.zoom = Math.max(viewport.zoom, 0.5);
 
@@ -215,11 +215,20 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     });
 
     const cancelContextMenu: () => void = this.viewRenderer.listen('window', 'contextmenu', () => {
-      cancelMouseMove();
+      if (!isMacOS) {
+        cancelMouseMove();
+      }
       cancelContextMenu();
 
       return false;
     });
+
+    if (isMacOS) {
+      const cancelMouseUp: () => void = this.viewRenderer.listen('window', 'mouseup', () => {
+        cancelMouseMove();
+        cancelMouseUp();
+      });
+    }
   }
 
   startWindowing(downEvent: MouseEvent): void {
