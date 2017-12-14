@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { AfterContentInit, Component, ElementRef, Renderer2, ViewChild } from '@angular/core';
+import { AfterContentInit, Component, ElementRef, OnDestroy, Renderer2, ViewChild } from '@angular/core';
 import { parseDicom, sharedCopy } from 'dicom-parser';
 import 'rxjs/add/operator/toPromise';
 
@@ -14,7 +14,7 @@ import { CanvasRenderer } from './renderer/canvas/canvas-renderer';
 import { Renderer } from './renderer/renderer';
 import { WebGLRenderer } from './renderer/webgl/webgl-renderer';
 
-const DATASET: string = 'CT-MONO2-16-ankle';
+const DATASET: string = 'TG18-CH-2k-01';
 const DELTA_LIMIT: number = 0.02;
 const MIN_WINDOW_WIDTH: number = 1;
 const ZOOM_LIMIT: number = 0.07;
@@ -26,7 +26,7 @@ const WINDOWING_SENSIBILITY: number = 5;
   templateUrl: './dicom-viewer.component.html',
   styleUrls: ['./dicom-viewer.component.scss'],
 })
-export class DicomViewerComponent implements AfterContentInit, WindowInstance {
+export class DicomViewerComponent implements AfterContentInit, OnDestroy, WindowInstance {
   static appName = 'DICOM Viewer';
   static iconClass = 'fa-heartbeat';
 
@@ -59,6 +59,8 @@ export class DicomViewerComponent implements AfterContentInit, WindowInstance {
       height, imageFormat, pixelData, pixelRepresentation, rescaleIntercept, rescaleSlope, width, windowLevel,
       windowWidth,
     } = this.dicomProperties;
+
+    console.log(this.dicomProperties);
 
     if (!(<any> window).canvasRenderer) {
       this.renderer = new CanvasRenderer(canvas);
@@ -117,11 +119,13 @@ export class DicomViewerComponent implements AfterContentInit, WindowInstance {
     }, 500);
   }
 
+  ngOnDestroy(): void {
+    this.renderer.destroy();
+  }
+
   onResize(size: { width: number; height: number }): void {
     const viewRenderer: Renderer2 = this.viewRenderer;
     const viewport: Viewport = this.viewport;
-
-    console.log(size);
 
     size.height -= 42;
 
@@ -259,8 +263,8 @@ function getDicomProperties(rawDicomData: Uint8Array): any {
     const patientName: string = dataset.string('x00100010');
     const photometricInterpretation: string = dataset.string('x00280004');
     const pixelRepresentation: number = dataset.uint16('x00280103');
-    const rescaleIntercept: number = dataset.intString('x00281052');
-    const rescaleSlope: number = dataset.floatString('x00281053');
+    const rescaleIntercept: number = dataset.intString('x00281052') || 0;
+    const rescaleSlope: number = dataset.floatString('x00281053') || 1;
     const width: number = dataset.uint16('x00280011');
     const windowLevel: number = dataset.intString('x00281050') || 30;
     const windowWidth: number = dataset.intString('x00281051') || 400;

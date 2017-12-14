@@ -10,6 +10,10 @@ export class CanvasRenderer implements Renderer {
     this.context = canvas.getContext('2d');
   }
 
+  destroy(): void {
+    // Non implemented
+  }
+
   render(viewport: Viewport): void {
     this.context.fillStyle = 'black';
     this.context.fillRect(0, 0, viewport.width, viewport.height);

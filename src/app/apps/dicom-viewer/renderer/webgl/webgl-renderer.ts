@@ -22,6 +22,12 @@ export class WebGLRenderer implements Renderer {
     this.gl = gl;
   }
 
+  destroy(): void {
+    const gl: WebGLRenderingContext = this.gl;
+    gl.deleteTexture(this.texture);
+    gl.deleteProgram(this.program);
+  }
+
   render(viewport: Viewport): void {
     const gl: WebGLRenderingContext = this.gl;
     const t: number = performance.now();
