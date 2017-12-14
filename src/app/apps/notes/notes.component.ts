@@ -1,21 +1,21 @@
 import { Component, ViewChild } from '@angular/core';
 
-import { WindowComponent } from '../../platform/window/window.component';
 import { WindowInstance } from '../../platform/window/window-instance';
+import { WindowComponent } from '../../platform/window/window.component';
 
-const smileys = {
+const smileys: any = {
   ':D': '\uD83D\uDE00',
   ':)': '\uD83D\uDE03',
   ';)': '\uD83D\uDE09',
   ':(': '\uD83D\uDE12',
   ':p': '\uD83D\uDE1B',
-  ';p': '\uD83D\uDE1C'
+  ';p': '\uD83D\uDE1C',
 };
 
 @Component({
   selector: 'app-notes',
   templateUrl: './notes.component.html',
-  styleUrls: ['./notes.component.scss']
+  styleUrls: ['./notes.component.scss'],
 })
 export class NotesComponent implements WindowInstance {
   static appName = 'Notes';
@@ -32,8 +32,8 @@ export class NotesComponent implements WindowInstance {
 
   saveNotes(): void {
 
-    this.notes = Object.keys(smileys).reduce((notes, smiley) => {
-      const escapedSmiley = smiley.replace(/([()[{*+.$^\\|?])/g, '\\$1');
+    this.notes = Object.keys(smileys).reduce((notes: string, smiley: string) => {
+      const escapedSmiley: string = smiley.replace(/([()[{*+.$^\\|?])/g, '\\$1');
       return notes.replace(new RegExp(escapedSmiley, 'gim'), smileys[smiley]);
     }, this.notes);
 
