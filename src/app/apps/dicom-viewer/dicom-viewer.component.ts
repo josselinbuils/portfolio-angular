@@ -17,7 +17,6 @@ import { WebGLRenderer } from './renderer/webgl/webgl-renderer';
 
 const DATASETS: string[] = [
   'CT-MONO2-8-abdo', 'CT-MONO2-16-ankle', 'CT-MONO2-16-brain', 'CT-MONO2-16-ort', 'TG18-CH-2k-01', 'TG18-MM-2k-01',
-  'US-RGB-8-epicard',
 ];
 const DELTA_LIMIT: number = 0.02;
 const MIN_WINDOW_WIDTH: number = 1;
