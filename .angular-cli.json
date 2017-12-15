@@ -24,7 +24,7 @@
         "styles.scss"
       ],
       "scripts": [
-        "app/apps/dicom-viewer/renderer/wasm/wasm-core.js"
+        "app/apps/dicom-viewer/renderer/asm/wasm-core.js"
       ],
       "environmentSource": "environments/environment.ts",
       "environments": {
