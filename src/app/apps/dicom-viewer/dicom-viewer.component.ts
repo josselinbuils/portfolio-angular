@@ -7,10 +7,11 @@ import { MOUSE_BUTTON } from '../../constants';
 import { WindowInstance } from '../../platform/window/window-instance';
 import { WindowComponent } from '../../platform/window/window.component';
 
-import { PHOTOMETRIC_INTERPRETATION, PIXEL_REPRESENTATION } from './constants';
+import { PHOTOMETRIC_INTERPRETATION, PIXEL_REPRESENTATION, RENDERER } from './constants';
 import { Image } from './models/image';
 import { Viewport } from './models/viewport';
-import { CanvasRenderer } from './renderer/canvas/canvas-renderer';
+import { AsmRenderer } from './renderer/asm/asm-renderer';
+import { JsRenderer } from './renderer/js/js-renderer';
 import { Renderer } from './renderer/renderer';
 import { WebGLRenderer } from './renderer/webgl/webgl-renderer';
 
@@ -44,42 +45,22 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   image: Image;
   loading: boolean = false;
   meanRenderDuration: number;
-  rendererType: string = 'canvas';
+  rendererType: string = RENDERER.JS;
   showConfig: boolean = true;
   title = DicomViewerComponent.appName;
   viewport: Viewport;
 
-  private frameDurations: number[] = [];
+  private frameDurations: number[];
   private lastTime: number = performance.now();
-  private renderDurations: number[] = [];
+  private renderDurations: number[];
   private renderer: Renderer;
+  private statsInterval: number;
 
   constructor(private http: HttpClient, private viewRenderer: Renderer2) {
-    setInterval(() => {
-      if (this.frameDurations.length > 0) {
-        const meanFrameDuration: number = this.frameDurations
-          .reduce((sum: number, d: number) => sum + d, 0) / this.frameDurations.length;
-        this.fps = Math.round(1000 / meanFrameDuration);
-        this.frameDurations = [];
-      } else {
-        this.fps = 0;
-      }
-
-      if (this.renderDurations.length > 0) {
-        this.meanRenderDuration = this.renderDurations
-          .reduce((sum: number, d: number) => sum + d, 0) / this.renderDurations.length;
-        this.renderDurations = [];
-      } else {
-        this.meanRenderDuration = 0;
-      }
-    }, 500);
   }
 
   back(): void {
-    if (this.renderer) {
-      this.renderer.destroy();
-      delete this.renderer;
-    }
+    this.ngOnDestroy();
     this.viewRenderer.removeChild(this.viewportElementRef.nativeElement, this.canvas);
     this.showConfig = true;
   }
@@ -87,7 +68,9 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   ngOnDestroy(): void {
     if (this.renderer) {
       this.renderer.destroy();
+      delete this.renderer;
     }
+    clearInterval(this.statsInterval);
   }
 
   onResize(size: { width: number; height: number }): void {
@@ -115,35 +98,36 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     this.dicomProperties = getDicomProperties(await this.getDicomData(this.dataset));
 
     const {
-      height, imageFormat, pixelData, pixelRepresentation, rescaleIntercept, rescaleSlope, width, windowLevel,
-      windowWidth,
+      height, imageFormat, pixelRepresentation, rescaleIntercept, rescaleSlope, width, windowLevel, windowWidth,
     } = this.dicomProperties;
 
-    const renderer: any = {
-      canvas: CanvasRenderer,
-      webgl: WebGLRenderer,
-    };
+    let {pixelData} = this.dicomProperties;
+
+    const renderer: any = {};
+    renderer[RENDERER.ASM] = AsmRenderer;
+    renderer[RENDERER.JS] = JsRenderer;
+    renderer[RENDERER.WEBGL] = WebGLRenderer;
 
     this.canvas = this.viewRenderer.createElement('canvas');
     this.viewRenderer.appendChild(this.viewportElementRef.nativeElement, this.canvas);
     this.viewRenderer.listen(this.canvas, 'mousedown', this.startTool.bind(this));
     this.renderer = new renderer[this.rendererType](this.canvas);
 
-    let imageData: Uint8Array = pixelData;
-
-    if (this.rendererType === 'canvas') {
+    if ([RENDERER.ASM, RENDERER.JS].includes(<RENDERER> this.rendererType)) {
       const arrayType: any = {
         int8: Int8Array,
         int16: Int16Array,
         uint8: Uint8Array,
         uint16: Uint16Array,
       };
-      imageData = new arrayType[imageFormat](pixelData.buffer, pixelData.byteOffset);
+      pixelData = new arrayType[imageFormat](pixelData.buffer, pixelData.byteOffset);
     }
 
-    const image: Image = new Image({
-      height, imageFormat, pixelData: imageData, rescaleIntercept, rescaleSlope, width,
-    });
+    if (this.rendererType === RENDERER.ASM) {
+      pixelData = new Int32Array(pixelData);
+    }
+
+    const image: Image = new Image({height, imageFormat, pixelData, rescaleIntercept, rescaleSlope, width});
 
     this.image = image;
     this.viewport = new Viewport({image, windowLevel, windowWidth});
@@ -270,17 +254,39 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       }
 
       if (this.windowComponent.active) {
-
         const t: number = performance.now();
-        this.frameDurations.push(t - this.lastTime);
-        this.lastTime = t;
 
         this.renderer.render(this.viewport);
 
         this.renderDurations.push(performance.now() - t);
+        this.frameDurations.push(t - this.lastTime);
+        this.lastTime = t;
       }
-      requestAnimationFrame(render);
+
+      window.requestAnimationFrame(render);
     };
+
+    this.frameDurations = [];
+    this.renderDurations = [];
+
+    this.statsInterval = window.setInterval(() => {
+      if (this.frameDurations.length > 0) {
+        const meanFrameDuration: number = this.frameDurations
+          .reduce((sum: number, d: number) => sum + d, 0) / this.frameDurations.length;
+        this.fps = Math.round(1000 / meanFrameDuration);
+        this.frameDurations = [];
+      } else {
+        this.fps = 0;
+      }
+
+      if (this.renderDurations.length > 0) {
+        this.meanRenderDuration = this.renderDurations
+          .reduce((sum: number, d: number) => sum + d, 0) / this.renderDurations.length;
+        this.renderDurations = [];
+      } else {
+        this.meanRenderDuration = 0;
+      }
+    }, 500);
 
     render();
   }

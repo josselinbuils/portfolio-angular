@@ -1,7 +1,16 @@
 import { Viewport } from '../../models/viewport';
 import { Renderer } from '../renderer';
 
-export class CanvasRenderer implements Renderer {
+declare const Module: any;
+
+const fillTable: any = Module.cwrap('fillTable', null, ['number', 'number']);
+
+const render: any = Module.cwrap('render', null, [
+  'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number',
+  'number', 'number', 'number', 'number',
+]);
+
+export class AsmRenderer implements Renderer {
 
   private context: CanvasRenderingContext2D;
   private lut: any;
@@ -20,11 +29,15 @@ export class CanvasRenderer implements Renderer {
     const {height, imageFormat, pixelData, rescaleIntercept, rescaleSlope, width} = viewport.image;
 
     if (!this.lut || this.lut.windowWidth !== viewport.windowWidth) {
-      const table: number[] = [];
 
-      for (let i: number = 0; i < viewport.windowWidth; i++) {
-        table[i] = Math.floor(i / viewport.windowWidth * 256);
+      if (this.lut) {
+        Module._free(this.lut.table.byteOffset);
       }
+
+      const pointer: number = Module._malloc(viewport.windowWidth);
+      const table: Uint8Array = new Uint8Array(Module.HEAPU8.buffer, pointer, viewport.windowWidth);
+
+      fillTable(table.byteOffset, viewport.windowWidth, 0);
 
       this.lut = {
         windowWidth: viewport.windowWidth,
@@ -56,31 +69,23 @@ export class CanvasRenderer implements Renderer {
     const leftLimit: number = Math.floor(viewport.windowLevel - viewport.windowWidth / 2);
     const rightLimit: number = Math.floor(viewport.windowLevel + viewport.windowWidth / 2);
 
-    if (length > 0) {
-      const imageData: Uint8ClampedArray = new Uint8ClampedArray(length);
-      let dataIndex: number = 0;
+    const rawDataPointer: number = Module._malloc(pixelData.byteLength);
+    const rawData: Uint8Array = new Uint8Array(Module.HEAPU8.buffer, rawDataPointer, pixelData.byteLength);
+    rawData.set(new Uint8Array(pixelData.buffer, pixelData.byteOffset));
 
-      for (let y: number = displayY0; y < displayY1; y++) {
-        for (let x: number = displayX0; x < displayX1; x++) {
-          const pixelDataIndex: number = Math.floor((y - y0) / zoom) * width + Math.floor((x - x0) / zoom);
-          const rawValue: number = pixelData[pixelDataIndex] * rescaleSlope + rescaleIntercept;
-          let intensity: number = 0;
+    const renderedDataLength: number = displayWidth * displayHeight * 4;
+    const renderedDataPointer: number = Module._malloc(renderedDataLength);
+    const renderedData: Uint8ClampedArray = new Uint8ClampedArray(Module.HEAPU8.buffer, renderedDataPointer, renderedDataLength);
 
-          if (rawValue >= rightLimit) {
-            intensity = 255;
-          } else if (rawValue > leftLimit) {
-            intensity = this.lut.table[rawValue - leftLimit];
-          }
+    render(
+      this.lut.table.byteOffset, rawData.byteOffset, renderedData.byteOffset, width, x0, y0, displayX0, displayX1,
+      displayY0, displayY1, zoom, leftLimit, rightLimit, rescaleSlope, rescaleIntercept,
+    );
 
-          imageData[dataIndex++] = intensity;
-          imageData[dataIndex++] = intensity;
-          imageData[dataIndex++] = intensity;
-          imageData[dataIndex++] = 255;
-        }
-      }
+    this.context.putImageData(new ImageData(renderedData, displayWidth, displayHeight), displayX0, displayY0);
 
-      this.context.putImageData(new ImageData(imageData, displayWidth, displayHeight), displayX0, displayY0);
-    }
+    Module._free(rawData.byteOffset);
+    Module._free(renderedData.byteOffset);
   }
 
   // noinspection TsLint

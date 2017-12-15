@@ -2,7 +2,7 @@ export class Image {
 
   height: number;
   imageFormat: string;
-  pixelData: Int8Array | Uint8Array | Int16Array | Uint16Array;
+  pixelData: Int8Array | Uint8Array | Int16Array | Uint16Array | Int32Array;
   rescaleIntercept: number;
   rescaleSlope: number;
   width: number;

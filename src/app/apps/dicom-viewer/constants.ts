@@ -1,10 +1,16 @@
 export enum PHOTOMETRIC_INTERPRETATION {
   MONOCHROME1 = 'MONOCHROME1',
   MONOCHROME2 = 'MONOCHROME2',
-  RGB = 'RGB'
+  RGB = 'RGB',
 }
 
 export enum PIXEL_REPRESENTATION {
   SIGNED = 1,
-  UNSIGNED = 0
+  UNSIGNED = 0,
+}
+
+export enum RENDERER {
+  ASM = 'asm',
+  JS = 'js',
+  WEBGL = 'webgl',
 }
