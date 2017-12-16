@@ -1,6 +1,5 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, ElementRef, OnDestroy, Renderer2, ViewChild } from '@angular/core';
-import { parseDicom, sharedCopy } from 'dicom-parser';
 import 'rxjs/add/operator/toPromise';
 
 import { MOUSE_BUTTON } from '../../constants';
@@ -256,7 +255,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
 
   private getDicomProperties(rawDicomData: Uint8Array): any {
     try {
-      const dataset: any = parseDicom(rawDicomData);
+      const dataset: any = (<any> window).dicomParser.parseDicom(rawDicomData);
       const bitsAllocated: number = dataset.uint16('x00280100');
       const height: number = dataset.uint16('x00280010');
       const patientName: string = dataset.string('x00100010');
@@ -268,7 +267,9 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       const windowLevel: number = dataset.intString('x00281050') || 30;
       const windowWidth: number = dataset.intString('x00281051') || 400;
       const pixelDataElement: any = dataset.elements.x7fe00010;
-      const pixelData: Uint8Array = sharedCopy(rawDicomData, pixelDataElement.dataOffset, pixelDataElement.length);
+      const pixelData: Uint8Array = (<any> window).dicomParser.sharedCopy(
+        rawDicomData, pixelDataElement.dataOffset, pixelDataElement.length,
+      );
       const imageFormat: string = this.getImageFormat(bitsAllocated, photometricInterpretation, pixelRepresentation);
 
       return {
