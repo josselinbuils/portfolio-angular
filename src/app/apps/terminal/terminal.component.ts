@@ -1,7 +1,11 @@
 import {
   AfterContentInit, Component, ComponentFactory, ComponentFactoryResolver, ComponentRef, ElementRef, HostListener,
-  OnInit, Type, ViewChild, ViewContainerRef
+  OnInit, Type, ViewChild, ViewContainerRef,
 } from '@angular/core';
+
+import { WindowInstance } from '../../platform/window/window-instance';
+import { WindowManagerService } from '../../platform/window/window-manager.service';
+import { WindowComponent } from '../../platform/window/window.component';
 
 import { AboutComponent } from './executors/about/about.component';
 import { BashErrorComponent } from './executors/bash-error/bash-error.component';
@@ -11,9 +15,6 @@ import { HelpComponent } from './executors/help/help.component';
 import { ProjectsComponent } from './executors/projects/projects.component';
 import { SkillsComponent } from './executors/skills/skills.component';
 import { WorkComponent } from './executors/work/work.component';
-import { WindowManagerService } from '../../platform/window/window-manager.service';
-import { WindowComponent } from '../../platform/window/window.component';
-import { WindowInstance } from '../../platform/window/window-instance';
 
 enum KEY_CODE {
   BACK_SPACE = 8,
@@ -22,21 +23,21 @@ enum KEY_CODE {
   K = 75,
   LEFT = 37,
   RIGHT = 39,
-  UP = 38
+  UP = 38,
 }
 
-const executors = {
+const executors: any = {
   about: AboutComponent,
   help: HelpComponent,
   projects: ProjectsComponent,
   skills: SkillsComponent,
-  work: WorkComponent
+  work: WorkComponent,
 };
 
 @Component({
   selector: 'app-terminal',
   templateUrl: './terminal.component.html',
-  styleUrls: ['./terminal.component.scss']
+  styleUrls: ['./terminal.component.scss'],
 })
 export class TerminalComponent implements AfterContentInit, OnInit, WindowInstance {
   static appName = 'Terminal';
@@ -58,44 +59,6 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
   private components: ComponentRef<{}>[] = [];
 
   constructor(private componentFactoryResolver: ComponentFactoryResolver, private windowManagerService: WindowManagerService) {
-  }
-
-  private clear(): void {
-    this.components.forEach((component: ComponentRef<{}>) => component.destroy());
-    this.components = [];
-  }
-
-  private exec(str: string): void {
-    const command = str.trim().split(' ')[0];
-
-    this.loadComponent(CommandComponent, [this.prefix, str]);
-
-    if (command.length > 0) {
-      this.commands.push(str);
-      this.caretIndex = 0;
-      this.commandIndex = this.commands.length;
-
-      switch (command) {
-
-        case 'clear':
-          this.clear();
-          break;
-
-        default:
-          if (executors[command]) {
-            this.loadComponent(executors[command], str.split(' ').slice(1));
-          } else {
-            this.loadComponent(BashErrorComponent, [command]);
-          }
-      }
-    }
-  }
-
-  private loadComponent(component: Type<{}>, args: any[]) {
-    const componentFactory: ComponentFactory<{}> = this.componentFactoryResolver.resolveComponentFactory(component);
-    const componentRef: ComponentRef<{}> = this.commandsViewContainerRef.createComponent(componentFactory);
-    (<Executor> componentRef.instance).args = args;
-    this.components.push(componentRef);
   }
 
   @HostListener('window:keydown', ['$event'])
@@ -175,11 +138,49 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
   }
 
   ngAfterContentInit(): void {
-    const terminal = this.terminalElementRef.nativeElement;
-    new MutationObserver(() => this.scrollTop = terminal.clientHeight)
+    const terminal: HTMLElement = this.terminalElementRef.nativeElement;
+    new MutationObserver((): number => this.scrollTop = terminal.clientHeight)
       .observe(terminal, {
         childList: true,
-        subtree: true
+        subtree: true,
       });
+  }
+
+  private clear(): void {
+    this.components.forEach((component: ComponentRef<{}>) => component.destroy());
+    this.components = [];
+  }
+
+  private exec(str: string): void {
+    const command: string = str.trim().split(' ')[0];
+
+    this.loadComponent(CommandComponent, [this.prefix, str]);
+
+    if (command.length > 0) {
+      this.commands.push(str);
+      this.caretIndex = 0;
+      this.commandIndex = this.commands.length;
+
+      switch (command) {
+
+        case 'clear':
+          this.clear();
+          break;
+
+        default:
+          if (executors[command]) {
+            this.loadComponent(executors[command], str.split(' ').slice(1));
+          } else {
+            this.loadComponent(BashErrorComponent, [command]);
+          }
+      }
+    }
+  }
+
+  private loadComponent(component: Type<{}>, args: any[]): void {
+    const componentFactory: ComponentFactory<{}> = this.componentFactoryResolver.resolveComponentFactory(component);
+    const componentRef: ComponentRef<{}> = this.commandsViewContainerRef.createComponent(componentFactory);
+    (<Executor> componentRef.instance).args = args;
+    this.components.push(componentRef);
   }
 }

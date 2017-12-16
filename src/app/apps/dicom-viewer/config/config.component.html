@@ -1,0 +1,17 @@
+<button *ngIf="step === 'dataset'" (click)="back()">Back</button>
+
+<div *ngIf="step === 'renderer'">
+  <h1>Choose the renderer</h1>
+  <div class="container">
+    <img class="renderer" *ngFor="let renderer of renderers" [src]="'/assets/' + renderer.logo"
+         (click)="chooseRenderer(renderer.type)">
+  </div>
+</div>
+
+<div *ngIf="step === 'dataset'">
+  <h1>Choose the dataset</h1>
+  <div class="container">
+    <img class="dataset" *ngFor="let dataset of datasets" [src]="'/assets/dicom/previews/' + dataset + '.jpg'"
+         (click)="chooseDataset(dataset)">
+  </div>
+</div>

@@ -7,17 +7,15 @@ import { MOUSE_BUTTON } from '../../constants';
 import { WindowInstance } from '../../platform/window/window-instance';
 import { WindowComponent } from '../../platform/window/window.component';
 
+import { Config } from './config/config';
 import { PHOTOMETRIC_INTERPRETATION, PIXEL_REPRESENTATION, RENDERER } from './constants';
 import { Image } from './models/image';
 import { Viewport } from './models/viewport';
-import { AsmRenderer } from './renderer/asm/asm-renderer';
+import { EmscriptenRenderer } from './renderer/emscripten/emscripten-renderer';
 import { JsRenderer } from './renderer/js/js-renderer';
 import { Renderer } from './renderer/renderer';
 import { WebGLRenderer } from './renderer/webgl/webgl-renderer';
 
-const DATASETS: string[] = [
-  'CT-MONO2-8-abdo', 'CT-MONO2-16-ankle', 'CT-MONO2-16-brain', 'CT-MONO2-16-ort', 'TG18-CH-2k-01', 'TG18-MM-2k-01',
-];
 const DELTA_LIMIT: number = 0.02;
 const MIN_WINDOW_WIDTH: number = 1;
 const ZOOM_LIMIT: number = 0.07;
@@ -37,14 +35,12 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   @ViewChild(WindowComponent) windowComponent: WindowComponent;
 
   canvas: HTMLCanvasElement;
-  dataset: string = DATASETS[0];
-  datasets = DATASETS;
+  config: any = {};
   dicomProperties: any = {};
   fps = 0;
   image: Image;
   loading: boolean = false;
   meanRenderDuration: number;
-  rendererType: string = RENDERER.JS;
   showConfig: boolean = true;
   title = DicomViewerComponent.appName;
   viewport: Viewport;
@@ -91,10 +87,11 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     }
   }
 
-  async start(): Promise<void> {
+  async start(config: Config): Promise<void> {
+    this.config = config;
     this.showConfig = false;
     this.loading = true;
-    this.dicomProperties = getDicomProperties(await this.getDicomData(this.dataset));
+    this.dicomProperties = getDicomProperties(await this.getDicomData(this.config.dataset));
 
     const {
       height, imageFormat, pixelRepresentation, rescaleIntercept, rescaleSlope, width, windowLevel, windowWidth,
@@ -103,16 +100,17 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     let {pixelData} = this.dicomProperties;
 
     const renderer: any = {};
-    renderer[RENDERER.ASM] = AsmRenderer;
+    renderer[RENDERER.ASM] = EmscriptenRenderer.bind(this, RENDERER.ASM);
     renderer[RENDERER.JS] = JsRenderer;
+    renderer[RENDERER.WASM] = EmscriptenRenderer.bind(this, RENDERER.WASM);
     renderer[RENDERER.WEBGL] = WebGLRenderer;
 
     this.canvas = this.viewRenderer.createElement('canvas');
     this.viewRenderer.appendChild(this.viewportElementRef.nativeElement, this.canvas);
     this.viewRenderer.listen(this.canvas, 'mousedown', this.startTool.bind(this));
-    this.renderer = new renderer[this.rendererType](this.canvas);
+    this.renderer = new renderer[this.config.rendererType](this.canvas);
 
-    if ([RENDERER.ASM, RENDERER.JS].includes(<RENDERER> this.rendererType)) {
+    if ([RENDERER.ASM, RENDERER.JS].includes(<RENDERER> this.config.rendererType)) {
       const arrayType: any = {
         int8: Int8Array,
         int16: Int16Array,
@@ -122,7 +120,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       pixelData = new arrayType[imageFormat](pixelData.buffer, pixelData.byteOffset);
     }
 
-    if (this.rendererType === RENDERER.ASM) {
+    if (this.config.rendererType === RENDERER.ASM) {
       pixelData = new Int32Array(pixelData);
     }
 

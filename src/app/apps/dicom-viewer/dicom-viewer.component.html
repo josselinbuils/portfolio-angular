@@ -1,44 +1,29 @@
 <app-window [windowTitle]="title" background="black" titleColor="white" [minWidth]="800" [minHeight]="540"
             (resize)="onResize($event)">
   <div class="container">
-    <div class="config" *ngIf="showConfig">
-      <div class="form-group">
-        <label for="renderer">Renderer</label>
-        <select class="form-control" id="renderer"[(ngModel)]="rendererType">
-          <option value="js">JavaScript</option>
-          <option value="asm">WebAssembly</option>
-          <option value="webgl">WebGL</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label for="dataset">Dataset</label>
-        <select class="form-control" id="dataset" [(ngModel)]="dataset">
-          <option *ngFor="let dataset of datasets" [value]="dataset">{{dataset}}</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <button class="form-control" (click)="start()">Start</button>
+    <app-config [hidden]="!showConfig" (config)="start($event)"></app-config>
+    <div #viewportElement class="viewport" [hidden]="showConfig">
+      <div *ngIf="!!viewport" class="overlay">
+        <div class="overlay-top-left">
+          <button (click)="back()">Back</button>
+          <p>{{config.dataset}}</p>
+        </div>
+        <div class="overlay-top-right">
+          <p>renderer: {{config.rendererType}}</p>
+          <p>framerate: {{fps ? fps + 'fps' : '-'}}</p>
+          <p>rendering: {{meanRenderDuration | number: '1.2-2'}}ms</p>
+        </div>
+        <div class="overlay-bottom-right">
+          <p *ngIf="!!image">zoom: {{viewport.height / image.height * viewport.zoom | number: '1.2-2'}}</p>
+        </div>
+        <div class="overlay-bottom-left">
+          <p>WW: {{viewport.windowWidth}}</p>
+          <p>WL: {{viewport.windowLevel}}</p>
+        </div>
       </div>
     </div>
-    <div #viewportElement class="viewport" [hidden]="showConfig">
-      <div class="overlay overlay-top-left">
-        <button (click)="back()">Back</button>
-      </div>
-      <div class="overlay overlay-top-right">
-        <p>renderer: {{rendererType}}</p>
-        <p>framerate: {{fps ? fps + 'fps' : '-'}}</p>
-        <p>rendering: {{meanRenderDuration | number: '1.2-2'}}ms</p>
-      </div>
-      <div class="overlay overlay-bottom-right">
-        <p *ngIf="!!viewport && !!image">zoom: {{viewport.height / image.height * viewport.zoom | number: '1.2-2'}}</p>
-      </div>
-      <div class="overlay overlay-bottom-left">
-        <p *ngIf="!!viewport">WW: {{viewport.windowWidth}}</p>
-        <p *ngIf="!!viewport">WL: {{viewport.windowLevel}}</p>
-      </div>
-      <div class="overlay overlay-center" *ngIf="loading">
-        <p>Loading...</p>
-      </div>
+    <div class="loading" *ngIf="loading">
+      <p>Loading...</p>
     </div>
   </div>
 </app-window>

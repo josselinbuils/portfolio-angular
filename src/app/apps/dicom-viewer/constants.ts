@@ -10,7 +10,8 @@ export enum PIXEL_REPRESENTATION {
 }
 
 export enum RENDERER {
-  ASM = 'asm',
-  JS = 'js',
-  WEBGL = 'webgl',
+  ASM = 'Asm.js',
+  JS = 'JavaScript',
+  WASM = 'WebAssembly',
+  WEBGL = 'WebGL',
 }

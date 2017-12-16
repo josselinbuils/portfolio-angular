@@ -53,10 +53,9 @@ export class JsRenderer implements Renderer {
 
     const length: number = displayWidth * displayHeight * 4;
 
-    const leftLimit: number = Math.floor(viewport.windowLevel - viewport.windowWidth / 2);
-    const rightLimit: number = Math.floor(viewport.windowLevel + viewport.windowWidth / 2);
-
     if (length > 0) {
+      const leftLimit: number = Math.floor(viewport.windowLevel - viewport.windowWidth / 2);
+      const rightLimit: number = Math.floor(viewport.windowLevel + viewport.windowWidth / 2);
       const imageData: Uint8ClampedArray = new Uint8ClampedArray(length);
       let dataIndex: number = 0;
 
