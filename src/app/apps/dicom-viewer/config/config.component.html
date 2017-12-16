@@ -11,7 +11,9 @@
 <div *ngIf="step === 'dataset'">
   <h1>Choose the dataset</h1>
   <div class="container">
-    <img class="dataset" *ngFor="let dataset of datasets" [src]="'/assets/dicom/previews/' + dataset + '.jpg'"
-         (click)="chooseDataset(dataset)">
+    <div *ngFor="let dataset of datasets" (click)="chooseDataset(dataset)" class="dataset">
+      <img *ngIf="dataset.preview" [src]="'/assets/dicom/previews/' + dataset.preview">
+      <span *ngIf="!dataset.preview">{{dataset.name}}</span>
+    </div>
   </div>
 </div>

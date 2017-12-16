@@ -3,10 +3,10 @@
   <div class="container">
     <app-config [hidden]="!showConfig" (config)="start($event)"></app-config>
     <div #viewportElement class="viewport" [hidden]="showConfig">
+      <button (click)="back()">Back</button>
       <div *ngIf="!!viewport" class="overlay">
         <div class="overlay-top-left">
-          <button (click)="back()">Back</button>
-          <p>{{config.dataset}}</p>
+          <p>{{config.dataset.name}}</p>
         </div>
         <div class="overlay-top-right">
           <p>renderer: {{config.rendererType}}</p>
@@ -14,7 +14,7 @@
           <p>rendering: {{meanRenderDuration | number: '1.2-2'}}ms</p>
         </div>
         <div class="overlay-bottom-right">
-          <p *ngIf="!!image">zoom: {{viewport.height / image.height * viewport.zoom | number: '1.2-2'}}</p>
+          <p>zoom: {{viewport.height / viewport.image.height * viewport.zoom | number: '1.2-2'}}</p>
         </div>
         <div class="overlay-bottom-left">
           <p>WW: {{viewport.windowWidth}}</p>
@@ -24,6 +24,9 @@
     </div>
     <div class="loading" *ngIf="loading">
       <p>Loading...</p>
+    </div>
+    <div class="error" *ngIf="!!errorMessage">
+      <p>{{errorMessage}}</p>
     </div>
   </div>
 </app-window>

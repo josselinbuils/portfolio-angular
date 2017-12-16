@@ -6,6 +6,7 @@ const {
   ENV_DEV, HTTP_DEFAULT_PREFIX, HTTP_INTERNAL_ERROR, HTTP_NOT_FOUND, PUBLIC_DIR
 } = require('./constants.json');
 const DependenciesRoutes = require('./api/dependencies/dependencies.routes');
+const DicomRoutes = require('./api/dicom/dicom.routes');
 const JamendoRoutes = require('./api/jamendo/jamendo.routes');
 const Logger = require('./logger');
 const RedditRoutes = require('./api/reddit/reddit.routes');
@@ -35,6 +36,7 @@ module.exports = class Router {
     router.use(bodyParser.json());
 
     DependenciesRoutes.init(router);
+    DicomRoutes.init(router);
     JamendoRoutes.init(router);
     RedditRoutes.init(router);
 

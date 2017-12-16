@@ -1,13 +1,10 @@
+import { HttpClient } from '@angular/common/http';
 import { Component, EventEmitter, Output } from '@angular/core';
 
+import { HTTP_PREFIX } from '../../../env';
 import { RENDERER } from '../constants';
 
 import { Config } from './config';
-
-const DATASETS: string[] = [
-  'CT-MONO2-16-ankle', 'CT-MONO2-16-brain', 'CT-MONO2-16-ort', 'TG18-BR-2k-01', 'TG18-CH-2k-01', 'TG18-MM-2k-01',
-  'TG18-QC-2k-01',
-];
 
 const RENDERERS: any[] = [
   {type: RENDERER.ASM, logo: 'asmjs.png'},
@@ -30,12 +27,13 @@ export class ConfigComponent {
 
   @Output() config = new EventEmitter<Config>();
 
-  datasets: string[] = DATASETS;
+  datasets: any[];
   renderers: any[] = RENDERERS;
   rendererType: string;
   step: string = STEP.RENDERER;
 
-  constructor() {
+  constructor(private http: HttpClient) {
+    this.loadDatasets();
   }
 
   back(): void {
@@ -47,10 +45,14 @@ export class ConfigComponent {
     this.step = STEP.DATASET;
   }
 
-  chooseDataset(dataset: string): void {
+  chooseDataset(dataset: any): void {
     this.config.emit({
       dataset,
       rendererType: this.rendererType,
     });
+  }
+
+  private async loadDatasets(): Promise<void> {
+    this.datasets = <string[]> await this.http.get(`${HTTP_PREFIX}/api/dicom`).toPromise();
   }
 }

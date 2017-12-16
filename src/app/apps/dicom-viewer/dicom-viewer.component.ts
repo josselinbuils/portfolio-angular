@@ -37,8 +37,8 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   canvas: HTMLCanvasElement;
   config: any = {};
   dicomProperties: any = {};
+  errorMessage: string;
   fps = 0;
-  image: Image;
   loading: boolean = false;
   meanRenderDuration: number;
   showConfig: boolean = true;
@@ -55,16 +55,29 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   }
 
   back(): void {
+
+    if (this.canvas) {
+      this.viewRenderer.removeChild(this.viewportElementRef.nativeElement, this.canvas);
+    }
+
     this.ngOnDestroy();
-    this.viewRenderer.removeChild(this.viewportElementRef.nativeElement, this.canvas);
+
+    delete this.canvas;
+    delete this.dicomProperties;
+    delete this.errorMessage;
+    delete this.renderer;
+    delete this.viewport;
+
+    this.config = {};
     this.showConfig = true;
   }
 
   ngOnDestroy(): void {
+
     if (this.renderer) {
       this.renderer.destroy();
-      delete this.renderer;
     }
+
     clearInterval(this.statsInterval);
   }
 
@@ -91,7 +104,9 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     this.config = config;
     this.showConfig = false;
     this.loading = true;
-    this.dicomProperties = getDicomProperties(await this.getDicomData(this.config.dataset));
+    this.dicomProperties = this.getDicomProperties(await this.getDicomData(this.config.dataset.fileName));
+
+    console.log(this.dicomProperties);
 
     const {
       height, imageFormat, pixelRepresentation, rescaleIntercept, rescaleSlope, width, windowLevel, windowWidth,
@@ -126,7 +141,6 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
 
     const image: Image = new Image({height, imageFormat, pixelData, rescaleIntercept, rescaleSlope, width});
 
-    this.image = image;
     this.viewport = new Viewport({image, windowLevel, windowWidth});
 
     const windowNativeElement: HTMLElement = this.windowComponent.windowElementRef.nativeElement;
@@ -235,10 +249,63 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
 
       return new Uint8Array(dicomData);
 
-    } catch (e) {
-      console.error(e);
-      throw new Error('Unable to retrieve DICOM file');
+    } catch (error) {
+      throw this.handleError(new Error(`Unable to retrieve DICOM file: ${error.message}`));
     }
+  }
+
+  private getDicomProperties(rawDicomData: Uint8Array): any {
+    try {
+      const dataset: any = parseDicom(rawDicomData);
+      const bitsAllocated: number = dataset.uint16('x00280100');
+      const height: number = dataset.uint16('x00280010');
+      const patientName: string = dataset.string('x00100010');
+      const photometricInterpretation: string = dataset.string('x00280004');
+      const pixelRepresentation: number = dataset.uint16('x00280103');
+      const rescaleIntercept: number = dataset.intString('x00281052') || 0;
+      const rescaleSlope: number = dataset.floatString('x00281053') || 1;
+      const width: number = dataset.uint16('x00280011');
+      const windowLevel: number = dataset.intString('x00281050') || 30;
+      const windowWidth: number = dataset.intString('x00281051') || 400;
+      const pixelDataElement: any = dataset.elements.x7fe00010;
+      const pixelData: Uint8Array = sharedCopy(rawDicomData, pixelDataElement.dataOffset, pixelDataElement.length);
+      const imageFormat: string = this.getImageFormat(bitsAllocated, photometricInterpretation, pixelRepresentation);
+
+      return {
+        bitsAllocated, height, imageFormat, patientName, photometricInterpretation, pixelData, pixelRepresentation,
+        rescaleIntercept, rescaleSlope, width, windowLevel, windowWidth,
+      };
+
+    } catch (error) {
+      throw this.handleError(new Error(`Unable to parse dicom: ${error.message || error}`));
+    }
+  }
+
+  private getImageFormat(bitsAllocated: number, photometricInterpretation: string, pixelRepresentation: number): string {
+    let format: string = '';
+
+    if (photometricInterpretation === PHOTOMETRIC_INTERPRETATION.RGB) {
+      format = 'rgb';
+    } else if (photometricInterpretation.indexOf('MONOCHROME') === 0) {
+      if (pixelRepresentation === PIXEL_REPRESENTATION.UNSIGNED) {
+        format += 'u';
+      }
+      format += `int${bitsAllocated <= 8 ? '8' : '16'}`;
+    } else {
+      throw this.handleError(new Error('Unsupported photometric interpretation'));
+    }
+
+    return format;
+  }
+
+  private handleError(error: Error): Error {
+    this.errorMessage = error.message;
+
+    if (this.loading) {
+      this.loading = false;
+    }
+
+    return error;
   }
 
   private startRender(): void {
@@ -287,60 +354,4 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
 
     render();
   }
-}
-
-function getDicomProperties(rawDicomData: Uint8Array): any {
-  try {
-    const dataset: any = parseDicom(rawDicomData);
-    const bitsAllocated: number = dataset.uint16('x00280100');
-    const height: number = dataset.uint16('x00280010');
-    const patientName: string = dataset.string('x00100010');
-    const photometricInterpretation: string = dataset.string('x00280004');
-    const pixelRepresentation: number = dataset.uint16('x00280103');
-    const rescaleIntercept: number = dataset.intString('x00281052') || 0;
-    const rescaleSlope: number = dataset.floatString('x00281053') || 1;
-    const width: number = dataset.uint16('x00280011');
-    const windowLevel: number = dataset.intString('x00281050') || 30;
-    const windowWidth: number = dataset.intString('x00281051') || 400;
-
-    const pixelDataElement: any = dataset.elements.x7fe00010;
-    const pixelData: Uint8Array = sharedCopy(rawDicomData, pixelDataElement.dataOffset, pixelDataElement.length);
-    const imageFormat: string = getImageFormat(bitsAllocated, photometricInterpretation, pixelRepresentation);
-
-    return {
-      bitsAllocated,
-      height,
-      imageFormat,
-      patientName,
-      photometricInterpretation,
-      pixelData,
-      pixelRepresentation,
-      rescaleIntercept,
-      rescaleSlope,
-      width,
-      windowLevel,
-      windowWidth,
-    };
-
-  } catch (e) {
-    console.error(e);
-    throw new Error('Unable to parse dicom');
-  }
-}
-
-function getImageFormat(bitsAllocated: number, photometricInterpretation: string, pixelRepresentation: number): string {
-  let format: string = '';
-
-  if (photometricInterpretation === PHOTOMETRIC_INTERPRETATION.RGB) {
-    format = 'rgb';
-  } else if (photometricInterpretation.indexOf('MONOCHROME') === 0) {
-    if (pixelRepresentation === PIXEL_REPRESENTATION.UNSIGNED) {
-      format += 'u';
-    }
-    format += `int${bitsAllocated <= 8 ? '8' : '16'}`;
-  } else {
-    throw new Error('Unsupported photometric interpretation');
-  }
-
-  return format;
 }

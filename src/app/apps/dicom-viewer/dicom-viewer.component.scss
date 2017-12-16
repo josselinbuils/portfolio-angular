@@ -26,7 +26,9 @@ $background-color: black;
   button {
     @extend .element;
     padding: 3px 5px;
-    margin-bottom: 10px;
+    position: absolute;
+    top: 10px;
+    left: 10px;
 
     &:active:hover {
       background: lighten($background-color, 25%);
@@ -43,7 +45,11 @@ $background-color: black;
     margin: 10px 0;
   }
 
-  .loading {
+  .error {
+    color: red;
+  }
+
+  .loading, .error {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -68,7 +74,7 @@ $background-color: black;
 
     .overlay-top-left {
       position: absolute;
-      top: $overlay-margin;
+      top: 40px;
       left: $overlay-margin;
     }
 
@@ -82,6 +88,10 @@ $background-color: black;
     p {
       text-shadow: #000 0 0 1px;
       margin: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 150px;
 
       & + p {
         margin-top: 5px;
