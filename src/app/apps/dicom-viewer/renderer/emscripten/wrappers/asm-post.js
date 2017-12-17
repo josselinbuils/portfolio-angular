@@ -1,1 +1,4 @@
-export { Module as AsmRenderer };
+  return Module;
+}
+
+export { AsmRenderer };

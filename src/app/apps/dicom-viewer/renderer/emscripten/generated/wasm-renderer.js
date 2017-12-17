@@ -1,5 +1,9 @@
-var Module = {};
-Module['wasmBinaryFile'] = '/assets/wasm-renderer.wasm';
+function WasmRenderer() {
+
+  // noinspection ES6ConvertVarToLetConst
+  var Module = {};
+  Module['print'] = Module['printErr'] = function () {};
+  Module['wasmBinaryFile'] = '/assets/wasm-renderer.wasm';
 
 // The Module object: Our interface to the outside world. We import
 // and export values on it, and do the work to get that through
@@ -1236,7 +1240,7 @@ function enlargeMemory() {
 
 
 var TOTAL_STACK = Module['TOTAL_STACK'] || 5242880;
-var TOTAL_MEMORY = Module['TOTAL_MEMORY'] || 838860800;
+var TOTAL_MEMORY = Module['TOTAL_MEMORY'] || 209715200;
 if (TOTAL_MEMORY < TOTAL_STACK) Module.printErr('TOTAL_MEMORY should be larger than TOTAL_STACK, was ' + TOTAL_MEMORY + '! (TOTAL_STACK=' + TOTAL_STACK + ')');
 
 // Initialize the runtime's memory
@@ -2715,5 +2719,8 @@ run();
 
 
 
-export { Module as WasmRenderer };
+  return Module;
+}
+
+export { WasmRenderer };
 

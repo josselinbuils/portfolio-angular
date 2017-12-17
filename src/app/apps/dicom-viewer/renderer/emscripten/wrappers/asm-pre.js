@@ -1,6 +1,5 @@
-function WasmRenderer() {
+function AsmRenderer() {
 
   // noinspection ES6ConvertVarToLetConst
   var Module = {};
   Module['print'] = Module['printErr'] = function () {};
-  Module['wasmBinaryFile'] = '/assets/wasm-renderer.wasm';

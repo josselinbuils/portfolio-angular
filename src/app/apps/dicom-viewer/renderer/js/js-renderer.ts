@@ -78,7 +78,16 @@ export class JsRenderer implements Renderer {
         }
       }
 
-      this.context.putImageData(new ImageData(imageData, displayWidth, displayHeight), displayX0, displayY0);
+      let imageDataInstance: ImageData;
+
+      try {
+        imageDataInstance = new ImageData(imageData, displayWidth, displayHeight);
+      } catch (e) {
+        imageDataInstance = this.context.createImageData(displayWidth, displayHeight);
+        imageDataInstance.data.set(imageData);
+      }
+
+      this.context.putImageData(imageDataInstance, displayX0, displayY0);
     }
   }
 

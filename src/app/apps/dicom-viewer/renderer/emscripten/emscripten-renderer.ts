@@ -23,7 +23,7 @@ export class EmscriptenRenderer implements Renderer {
   private lut: any;
 
   constructor(renderingCoreType: string, canvas: HTMLCanvasElement) {
-    this.renderingCore = renderingCore[renderingCoreType];
+    this.renderingCore = renderingCore[renderingCoreType]();
     this.fillTable = this.renderingCore.cwrap('fillTable', null, ['number', 'number']);
     this.coreRender = this.renderingCore.cwrap('render', null, [
       'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number',
@@ -50,7 +50,11 @@ export class EmscriptenRenderer implements Renderer {
       const pointer: number = this.renderingCore._malloc(viewport.windowWidth);
       const table: Uint8Array = new Uint8Array(this.renderingCore.HEAPU8.buffer, pointer, viewport.windowWidth);
 
-      this.fillTable(table.byteOffset, viewport.windowWidth, 0);
+      try {
+        this.fillTable(table.byteOffset, viewport.windowWidth, 0);
+      } catch (error) {
+        throw this.handleEmscriptenErrors(error);
+      }
 
       this.lut = {
         windowWidth: viewport.windowWidth,
@@ -83,28 +87,50 @@ export class EmscriptenRenderer implements Renderer {
       const leftLimit: number = Math.floor(viewport.windowLevel - viewport.windowWidth / 2);
       const rightLimit: number = Math.floor(viewport.windowLevel + viewport.windowWidth / 2);
 
-      const rawDataPointer: number = this.renderingCore._malloc(pixelData.byteLength);
-      const rawData: Uint8Array = new Uint8Array(this.renderingCore.HEAPU8.buffer, rawDataPointer, pixelData.byteLength);
-      rawData.set(new Uint8Array(pixelData.buffer, pixelData.byteOffset));
+      try {
+        const rawDataPointer: number = this.renderingCore._malloc(pixelData.byteLength);
+        const rawData: Uint8Array = new Uint8Array(this.renderingCore.HEAPU8.buffer, rawDataPointer, pixelData.byteLength);
+        rawData.set(new Uint8Array(pixelData.buffer, pixelData.byteOffset));
 
-      const renderedDataLength: number = displayWidth * displayHeight * 4;
-      const renderedDataPointer: number = this.renderingCore._malloc(renderedDataLength);
-      const renderedData: Uint8ClampedArray = new Uint8ClampedArray(
-        this.renderingCore.HEAPU8.buffer, renderedDataPointer, renderedDataLength,
-      );
+        const renderedDataLength: number = displayWidth * displayHeight * 4;
+        const renderedDataPointer: number = this.renderingCore._malloc(renderedDataLength);
+        const renderedData: Uint8ClampedArray = new Uint8ClampedArray(
+          this.renderingCore.HEAPU8.buffer, renderedDataPointer, renderedDataLength,
+        );
 
-      this.coreRender(
-        this.lut.table.byteOffset, rawData.byteOffset, renderedData.byteOffset, width, x0, y0, displayX0, displayX1,
-        displayY0, displayY1, zoom, leftLimit, rightLimit, rescaleSlope, rescaleIntercept,
-      );
+        this.coreRender(
+          this.lut.table.byteOffset, rawData.byteOffset, renderedData.byteOffset, width, x0, y0, displayX0, displayX1,
+          displayY0, displayY1, zoom, leftLimit, rightLimit, rescaleSlope, rescaleIntercept,
+        );
 
-      this.context.putImageData(new ImageData(renderedData, displayWidth, displayHeight), displayX0, displayY0);
+        let imageData: ImageData;
 
-      this.renderingCore._free(rawData.byteOffset);
-      this.renderingCore._free(renderedData.byteOffset);
+        try {
+          imageData = new ImageData(renderedData, displayWidth, displayHeight);
+        } catch (e) {
+          imageData = this.context.createImageData(displayWidth, displayHeight);
+          imageData.data.set(renderedData);
+        }
+
+        this.context.putImageData(imageData, displayX0, displayY0);
+
+        this.renderingCore._free(rawData.byteOffset);
+        this.renderingCore._free(renderedData.byteOffset);
+
+      } catch (error) {
+        throw this.handleEmscriptenErrors(error);
+      }
     }
   }
 
   resize(viewport: Viewport): void {
+  }
+
+  private handleEmscriptenErrors(error: Error | string): Error {
+    if (typeof error === 'string') {
+      console.error(error);
+      error = new Error('Emscripten internal error, see browser console for more information');
+    }
+    return error;
   }
 }

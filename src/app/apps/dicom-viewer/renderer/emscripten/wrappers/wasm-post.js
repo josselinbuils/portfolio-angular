@@ -1,1 +1,4 @@
-export { Module as WasmRenderer };
+  return Module;
+}
+
+export { WasmRenderer };
