@@ -14,8 +14,6 @@ audio {
 .player {
   font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
   font-size: .8em;
-  display: flex;
-  flex-direction: column;
   position: absolute;
   top: 0;
   right: 0;
@@ -25,9 +23,14 @@ audio {
   color: $text-color;
 
   &.max {
+    $navbar-height: 75px;
+    $sidebar-width: 120px;
+
     .body {
       display: flex;
-      flex-grow: 1;
+      flex: 0 1 auto;
+      overflow: hidden;
+      height: calc(100% - #{$navbar-height});
     }
 
     .controls {
@@ -65,10 +68,9 @@ audio {
       margin-left: 15px;
     }
 
-    .nav-bar {
-      margin-bottom: 13px;
+    .navbar {
       display: flex;
-      flex: 0 0 62px;
+      height: $navbar-height;
     }
 
     .play-button {
@@ -77,7 +79,7 @@ audio {
     }
 
     .playlist {
-      flex-grow: 1;
+      width: calc(100% - #{$sidebar-width});
       margin: 5px 15px 15px 15px;
       display: flex;
       flex-direction: column;
@@ -89,6 +91,7 @@ audio {
 
         &.header {
           width: calc(100% - 18px);
+          flex: 0 0 auto;
 
           th {
             padding: 3px 15px 10px 0;
@@ -221,7 +224,7 @@ audio {
     }
 
     .sidebar {
-      flex: 0 0 120px;
+      width: $sidebar-width;
       padding: 15px;
 
       .brand {

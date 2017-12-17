@@ -43,7 +43,7 @@
 
   .content {
     flex-grow: 1;
-    overflow: auto;
+    overflow: hidden;
     position: relative;
     user-select: none;
   }
