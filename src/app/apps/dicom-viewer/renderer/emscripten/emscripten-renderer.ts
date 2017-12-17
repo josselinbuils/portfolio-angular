@@ -67,10 +67,10 @@ export class EmscriptenRenderer implements Renderer {
     const imageHeight: number = Math.round(height * zoom);
 
     const y0: number = Math.round(((viewport.height - imageHeight) / 2 + viewport.deltaY * viewport.height));
-    const y1: number = y0 + imageHeight;
+    const y1: number = y0 + imageHeight - 1;
 
     const x0: number = Math.round(((viewport.width - imageWidth) / 2 + viewport.deltaX * viewport.width));
-    const x1: number = x0 + imageWidth;
+    const x1: number = x0 + imageWidth - 1;
 
     const displayY0: number = Math.max(y0, 0);
     const displayY1: number = Math.min(y1, viewport.height - 1);
@@ -78,8 +78,8 @@ export class EmscriptenRenderer implements Renderer {
     const displayX0: number = Math.max(x0, 0);
     const displayX1: number = Math.min(x1, viewport.width - 1);
 
-    const displayWidth: number = Math.max(displayX1 - displayX0, 0);
-    const displayHeight: number = Math.max(displayY1 - displayY0, 0);
+    const displayWidth: number = Math.max(displayX1 - displayX0 + 1, 0);
+    const displayHeight: number = Math.max(displayY1 - displayY0 + 1, 0);
 
     const length: number = displayWidth * displayHeight * 4;
 

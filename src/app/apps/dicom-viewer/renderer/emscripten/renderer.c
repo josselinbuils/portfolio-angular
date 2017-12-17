@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdint.h>
 
 void fillTable(uint8_t *table, int windowWidth, int invert) {
@@ -19,9 +20,9 @@ void render(
 ) {
   int dataIndex = 0;
 
-  for (int y = displayY0; y < displayY1; y++) {
-    for (int x = displayX0; x < displayX1; x++) {
-      int pixelDataIndex = (int) (((double) (y - y0)) / zoom) * ((double) sliceWidth) + (int) (((double) (x - x0)) / zoom);
+  for (int y = displayY0; y <= displayY1; y++) {
+    for (int x = displayX0; x <= displayX1; x++) {
+      int pixelDataIndex = (int) round(((double) (y - y0)) / zoom) * ((double) sliceWidth) + (int) round(((double) (x - x0)) / zoom);
       int rawValue = (int) ((double) rawImageData[pixelDataIndex] * rescaleSlope) + rescaleIntercept;
       int intensity = 0;
 

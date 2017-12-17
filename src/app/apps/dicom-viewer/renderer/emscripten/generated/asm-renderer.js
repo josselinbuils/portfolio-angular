@@ -1239,7 +1239,7 @@ function enlargeMemory() {
 
 
 var TOTAL_STACK = Module['TOTAL_STACK'] || 5242880;
-var TOTAL_MEMORY = Module['TOTAL_MEMORY'] || 419430400;
+var TOTAL_MEMORY = Module['TOTAL_MEMORY'] || 33554432;
 if (TOTAL_MEMORY < TOTAL_STACK) Module.printErr('TOTAL_MEMORY should be larger than TOTAL_STACK, was ' + TOTAL_MEMORY + '! (TOTAL_STACK=' + TOTAL_STACK + ')');
 
 // Initialize the runtime's memory
@@ -1688,6 +1688,8 @@ function copyTempDouble(ptr) {
 
    
 
+   
+
   function ___lock() {}
 
   
@@ -2016,11 +2018,12 @@ function _render($0,$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) {
  $12 = $12|0;
  $13 = +$13;
  $14 = $14|0;
- var $100 = 0, $101 = 0, $102 = 0, $103 = 0, $104 = 0, $105 = 0, $106 = 0, $107 = 0, $108 = 0, $109 = 0, $110 = 0, $111 = 0, $112 = 0, $15 = 0, $16 = 0, $17 = 0, $18 = 0, $19 = 0, $20 = 0, $21 = 0;
- var $22 = 0, $23 = 0, $24 = 0, $25 = 0.0, $26 = 0, $27 = 0, $28 = 0.0, $29 = 0, $30 = 0, $31 = 0, $32 = 0, $33 = 0, $34 = 0, $35 = 0, $36 = 0, $37 = 0, $38 = 0, $39 = 0, $40 = 0, $41 = 0;
- var $42 = 0, $43 = 0, $44 = 0, $45 = 0, $46 = 0, $47 = 0.0, $48 = 0.0, $49 = 0.0, $50 = 0, $51 = 0.0, $52 = 0, $53 = 0.0, $54 = 0.0, $55 = 0, $56 = 0, $57 = 0, $58 = 0.0, $59 = 0.0, $60 = 0.0, $61 = 0;
- var $62 = 0.0, $63 = 0.0, $64 = 0, $65 = 0, $66 = 0, $67 = 0, $68 = 0, $69 = 0.0, $70 = 0.0, $71 = 0.0, $72 = 0, $73 = 0, $74 = 0, $75 = 0, $76 = 0, $77 = 0, $78 = 0, $79 = 0, $80 = 0, $81 = 0;
- var $82 = 0, $83 = 0, $84 = 0, $85 = 0, $86 = 0, $87 = 0, $88 = 0, $89 = 0, $90 = 0, $91 = 0, $92 = 0, $93 = 0, $94 = 0, $95 = 0, $96 = 0, $97 = 0, $98 = 0, $99 = 0, label = 0, sp = 0;
+ var $100 = 0, $101 = 0, $102 = 0, $103 = 0, $104 = 0, $105 = 0, $106 = 0, $107 = 0, $108 = 0, $109 = 0, $110 = 0, $111 = 0, $112 = 0, $113 = 0, $114 = 0, $15 = 0, $16 = 0, $17 = 0, $18 = 0, $19 = 0;
+ var $20 = 0, $21 = 0, $22 = 0, $23 = 0, $24 = 0, $25 = 0.0, $26 = 0, $27 = 0, $28 = 0.0, $29 = 0, $30 = 0, $31 = 0, $32 = 0, $33 = 0, $34 = 0, $35 = 0, $36 = 0, $37 = 0, $38 = 0, $39 = 0;
+ var $40 = 0, $41 = 0, $42 = 0, $43 = 0, $44 = 0, $45 = 0, $46 = 0, $47 = 0.0, $48 = 0.0, $49 = 0.0, $50 = 0.0, $51 = 0, $52 = 0.0, $53 = 0, $54 = 0.0, $55 = 0.0, $56 = 0, $57 = 0, $58 = 0, $59 = 0.0;
+ var $60 = 0.0, $61 = 0.0, $62 = 0.0, $63 = 0, $64 = 0.0, $65 = 0.0, $66 = 0, $67 = 0, $68 = 0, $69 = 0, $70 = 0, $71 = 0.0, $72 = 0.0, $73 = 0.0, $74 = 0, $75 = 0, $76 = 0, $77 = 0, $78 = 0, $79 = 0;
+ var $80 = 0, $81 = 0, $82 = 0, $83 = 0, $84 = 0, $85 = 0, $86 = 0, $87 = 0, $88 = 0, $89 = 0, $90 = 0, $91 = 0, $92 = 0, $93 = 0, $94 = 0, $95 = 0, $96 = 0, $97 = 0, $98 = 0, $99 = 0;
+ var label = 0, sp = 0;
  sp = STACKTOP;
  STACKTOP = STACKTOP + 96|0; if ((STACKTOP|0) >= (STACK_MAX|0)) abortStackOverflow(96|0);
  $15 = $0;
@@ -2044,7 +2047,7 @@ function _render($0,$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) {
  while(1) {
   $37 = $31;
   $38 = $24;
-  $39 = ($37|0)<($38|0);
+  $39 = ($37|0)<=($38|0);
   if (!($39)) {
    break;
   }
@@ -2053,7 +2056,7 @@ function _render($0,$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) {
   while(1) {
    $41 = $32;
    $42 = $22;
-   $43 = ($41|0)<($42|0);
+   $43 = ($41|0)<=($42|0);
    $44 = $31;
    if (!($43)) {
     break;
@@ -2063,90 +2066,92 @@ function _render($0,$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) {
    $47 = (+($46|0));
    $48 = $25;
    $49 = $47 / $48;
-   $50 = (~~(($49)));
-   $51 = (+($50|0));
-   $52 = $18;
-   $53 = (+($52|0));
-   $54 = $51 * $53;
-   $55 = $32;
-   $56 = $19;
-   $57 = (($55) - ($56))|0;
-   $58 = (+($57|0));
-   $59 = $25;
-   $60 = $58 / $59;
-   $61 = (~~(($60)));
-   $62 = (+($61|0));
-   $63 = $54 + $62;
-   $64 = (~~(($63)));
-   $33 = $64;
-   $65 = $16;
-   $66 = $33;
-   $67 = (($65) + ($66<<2)|0);
-   $68 = HEAP32[$67>>2]|0;
-   $69 = (+($68|0));
-   $70 = $28;
-   $71 = $69 * $70;
-   $72 = (~~(($71)));
-   $73 = $29;
-   $74 = (($72) + ($73))|0;
-   $34 = $74;
+   $50 = (+_round((+$49)));
+   $51 = (~~(($50)));
+   $52 = (+($51|0));
+   $53 = $18;
+   $54 = (+($53|0));
+   $55 = $52 * $54;
+   $56 = $32;
+   $57 = $19;
+   $58 = (($56) - ($57))|0;
+   $59 = (+($58|0));
+   $60 = $25;
+   $61 = $59 / $60;
+   $62 = (+_round((+$61)));
+   $63 = (~~(($62)));
+   $64 = (+($63|0));
+   $65 = $55 + $64;
+   $66 = (~~(($65)));
+   $33 = $66;
+   $67 = $16;
+   $68 = $33;
+   $69 = (($67) + ($68<<2)|0);
+   $70 = HEAP32[$69>>2]|0;
+   $71 = (+($70|0));
+   $72 = $28;
+   $73 = $71 * $72;
+   $74 = (~~(($73)));
+   $75 = $29;
+   $76 = (($74) + ($75))|0;
+   $34 = $76;
    $35 = 0;
-   $75 = $34;
-   $76 = $27;
-   $77 = ($75|0)>=($76|0);
-   if ($77) {
+   $77 = $34;
+   $78 = $27;
+   $79 = ($77|0)>=($78|0);
+   if ($79) {
     $35 = 255;
    } else {
-    $78 = $34;
-    $79 = $26;
-    $80 = ($78|0)>($79|0);
-    if ($80) {
-     $81 = $15;
-     $82 = $34;
-     $83 = $26;
-     $84 = (($82) - ($83))|0;
-     $85 = (($81) + ($84)|0);
-     $86 = HEAP8[$85>>0]|0;
-     $87 = $86&255;
-     $35 = $87;
+    $80 = $34;
+    $81 = $26;
+    $82 = ($80|0)>($81|0);
+    if ($82) {
+     $83 = $15;
+     $84 = $34;
+     $85 = $26;
+     $86 = (($84) - ($85))|0;
+     $87 = (($83) + ($86)|0);
+     $88 = HEAP8[$87>>0]|0;
+     $89 = $88&255;
+     $35 = $89;
     }
    }
-   $88 = $35;
-   $89 = $88&255;
-   $90 = $17;
-   $91 = $30;
-   $92 = (($91) + 1)|0;
-   $30 = $92;
-   $93 = (($90) + ($91)|0);
-   HEAP8[$93>>0] = $89;
-   $94 = $35;
-   $95 = $94&255;
-   $96 = $17;
-   $97 = $30;
-   $98 = (($97) + 1)|0;
-   $30 = $98;
-   $99 = (($96) + ($97)|0);
-   HEAP8[$99>>0] = $95;
-   $100 = $35;
-   $101 = $100&255;
-   $102 = $17;
-   $103 = $30;
-   $104 = (($103) + 1)|0;
-   $30 = $104;
-   $105 = (($102) + ($103)|0);
-   HEAP8[$105>>0] = $101;
-   $106 = $17;
-   $107 = $30;
-   $108 = (($107) + 1)|0;
-   $30 = $108;
-   $109 = (($106) + ($107)|0);
-   HEAP8[$109>>0] = -1;
-   $110 = $32;
-   $111 = (($110) + 1)|0;
-   $32 = $111;
+   $90 = $35;
+   $91 = $90&255;
+   $92 = $17;
+   $93 = $30;
+   $94 = (($93) + 1)|0;
+   $30 = $94;
+   $95 = (($92) + ($93)|0);
+   HEAP8[$95>>0] = $91;
+   $96 = $35;
+   $97 = $96&255;
+   $98 = $17;
+   $99 = $30;
+   $100 = (($99) + 1)|0;
+   $30 = $100;
+   $101 = (($98) + ($99)|0);
+   HEAP8[$101>>0] = $97;
+   $102 = $35;
+   $103 = $102&255;
+   $104 = $17;
+   $105 = $30;
+   $106 = (($105) + 1)|0;
+   $30 = $106;
+   $107 = (($104) + ($105)|0);
+   HEAP8[$107>>0] = $103;
+   $108 = $17;
+   $109 = $30;
+   $110 = (($109) + 1)|0;
+   $30 = $110;
+   $111 = (($108) + ($109)|0);
+   HEAP8[$111>>0] = -1;
+   $112 = $32;
+   $113 = (($112) + 1)|0;
+   $32 = $113;
   }
-  $112 = (($44) + 1)|0;
-  $31 = $112;
+  $114 = (($44) + 1)|0;
+  $31 = $114;
  }
  STACKTOP = sp;return;
 }
@@ -5133,6 +5138,10 @@ function _memset(ptr, value, num) {
     }
     return (end-num)|0;
 }
+function _round(d) {
+    d = +d;
+    return d >= +0 ? +Math_floor(d + +0.5) : +Math_ceil(d - +0.5);
+}
 function _memcpy(dest, src, num) {
     dest = dest|0; src = src|0; num = num|0;
     var ret = 0;
@@ -5230,7 +5239,7 @@ function b1(p0,p1,p2) {
 var FUNCTION_TABLE_ii = [b0,___stdio_close];
 var FUNCTION_TABLE_iiii = [b1,b1,___stdout_write,___stdio_seek,___stdio_write,b1,b1,b1];
 
-  return { _malloc: _malloc, getTempRet0: getTempRet0, _free: _free, runPostSets: runPostSets, setTempRet0: setTempRet0, establishStackSpace: establishStackSpace, dynCall_iiii: dynCall_iiii, _memset: _memset, dynCall_ii: dynCall_ii, _render: _render, ___errno_location: ___errno_location, _emscripten_get_global_libc: _emscripten_get_global_libc, _memcpy: _memcpy, stackAlloc: stackAlloc, _fillTable: _fillTable, _sbrk: _sbrk, _fflush: _fflush, setThrew: setThrew, stackRestore: stackRestore, stackSave: stackSave };
+  return { _malloc: _malloc, getTempRet0: getTempRet0, _free: _free, runPostSets: runPostSets, setTempRet0: setTempRet0, _round: _round, establishStackSpace: establishStackSpace, dynCall_iiii: dynCall_iiii, _memset: _memset, dynCall_ii: dynCall_ii, _render: _render, ___errno_location: ___errno_location, _emscripten_get_global_libc: _emscripten_get_global_libc, _memcpy: _memcpy, stackAlloc: stackAlloc, _fillTable: _fillTable, _sbrk: _sbrk, _fflush: _fflush, setThrew: setThrew, stackRestore: stackRestore, stackSave: stackSave };
 })
 // EMSCRIPTEN_END_ASM
 (Module.asmGlobalArg, Module.asmLibraryArg, buffer);
@@ -5257,6 +5266,12 @@ var real_setTempRet0 = asm["setTempRet0"]; asm["setTempRet0"] = function() {
   assert(runtimeInitialized, 'you need to wait for the runtime to be ready (e.g. wait for main() to be called)');
   assert(!runtimeExited, 'the runtime was exited (use NO_EXIT_RUNTIME to keep it alive after main() exits)');
   return real_setTempRet0.apply(null, arguments);
+};
+
+var real__round = asm["_round"]; asm["_round"] = function() {
+  assert(runtimeInitialized, 'you need to wait for the runtime to be ready (e.g. wait for main() to be called)');
+  assert(!runtimeExited, 'the runtime was exited (use NO_EXIT_RUNTIME to keep it alive after main() exits)');
+  return real__round.apply(null, arguments);
 };
 
 var real_establishStackSpace = asm["establishStackSpace"]; asm["establishStackSpace"] = function() {
@@ -5329,6 +5344,7 @@ var getTempRet0 = Module["getTempRet0"] = asm["getTempRet0"];
 var _free = Module["_free"] = asm["_free"];
 var runPostSets = Module["runPostSets"] = asm["runPostSets"];
 var setTempRet0 = Module["setTempRet0"] = asm["setTempRet0"];
+var _round = Module["_round"] = asm["_round"];
 var establishStackSpace = Module["establishStackSpace"] = asm["establishStackSpace"];
 var stackSave = Module["stackSave"] = asm["stackSave"];
 var _memset = Module["_memset"] = asm["_memset"];
