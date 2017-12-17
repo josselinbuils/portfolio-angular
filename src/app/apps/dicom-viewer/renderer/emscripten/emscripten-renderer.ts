@@ -23,12 +23,7 @@ export class EmscriptenRenderer implements Renderer {
   private lut: any;
 
   constructor(renderingCoreType: string, canvas: HTMLCanvasElement) {
-    this.renderingCore = renderingCore[renderingCoreType]();
-    this.fillTable = this.renderingCore.cwrap('fillTable', null, ['number', 'number']);
-    this.coreRender = this.renderingCore.cwrap('render', null, [
-      'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number',
-      'number', 'number', 'number', 'number',
-    ]);
+    this.loadRenderingCore(renderingCoreType);
     this.context = canvas.getContext('2d');
   }
 
@@ -36,6 +31,11 @@ export class EmscriptenRenderer implements Renderer {
   }
 
   render(viewport: Viewport): void {
+
+    if (!this.renderingCore) {
+      return;
+    }
+
     this.context.fillStyle = 'black';
     this.context.fillRect(0, 0, viewport.width, viewport.height);
 
@@ -132,5 +132,18 @@ export class EmscriptenRenderer implements Renderer {
       error = new Error('Emscripten internal error, see browser console for more information');
     }
     return error;
+  }
+
+  private async loadRenderingCore(renderingCoreType: string): Promise<void> {
+    try {
+      this.renderingCore = await renderingCore[renderingCoreType]();
+      this.fillTable = this.renderingCore.cwrap('fillTable', null, ['number', 'number']);
+      this.coreRender = this.renderingCore.cwrap('render', null, [
+        'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number',
+        'number', 'number', 'number', 'number',
+      ]);
+    } catch (error) {
+      throw this.handleEmscriptenErrors(error);
+    }
   }
 }

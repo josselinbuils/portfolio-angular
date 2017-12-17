@@ -1,6 +1,6 @@
 function WasmRenderer() {
-
-  // noinspection ES6ConvertVarToLetConst
-  var Module = {};
-  Module['print'] = Module['printErr'] = function () {};
-  Module['wasmBinaryFile'] = '/assets/wasm-renderer.wasm';
+  return new Promise(resolve => {
+    var Module = {};
+    Module['onRuntimeInitialized'] = () => resolve(Module);
+    Module['print'] = Module['printErr'] = function () {};
+    Module['wasmBinaryFile'] = '/assets/wasm-renderer.wasm';

@@ -1,4 +1,4 @@
-  return Module;
+  });
 }
 
 export { WasmRenderer };

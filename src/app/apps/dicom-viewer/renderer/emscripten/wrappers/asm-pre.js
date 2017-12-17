@@ -1,5 +1,5 @@
 function AsmRenderer() {
-
-  // noinspection ES6ConvertVarToLetConst
-  var Module = {};
-  Module['print'] = Module['printErr'] = function () {};
+  return new Promise(resolve => {
+    var Module = {};
+    Module['onRuntimeInitialized'] = () => resolve(Module);
+    Module['print'] = Module['printErr'] = function () {};
