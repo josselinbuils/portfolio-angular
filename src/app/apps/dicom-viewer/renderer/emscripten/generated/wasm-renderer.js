@@ -1,7 +1,7 @@
 function WasmRenderer() {
-  return new Promise(resolve => {
+  return new Promise(function (resolve) {
     var Module = {};
-    Module['onRuntimeInitialized'] = () => resolve(Module);
+    Module['onRuntimeInitialized'] = function () { resolve(Module); };
     Module['print'] = Module['printErr'] = function () {};
     Module['wasmBinaryFile'] = '/assets/wasm-renderer.wasm';
 
@@ -2107,26 +2107,26 @@ function copyTempDouble(ptr) {
 // {{PRE_LIBRARY}}
 
 
-
+  
   function ___setErrNo(value) {
       if (Module['___errno_location']) HEAP32[((Module['___errno_location']())>>2)]=value;
       else Module.printErr('failed to set errno from JS');
       return value;
-    }
+    } 
 
+   
 
-
-
+   
 
   function ___lock() {}
 
-
+  
   function _emscripten_memcpy_big(dest, src, num) {
       HEAPU8.set(HEAPU8.subarray(src, src+num), dest);
       return dest;
-    }
+    } 
 
-
+  
   var SYSCALLS={varargs:0,get:function (varargs) {
         SYSCALLS.varargs += 4;
         var ret = HEAP32[(((SYSCALLS.varargs)-(4))>>2)];

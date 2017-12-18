@@ -135,7 +135,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       this.handleError(new Error(`Unable to instantiate ${this.config.rendererType} renderer: ${error.message}`));
     }
 
-    if ([RENDERER.ASM, RENDERER.JS].includes(<RENDERER> this.config.rendererType)) {
+    if ([RENDERER.ASM, RENDERER.JS, RENDERER.WASM].includes(this.config.rendererType)) {
       const arrayType: any = {
         int8: Int8Array,
         int16: Int16Array,
@@ -145,7 +145,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       pixelData = new arrayType[imageFormat](pixelData.buffer, pixelData.byteOffset);
     }
 
-    if (this.config.rendererType === RENDERER.ASM) {
+    if ([RENDERER.ASM, RENDERER.WASM].includes(this.config.rendererType)) {
       pixelData = new Int32Array(pixelData);
     }
 

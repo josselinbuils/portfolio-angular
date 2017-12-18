@@ -1,7 +1,7 @@
 function AsmRenderer() {
-  return new Promise(resolve => {
+  return new Promise(function (resolve) {
     var Module = {};
-    Module['onRuntimeInitialized'] = () => resolve(Module);
+    Module['onRuntimeInitialized'] = function () { resolve(Module); };
     Module['print'] = Module['printErr'] = function () {};
 
 // The Module object: Our interface to the outside world. We import
