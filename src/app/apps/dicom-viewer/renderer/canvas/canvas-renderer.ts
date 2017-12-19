@@ -1,13 +1,15 @@
 import { Viewport } from '../../models/viewport';
 import { Renderer } from '../renderer';
 
-export class JsRenderer implements Renderer {
+export class CanvasRenderer implements Renderer {
 
   private context: CanvasRenderingContext2D;
   private lut: any;
+  private renderingContext: CanvasRenderingContext2D;
 
   constructor(canvas: HTMLCanvasElement) {
     this.context = canvas.getContext('2d');
+    this.renderingContext = document.createElement('canvas').getContext('2d');
   }
 
   destroy(): void {
@@ -33,25 +35,12 @@ export class JsRenderer implements Renderer {
     }
 
     const zoom: number = viewport.height / height * viewport.zoom;
-    const imageWidth: number = Math.round(width * zoom);
-    const imageHeight: number = Math.round(height * zoom);
+    const renderZoom: number = Math.min(zoom, 1);
 
-    const y0: number = Math.round(((viewport.height - imageHeight) / 2 + viewport.deltaY * viewport.height));
-    const y1: number = y0 + imageHeight - 1;
+    const imageWidth: number = Math.round(width * renderZoom);
+    const imageHeight: number = Math.round(height * renderZoom);
 
-    const x0: number = Math.round(((viewport.width - imageWidth) / 2 + viewport.deltaX * viewport.width));
-    const x1: number = x0 + imageWidth - 1;
-
-    const displayY0: number = Math.max(y0, 0);
-    const displayY1: number = Math.min(y1, viewport.height - 1);
-
-    const displayX0: number = Math.max(x0, 0);
-    const displayX1: number = Math.min(x1, viewport.width - 1);
-
-    const displayWidth: number = Math.max(displayX1 - displayX0 + 1, 0);
-    const displayHeight: number = Math.max(displayY1 - displayY0 + 1, 0);
-
-    const length: number = displayWidth * displayHeight * 4;
+    const length: number = imageWidth * imageHeight * 4;
 
     if (length > 0) {
       const leftLimit: number = Math.floor(viewport.windowLevel - viewport.windowWidth / 2);
@@ -59,9 +48,9 @@ export class JsRenderer implements Renderer {
       const imageData: Uint8ClampedArray = new Uint8ClampedArray(length);
       let dataIndex: number = 0;
 
-      for (let y: number = displayY0; y <= displayY1; y++) {
-        for (let x: number = displayX0; x <= displayX1; x++) {
-          const pixelDataIndex: number = Math.round((y - y0) / zoom) * width + Math.round((x - x0) / zoom);
+      for (let y: number = 0; y < imageWidth; y++) {
+        for (let x: number = 0; x < imageHeight; x++) {
+          const pixelDataIndex: number = Math.round(y / renderZoom) * width + Math.round(x / renderZoom);
           const rawValue: number = pixelData[pixelDataIndex] * rescaleSlope + rescaleIntercept;
           let intensity: number = 0;
 
@@ -81,13 +70,27 @@ export class JsRenderer implements Renderer {
       let imageDataInstance: ImageData;
 
       try {
-        imageDataInstance = new ImageData(imageData, displayWidth, displayHeight);
+        imageDataInstance = new ImageData(imageData, imageWidth, imageHeight);
       } catch (e) {
-        imageDataInstance = this.context.createImageData(displayWidth, displayHeight);
+        imageDataInstance = this.context.createImageData(imageWidth, imageHeight);
         imageDataInstance.data.set(imageData);
       }
 
-      this.context.putImageData(imageDataInstance, displayX0, displayY0);
+      const renderingCanvas: HTMLCanvasElement = this.renderingContext.canvas;
+      renderingCanvas.width = imageWidth;
+      renderingCanvas.height = imageHeight;
+      this.renderingContext.putImageData(imageDataInstance, 0, 0);
+
+      const newWidth: number = Math.round(imageWidth * zoom);
+      const newHeight: number = Math.round(imageHeight * zoom);
+
+      const newX: number = Math.round((viewport.width - newWidth) / 2 + viewport.deltaX * viewport.width);
+      const newY: number = Math.round((viewport.height - newHeight) / 2 + viewport.deltaY * viewport.height);
+
+      (<any> this.context).msImageSmoothingEnabled = false;
+      this.context.imageSmoothingEnabled = false;
+
+      this.context.drawImage(renderingCanvas, newX, newY, newWidth, newHeight);
     }
   }
 

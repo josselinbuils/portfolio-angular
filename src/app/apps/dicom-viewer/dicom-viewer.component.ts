@@ -10,6 +10,7 @@ import { Config } from './config/config';
 import { PHOTOMETRIC_INTERPRETATION, PIXEL_REPRESENTATION, RENDERER } from './constants';
 import { Image } from './models/image';
 import { Viewport } from './models/viewport';
+import { CanvasRenderer } from './renderer/canvas/canvas-renderer';
 import { EmscriptenRenderer } from './renderer/emscripten/emscripten-renderer';
 import { JsRenderer } from './renderer/js/js-renderer';
 import { Renderer } from './renderer/renderer';
@@ -62,10 +63,8 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
 
     this.ngOnDestroy();
 
-    delete this.canvas;
-    delete this.dicomProperties;
     delete this.errorMessage;
-    delete this.renderer;
+    delete this.dicomProperties;
     delete this.viewport;
 
     this.config = {};
@@ -76,6 +75,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
 
     if (this.renderer) {
       this.renderer.destroy();
+      delete this.renderer;
     }
 
     clearInterval(this.statsInterval);
@@ -121,6 +121,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
 
     const renderer: any = {};
     renderer[RENDERER.ASM] = EmscriptenRenderer.bind(this, RENDERER.ASM);
+    renderer[RENDERER.CANVAS] = CanvasRenderer;
     renderer[RENDERER.JS] = JsRenderer;
     renderer[RENDERER.WASM] = EmscriptenRenderer.bind(this, RENDERER.WASM);
     renderer[RENDERER.WEBGL] = WebGLRenderer;
@@ -135,7 +136,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       this.handleError(new Error(`Unable to instantiate ${this.config.rendererType} renderer: ${error.message}`));
     }
 
-    if ([RENDERER.ASM, RENDERER.JS, RENDERER.WASM].includes(this.config.rendererType)) {
+    if (this.config.rendererType !== RENDERER.WEBGL) {
       const arrayType: any = {
         int8: Int8Array,
         int16: Int16Array,

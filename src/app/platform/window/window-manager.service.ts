@@ -1,5 +1,9 @@
-import { ComponentFactoryResolver, Injectable, Type, ViewContainerRef } from '@angular/core';
+import {
+  ComponentFactory, ComponentFactoryResolver, ComponentRef, Injectable, Type,
+  ViewContainerRef,
+} from '@angular/core';
 import { BehaviorSubject } from 'rxjs/Rx';
+
 import { WindowInstance } from './window-instance';
 import { WindowComponent } from './window.component';
 
@@ -7,21 +11,22 @@ import { WindowComponent } from './window.component';
 export class WindowManagerService {
   windowInstancesSubject: BehaviorSubject<WindowInstance[]> = new BehaviorSubject<WindowInstance[]>(<WindowInstance[]> []);
 
-  private windowComponents: WindowComponent[] = [];
+  private windows: WindowComponent[] = [];
   private id = -1;
   private viewContainerRef: ViewContainerRef;
 
   constructor(private componentFactoryResolver: ComponentFactoryResolver) {
   }
 
-  closeWindow(id: number) {
-    const index = this.windowComponents.findIndex(windowComponent => windowComponent.id === id);
-    this.windowComponents[index].parentRef.destroy();
-    this.windowComponents.splice(index, 1);
+  closeWindow(id: number): void {
+    const index: number = this.windows.findIndex((w: WindowComponent) => w.id === id);
+    const window: WindowComponent = this.windows[index];
+    this.windows.splice(index, 1);
+    window.parentRef.destroy();
     this.publishWindowInstances();
   }
 
-  hideWindow(id: number) {
+  hideWindow(id: number): void {
     this.getWindowComponent(id).hide();
     this.unselectWindow(id);
   }
@@ -34,57 +39,60 @@ export class WindowManagerService {
     return this.getWindowComponent(id).visible;
   }
 
-  openWindow(component: Type<{}>) {
-    const componentFactory = this.componentFactoryResolver.resolveComponentFactory(component);
-    const componentRef = this.viewContainerRef.createComponent(componentFactory);
+  openWindow(component: Type<{}>): void {
+    const componentFactory: ComponentFactory<{}> = this.componentFactoryResolver.resolveComponentFactory(component);
+    const componentRef: ComponentRef<{}> = this.viewContainerRef.createComponent(componentFactory);
 
-    const windowComponent = (<WindowInstance> componentRef.instance).windowComponent;
-    windowComponent.id = ++this.id;
-    windowComponent.parentRef = componentRef;
+    const window: WindowComponent = (<WindowInstance> componentRef.instance).windowComponent;
+    window.id = ++this.id;
+    window.parentRef = componentRef;
 
-    this.windowComponents.push(windowComponent);
-    this.selectWindow(windowComponent.id);
+    this.windows.push(window);
+    this.selectWindow(window.id);
     this.publishWindowInstances();
   }
 
-  showWindow(id: number) {
+  showWindow(id: number): void {
     this.getWindowComponent(id).show();
     this.selectWindow(id);
   }
 
-  selectWindow(id: number) {
-    let i = 0;
+  selectWindow(id: number): void {
+    let i: number = 0;
 
-    this.windowComponents
-      .filter(windowComponent => windowComponent.id !== id)
-      .sort((a, b) => (a.zIndex < b.zIndex) ? -1 : 1)
-      .forEach((windowComponent, index) => {
-        windowComponent.active = false;
-        windowComponent.zIndex = ++i;
+    this.windows
+      .filter((window: WindowComponent) => window.id !== id)
+      .sort((a: WindowComponent, b: WindowComponent) => (a.zIndex < b.zIndex) ? -1 : 1)
+      .forEach((window: WindowComponent, index: number) => {
+        window.active = false;
+        window.zIndex = ++i;
       });
 
-    const activeWindow = this.getWindowComponent(id);
+    const activeWindow: WindowComponent = this.getWindowComponent(id);
     activeWindow.active = true;
     activeWindow.zIndex = ++i;
   }
 
-  setViewContainerRef(viewContainerRef: ViewContainerRef) {
+  setViewContainerRef(viewContainerRef: ViewContainerRef): void {
     this.viewContainerRef = viewContainerRef;
   }
 
-  unselectAllWindows() {
-    this.windowComponents.forEach(window => window.active = false);
+  unselectAllWindows(): void {
+    this.windows.forEach((window: WindowComponent) => window.active = false);
   }
 
-  unselectWindow(id: number) {
+  unselectWindow(id: number): void {
     this.getWindowComponent(id).active = false;
   }
 
   private getWindowComponent(id: number): WindowComponent {
-    return this.windowComponents.find(windowComponent => windowComponent.id === id);
+    return this.windows.find((window: WindowComponent) => window.id === id);
   }
 
   private publishWindowInstances(): void {
-    this.windowInstancesSubject.next(this.windowComponents.map(windowComponent => <WindowInstance> windowComponent.parentRef.instance));
+    const instances: WindowInstance[] = this.windows.map((window: WindowComponent) => {
+      return <WindowInstance> window.parentRef.instance;
+    });
+    this.windowInstancesSubject.next(instances);
   }
 }
