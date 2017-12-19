@@ -8,7 +8,7 @@ import { Config } from './config';
 
 const RENDERERS: any[] = [
   {type: RENDERER.ASM, logo: 'asmjs.png'},
-  {type: RENDERER.CANVAS, logo: 'canvas.png'},
+  // {type: RENDERER.CANVAS, logo: 'canvas.png'},
   {type: RENDERER.JS, logo: 'javascript.png'},
   {type: RENDERER.WASM, logo: 'webassembly.png'},
   {type: RENDERER.WEBGL, logo: 'webgl.png'},
