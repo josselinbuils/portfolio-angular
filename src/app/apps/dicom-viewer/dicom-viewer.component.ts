@@ -17,12 +17,13 @@ import { Renderer } from './renderer/renderer';
 import { WebGLRenderer } from './renderer/webgl/webgl-renderer';
 
 const DELTA_LIMIT: number = 0.02;
-const MIN_WINDOW_WIDTH: number = 1;
-const MIN_ZOOM: number = 0.2;
 const ZOOM_LIMIT: number = 0.07;
+const ZOOM_MAX: number = 5;
+const ZOOM_MIN: number = 0.2;
 const ZOOM_SENSIBILITY: number = 3;
 const WINDOW_LEVEL_SENSIBILITY: number = 3;
 const WINDOW_WIDTH_SENSIBILITY: number = 5;
+const WINDOW_WIDTH_MIN: number = 1;
 
 @Component({
   selector: 'app-dicom-viewer',
@@ -216,7 +217,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
 
     const cancelMouseMove: () => void = this.viewRenderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
       viewport.zoom = startZoom - (moveEvent.clientY - startY) * ZOOM_SENSIBILITY / this.canvas.clientHeight;
-      viewport.zoom = Math.max(viewport.zoom, MIN_ZOOM);
+      viewport.zoom = Math.min(Math.max(viewport.zoom, ZOOM_MIN), ZOOM_MAX);
 
       // Helps to set zoom at 1 or to fit window
       [1, viewport.height / viewport.image.height].forEach((zoom: number) => {
@@ -255,7 +256,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     const cancelMouseMove: () => void = this.viewRenderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
       this.viewport.windowWidth = startWindowWidth + (moveEvent.clientX - startX) * WINDOW_WIDTH_SENSIBILITY;
       this.viewport.windowLevel = startWindowLevel - (moveEvent.clientY - startY) * WINDOW_LEVEL_SENSIBILITY;
-      this.viewport.windowWidth = Math.max(this.viewport.windowWidth, MIN_WINDOW_WIDTH);
+      this.viewport.windowWidth = Math.max(this.viewport.windowWidth, WINDOW_WIDTH_MIN);
     });
 
     const cancelMouseUp: () => void = this.viewRenderer.listen('window', 'mouseup', () => {
@@ -357,6 +358,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
         try {
           this.renderer.render(this.viewport);
         } catch (error) {
+          console.error(error);
           this.handleError(new Error(`Unable to render viewport: ${error.message}`));
           return;
         }

@@ -1,6 +1,7 @@
 import { RENDERER } from '../../constants';
 import { Viewport } from '../../models/viewport';
 import { Renderer } from '../renderer';
+import { createImageData, getRenderingProperties } from '../rendering-utils';
 
 import { AsmRenderer } from './generated/asm-renderer';
 import { WasmRenderer } from './generated/wasm-renderer';
@@ -62,30 +63,13 @@ export class EmscriptenRenderer implements Renderer {
       };
     }
 
-    const imageWidth: number = Math.round(width * viewport.zoom);
-    const imageHeight: number = Math.round(height * viewport.zoom);
-
-    const y0: number = Math.round(((viewport.height - imageHeight) / 2 + viewport.deltaY * viewport.height));
-    const y1: number = y0 + imageHeight - 1;
-
-    const x0: number = Math.round(((viewport.width - imageWidth) / 2 + viewport.deltaX * viewport.width));
-    const x1: number = x0 + imageWidth - 1;
-
-    const displayY0: number = Math.max(y0, 0);
-    const displayY1: number = Math.min(y1, viewport.height - 1);
-
-    const displayX0: number = Math.max(x0, 0);
-    const displayX1: number = Math.min(x1, viewport.width - 1);
-
-    const displayWidth: number = Math.max(displayX1 - displayX0 + 1, 0);
-    const displayHeight: number = Math.max(displayY1 - displayY0 + 1, 0);
+    const {
+      displayHeight, displayWidth, displayX0, displayX1, displayY0, displayY1, leftLimit, rightLimit, x0, y0,
+    } = getRenderingProperties(viewport);
 
     const length: number = displayWidth * displayHeight * 4;
 
     if (length > 0) {
-      const leftLimit: number = Math.floor(viewport.windowLevel - viewport.windowWidth / 2);
-      const rightLimit: number = Math.floor(viewport.windowLevel + viewport.windowWidth / 2);
-
       try {
         const rawDataPointer: number = this.renderingCore._malloc(pixelData.byteLength);
         const rawData: Uint8Array = new Uint8Array(this.renderingCore.HEAPU8.buffer, rawDataPointer, pixelData.byteLength);
@@ -102,15 +86,7 @@ export class EmscriptenRenderer implements Renderer {
           displayY0, displayY1, viewport.zoom, leftLimit, rightLimit, rescaleSlope, rescaleIntercept,
         );
 
-        let imageData: ImageData;
-
-        try {
-          imageData = new ImageData(renderedData, displayWidth, displayHeight);
-        } catch (e) {
-          imageData = this.context.createImageData(displayWidth, displayHeight);
-          imageData.data.set(renderedData);
-        }
-
+        const imageData: ImageData = createImageData(this.context, renderedData, displayWidth, displayHeight);
         this.context.putImageData(imageData, displayX0, displayY0);
 
         this.renderingCore._free(rawData.byteOffset);

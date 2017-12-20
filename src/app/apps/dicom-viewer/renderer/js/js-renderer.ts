@@ -1,5 +1,6 @@
 import { Viewport } from '../../models/viewport';
 import { Renderer } from '../renderer';
+import { createImageData, getRenderingProperties } from '../rendering-utils';
 
 export class JsRenderer implements Renderer {
 
@@ -13,6 +14,17 @@ export class JsRenderer implements Renderer {
   destroy(): void {
   }
 
+  getVOILut(viewport: Viewport): { table: number[]; windowWidth: number } {
+    const table: number[] = [];
+    const windowWidth: number = viewport.windowWidth;
+
+    for (let i: number = 0; i < windowWidth; i++) {
+      table[i] = Math.floor(i / windowWidth * 256);
+    }
+
+    return {table, windowWidth};
+  }
+
   render(viewport: Viewport): void {
     this.context.fillStyle = 'black';
     this.context.fillRect(0, 0, viewport.width, viewport.height);
@@ -20,41 +32,16 @@ export class JsRenderer implements Renderer {
     const {height, imageFormat, pixelData, rescaleIntercept, rescaleSlope, width} = viewport.image;
 
     if (!this.lut || this.lut.windowWidth !== viewport.windowWidth) {
-      const table: number[] = [];
-
-      for (let i: number = 0; i < viewport.windowWidth; i++) {
-        table[i] = Math.floor(i / viewport.windowWidth * 256);
-      }
-
-      this.lut = {
-        windowWidth: viewport.windowWidth,
-        table,
-      };
+      this.lut = this.getVOILut(viewport);
     }
 
-    const imageWidth: number = Math.round(width * viewport.zoom);
-    const imageHeight: number = Math.round(height * viewport.zoom);
-
-    const y0: number = Math.round(((viewport.height - imageHeight) / 2 + viewport.deltaY * viewport.height));
-    const y1: number = y0 + imageHeight - 1;
-
-    const x0: number = Math.round(((viewport.width - imageWidth) / 2 + viewport.deltaX * viewport.width));
-    const x1: number = x0 + imageWidth - 1;
-
-    const displayY0: number = Math.max(y0, 0);
-    const displayY1: number = Math.min(y1, viewport.height - 1);
-
-    const displayX0: number = Math.max(x0, 0);
-    const displayX1: number = Math.min(x1, viewport.width - 1);
-
-    const displayWidth: number = Math.max(displayX1 - displayX0 + 1, 0);
-    const displayHeight: number = Math.max(displayY1 - displayY0 + 1, 0);
+    const {
+      displayHeight, displayWidth, displayX0, displayX1, displayY0, displayY1, leftLimit, rightLimit, x0, y0,
+    } = getRenderingProperties(viewport);
 
     const length: number = displayWidth * displayHeight * 4;
 
     if (length > 0) {
-      const leftLimit: number = Math.floor(viewport.windowLevel - viewport.windowWidth / 2);
-      const rightLimit: number = Math.floor(viewport.windowLevel + viewport.windowWidth / 2);
       const imageData: Uint8ClampedArray = new Uint8ClampedArray(length);
       let dataIndex: number = 0;
 
@@ -77,15 +64,7 @@ export class JsRenderer implements Renderer {
         }
       }
 
-      let imageDataInstance: ImageData;
-
-      try {
-        imageDataInstance = new ImageData(imageData, displayWidth, displayHeight);
-      } catch (e) {
-        imageDataInstance = this.context.createImageData(displayWidth, displayHeight);
-        imageDataInstance.data.set(imageData);
-      }
-
+      const imageDataInstance: ImageData = createImageData(this.context, imageData, displayWidth, displayHeight);
       this.context.putImageData(imageDataInstance, displayX0, displayY0);
     }
   }

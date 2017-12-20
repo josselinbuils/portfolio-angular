@@ -1,6 +1,7 @@
 import { Viewport } from '../../models/viewport';
 import { JsRenderer } from '../js/js-renderer';
 import { Renderer } from '../renderer';
+import { createImageData, getRenderingProperties } from '../rendering-utils';
 
 export class CanvasRenderer implements Renderer {
 
@@ -26,35 +27,12 @@ export class CanvasRenderer implements Renderer {
     const {height, imageFormat, pixelData, rescaleIntercept, rescaleSlope, width} = viewport.image;
 
     if (!this.lut || this.lut.windowWidth !== viewport.windowWidth) {
-      const table: number[] = [];
-
-      for (let i: number = 0; i < viewport.windowWidth; i++) {
-        table[i] = Math.floor(i / viewport.windowWidth * 256);
-      }
-
-      this.lut = {
-        windowWidth: viewport.windowWidth,
-        table,
-      };
+      this.lut = this.jsRenderer.getVOILut(viewport);
     }
 
-    const imageWidth: number = Math.round(width * viewport.zoom);
-    const imageHeight: number = Math.round(height * viewport.zoom);
-
-    const y0: number = Math.round(((viewport.height - imageHeight) / 2 + viewport.deltaY * viewport.height));
-    const y1: number = y0 + imageHeight - 1;
-
-    const x0: number = Math.round(((viewport.width - imageWidth) / 2 + viewport.deltaX * viewport.width));
-    const x1: number = x0 + imageWidth - 1;
-
-    const displayY0: number = Math.max(y0, 0);
-    const displayY1: number = Math.min(y1, viewport.height - 1);
-
-    const displayX0: number = Math.max(x0, 0);
-    const displayX1: number = Math.min(x1, viewport.width - 1);
-
-    const displayWidth: number = Math.max(displayX1 - displayX0 + 1, 0);
-    const displayHeight: number = Math.max(displayY1 - displayY0 + 1, 0);
+    const {
+      displayHeight, displayWidth, displayX0, displayX1, displayY0, displayY1, leftLimit, rightLimit, x0, x1, y0, y1,
+    } = getRenderingProperties(viewport);
 
     const imageY0: number = y0 < 0 ? Math.round(-y0 / viewport.zoom) : 0;
     const imageY1: number = y1 > viewport.height ? height - Math.round((y1 - viewport.height) / viewport.zoom) : height;
@@ -65,7 +43,7 @@ export class CanvasRenderer implements Renderer {
     const croppedImageWidth: number = imageX1 - imageX0;
     const croppedImageHeight: number = imageY1 - imageY0;
 
-    if (croppedImageWidth >= displayWidth) {
+    if (viewport.zoom <= 0.8) {
       this.jsRenderer.render(viewport);
       return;
     }
@@ -73,8 +51,6 @@ export class CanvasRenderer implements Renderer {
     const length: number = croppedImageWidth * croppedImageHeight * 4;
 
     if (length > 0) {
-      const leftLimit: number = Math.floor(viewport.windowLevel - viewport.windowWidth / 2);
-      const rightLimit: number = Math.floor(viewport.windowLevel + viewport.windowWidth / 2);
       const imageData: Uint8ClampedArray = new Uint8ClampedArray(length);
       let dataIndex: number = 0;
 
@@ -97,18 +73,10 @@ export class CanvasRenderer implements Renderer {
         }
       }
 
-      let imageDataInstance: ImageData;
+      this.renderingContext.canvas.width = croppedImageWidth;
+      this.renderingContext.canvas.height = croppedImageHeight;
 
-      try {
-        imageDataInstance = new ImageData(imageData, croppedImageWidth, croppedImageHeight);
-      } catch (e) {
-        imageDataInstance = this.context.createImageData(croppedImageWidth, croppedImageHeight);
-        imageDataInstance.data.set(imageData);
-      }
-
-      const renderingCanvas: HTMLCanvasElement = this.renderingContext.canvas;
-      renderingCanvas.width = croppedImageWidth;
-      renderingCanvas.height = croppedImageHeight;
+      const imageDataInstance: ImageData = createImageData(this.renderingContext, imageData, croppedImageWidth, croppedImageHeight);
       this.renderingContext.putImageData(imageDataInstance, 0, 0);
     }
 
