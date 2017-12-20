@@ -32,9 +32,8 @@ export class JsRenderer implements Renderer {
       };
     }
 
-    const zoom: number = viewport.height / height * viewport.zoom;
-    const imageWidth: number = Math.round(width * zoom);
-    const imageHeight: number = Math.round(height * zoom);
+    const imageWidth: number = Math.round(width * viewport.zoom);
+    const imageHeight: number = Math.round(height * viewport.zoom);
 
     const y0: number = Math.round(((viewport.height - imageHeight) / 2 + viewport.deltaY * viewport.height));
     const y1: number = y0 + imageHeight - 1;
@@ -61,7 +60,7 @@ export class JsRenderer implements Renderer {
 
       for (let y: number = displayY0; y <= displayY1; y++) {
         for (let x: number = displayX0; x <= displayX1; x++) {
-          const pixelDataIndex: number = Math.round((y - y0) / zoom) * width + Math.round((x - x0) / zoom);
+          const pixelDataIndex: number = Math.round((y - y0) / viewport.zoom) * width + Math.round((x - x0) / viewport.zoom);
           const rawValue: number = pixelData[pixelDataIndex] * rescaleSlope + rescaleIntercept;
           let intensity: number = 0;
 

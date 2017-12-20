@@ -18,6 +18,7 @@ import { WebGLRenderer } from './renderer/webgl/webgl-renderer';
 
 const DELTA_LIMIT: number = 0.02;
 const MIN_WINDOW_WIDTH: number = 1;
+const MIN_ZOOM: number = 0.2;
 const ZOOM_LIMIT: number = 0.07;
 const ZOOM_SENSIBILITY: number = 3;
 const WINDOW_LEVEL_SENSIBILITY: number = 3;
@@ -161,6 +162,8 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       height: windowNativeElement.clientHeight,
     });
 
+    this.viewport.zoom = Math.min(this.viewport.height / image.height, 1);
+
     this.loading = false;
     this.startRender();
   }
@@ -213,11 +216,14 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
 
     const cancelMouseMove: () => void = this.viewRenderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
       viewport.zoom = startZoom - (moveEvent.clientY - startY) * ZOOM_SENSIBILITY / this.canvas.clientHeight;
-      viewport.zoom = Math.max(viewport.zoom, 0.5);
+      viewport.zoom = Math.max(viewport.zoom, MIN_ZOOM);
 
-      if (Math.abs(viewport.zoom - 1) < ZOOM_LIMIT) {
-        viewport.zoom = 1;
-      }
+      // Helps to set zoom at 1 or to fit window
+      [1, viewport.height / viewport.image.height].forEach((zoom: number) => {
+        if (Math.abs(viewport.zoom - zoom) < ZOOM_LIMIT) {
+          viewport.zoom = zoom;
+        }
+      });
     });
 
     const cancelContextMenu: () => void = this.viewRenderer.listen('window', 'contextmenu', () => {

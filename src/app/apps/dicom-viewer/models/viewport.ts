@@ -19,6 +19,6 @@ export class Viewport {
     this.width = config.width;
     this.windowLevel = config.windowLevel;
     this.windowWidth = config.windowWidth;
-    this.zoom = config.zoom || 1;
+    this.zoom = config.zoom;
   }
 }

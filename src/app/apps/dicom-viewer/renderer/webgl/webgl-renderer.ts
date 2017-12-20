@@ -68,9 +68,8 @@ export class WebGLRenderer implements Renderer {
     const matrixLocation: WebGLUniformLocation = gl.getUniformLocation(this.program, 'u_matrix');
 
     // Convert dst pixel coordinates to clip space coordinates
-    const baseZoom: number = viewport.height / height;
-    const displayWidth: number = Math.round(width * baseZoom * viewport.zoom);
-    const displayHeight: number = Math.round(height * baseZoom * viewport.zoom);
+    const displayWidth: number = Math.round(width * viewport.zoom);
+    const displayHeight: number = Math.round(height * viewport.zoom);
     const clipX: number = (0.5 - displayWidth / viewport.width / 2 + viewport.deltaX) * 2 - 1;
     const clipY: number = (0.5 - displayHeight / viewport.height / 2 + viewport.deltaY) * -2 + 1;
     const clipWidth: number = displayWidth / viewport.width * 2;

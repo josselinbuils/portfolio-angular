@@ -38,10 +38,8 @@ export class CanvasRenderer implements Renderer {
       };
     }
 
-    const zoom: number = viewport.height / height * viewport.zoom;
-
-    const imageWidth: number = Math.round(width * zoom);
-    const imageHeight: number = Math.round(height * zoom);
+    const imageWidth: number = Math.round(width * viewport.zoom);
+    const imageHeight: number = Math.round(height * viewport.zoom);
 
     const y0: number = Math.round(((viewport.height - imageHeight) / 2 + viewport.deltaY * viewport.height));
     const y1: number = y0 + imageHeight - 1;
@@ -58,11 +56,11 @@ export class CanvasRenderer implements Renderer {
     const displayWidth: number = Math.max(displayX1 - displayX0 + 1, 0);
     const displayHeight: number = Math.max(displayY1 - displayY0 + 1, 0);
 
-    const imageY0: number = y0 < 0 ? Math.round(-y0 / zoom) : 0;
-    const imageY1: number = y1 > viewport.height ? height - Math.round((y1 - viewport.height) / zoom) : height;
+    const imageY0: number = y0 < 0 ? Math.round(-y0 / viewport.zoom) : 0;
+    const imageY1: number = y1 > viewport.height ? height - Math.round((y1 - viewport.height) / viewport.zoom) : height;
 
-    const imageX0: number = x0 < 0 ? Math.round(-x0 / zoom) : 0;
-    const imageX1: number = x1 > viewport.width ? width - Math.round((x1 - viewport.width) / zoom) : width;
+    const imageX0: number = x0 < 0 ? Math.round(-x0 / viewport.zoom) : 0;
+    const imageX1: number = x1 > viewport.width ? width - Math.round((x1 - viewport.width) / viewport.zoom) : width;
 
     const croppedImageWidth: number = imageX1 - imageX0;
     const croppedImageHeight: number = imageY1 - imageY0;

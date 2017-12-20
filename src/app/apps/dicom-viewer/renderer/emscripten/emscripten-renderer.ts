@@ -62,9 +62,8 @@ export class EmscriptenRenderer implements Renderer {
       };
     }
 
-    const zoom: number = viewport.height / height * viewport.zoom;
-    const imageWidth: number = Math.round(width * zoom);
-    const imageHeight: number = Math.round(height * zoom);
+    const imageWidth: number = Math.round(width * viewport.zoom);
+    const imageHeight: number = Math.round(height * viewport.zoom);
 
     const y0: number = Math.round(((viewport.height - imageHeight) / 2 + viewport.deltaY * viewport.height));
     const y1: number = y0 + imageHeight - 1;
@@ -100,7 +99,7 @@ export class EmscriptenRenderer implements Renderer {
 
         this.coreRender(
           this.lut.table.byteOffset, rawData.byteOffset, renderedData.byteOffset, width, x0, y0, displayX0, displayX1,
-          displayY0, displayY1, zoom, leftLimit, rightLimit, rescaleSlope, rescaleIntercept,
+          displayY0, displayY1, viewport.zoom, leftLimit, rightLimit, rescaleSlope, rescaleIntercept,
         );
 
         let imageData: ImageData;
