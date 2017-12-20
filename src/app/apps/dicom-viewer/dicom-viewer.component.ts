@@ -169,6 +169,34 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     this.startRender();
   }
 
+  startBenchmark(): void {
+    clearInterval(this.statsInterval);
+    this.frameDurations = [];
+    this.renderDurations = [];
+
+    setTimeout(() => {
+
+      const meanFrameDuration: number = this.frameDurations
+        .reduce((sum: number, d: number) => sum + d, 0) / this.frameDurations.length;
+
+      const meanRenderDuration: number = this.renderDurations
+        .reduce((sum: number, d: number) => sum + d, 0) / this.renderDurations.length;
+
+      console.log({
+        meanFrameDuration,
+        meanRenderDuration,
+        rendererType: this.config.rendererType,
+        dataset: this.config.dataset.name,
+        imageWidth: this.viewport.image.width,
+        imageHeight: this.viewport.image.height,
+        zoom: this.viewport.zoom,
+      });
+
+      this.back();
+
+    }, 15000);
+  }
+
   startPan(downEvent: MouseEvent): void {
     downEvent.preventDefault();
 
