@@ -182,7 +182,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       const meanRenderDuration: number = this.renderDurations
         .reduce((sum: number, d: number) => sum + d, 0) / this.renderDurations.length;
 
-      console.log({
+      const res: any = {
         meanFrameDuration,
         meanRenderDuration,
         rendererType: this.config.rendererType,
@@ -192,7 +192,9 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
         zoom: this.viewport.zoom,
         viewportWidth: this.viewport.width,
         viewportHeight: this.viewport.height,
-      });
+      };
+
+      setTimeout(() => console.log(res), 3000);
 
       this.back();
 
