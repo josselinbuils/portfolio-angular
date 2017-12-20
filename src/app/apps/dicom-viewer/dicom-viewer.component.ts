@@ -190,6 +190,8 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
         imageWidth: this.viewport.image.width,
         imageHeight: this.viewport.image.height,
         zoom: this.viewport.zoom,
+        viewportWidth: this.viewport.width,
+        viewportHeight: this.viewport.height,
       });
 
       this.back();
