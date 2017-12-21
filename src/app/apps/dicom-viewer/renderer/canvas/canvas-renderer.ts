@@ -43,7 +43,7 @@ export class CanvasRenderer implements Renderer {
     const croppedImageWidth: number = imageX1 - imageX0;
     const croppedImageHeight: number = imageY1 - imageY0;
 
-    if (viewport.zoom <= 0.8) {
+    if (viewport.zoom < 1) {
       this.jsRenderer.render(viewport);
       return;
     }
