@@ -2,7 +2,7 @@
             (resize)="onResize($event)">
   <div class="container">
     <app-config [hidden]="!showConfig" (config)="start($event)"></app-config>
-    <div #viewportElement class="viewport" [hidden]="showConfig" (dblclick)="startBenchmark()">
+    <div #viewportElement class="viewport" [hidden]="showConfig">
       <button (click)="back()">Back</button>
       <div *ngIf="!!viewport" class="overlay">
         <div class="overlay-top-left">

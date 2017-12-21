@@ -163,45 +163,10 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       height: windowNativeElement.clientHeight,
     });
 
-    this.viewport.zoom = 0.91; // Math.min(this.viewport.height / image.height, 1);
-    this.windowComponent.maximize();
-
-    setTimeout(() => this.startBenchmark(), 3000);
+    this.viewport.zoom = Math.min(this.viewport.height / image.height, 1);
 
     this.loading = false;
     this.startRender();
-  }
-
-  startBenchmark(): void {
-    clearInterval(this.statsInterval);
-    this.frameDurations = [];
-    this.renderDurations = [];
-
-    setTimeout(() => {
-
-      const meanFrameDuration: number = this.frameDurations
-        .reduce((sum: number, d: number) => sum + d, 0) / this.frameDurations.length;
-
-      const meanRenderDuration: number = this.renderDurations
-        .reduce((sum: number, d: number) => sum + d, 0) / this.renderDurations.length;
-
-      const res: any = {
-        meanFrameDuration: meanFrameDuration.toString().replace('.', ','),
-        meanRenderDuration: meanRenderDuration.toString().replace('.', ','),
-        rendererType: this.config.rendererType,
-        dataset: this.config.dataset.name,
-        imageWidth: this.viewport.image.width,
-        imageHeight: this.viewport.image.height,
-        zoom: this.viewport.zoom,
-        viewportWidth: this.viewport.width,
-        viewportHeight: this.viewport.height,
-      };
-
-      setTimeout(() => console.log(res), 3000);
-
-      this.back();
-
-    }, 15000);
   }
 
   startPan(downEvent: MouseEvent): void {
@@ -254,12 +219,19 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       viewport.zoom = startZoom - (moveEvent.clientY - startY) * ZOOM_SENSIBILITY / this.canvas.clientHeight;
       viewport.zoom = Math.min(Math.max(viewport.zoom, ZOOM_MIN), ZOOM_MAX);
 
-      // Helps to set zoom at 1 or to fit window
-      [1, viewport.height / viewport.image.height].forEach((zoom: number) => {
-        if (Math.abs(viewport.zoom - zoom) < ZOOM_LIMIT) {
-          viewport.zoom = zoom;
+      // Helps to set zoom at 1
+      if (Math.abs(viewport.zoom - 1) < ZOOM_LIMIT) {
+        viewport.zoom = 1;
+      }
+
+      // Helps to fit the viewport of image is centered
+      if (viewport.deltaX === 0 && viewport.deltaY === 0) {
+        const fitViewportZoom: number = viewport.height / viewport.image.height;
+
+        if (Math.abs(viewport.zoom - fitViewportZoom) < ZOOM_LIMIT) {
+          viewport.zoom = fitViewportZoom;
         }
-      });
+      }
     });
 
     const cancelContextMenu: () => void = this.viewRenderer.listen('window', 'contextmenu', () => {
