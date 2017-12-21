@@ -163,7 +163,10 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       height: windowNativeElement.clientHeight,
     });
 
-    this.viewport.zoom = Math.min(this.viewport.height / image.height, 1);
+    this.viewport.zoom = 0.91; // Math.min(this.viewport.height / image.height, 1);
+    this.windowComponent.maximize();
+
+    setTimeout(() => this.startBenchmark(), 3000);
 
     this.loading = false;
     this.startRender();
