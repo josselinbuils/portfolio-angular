@@ -186,8 +186,8 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
         .reduce((sum: number, d: number) => sum + d, 0) / this.renderDurations.length;
 
       const res: any = {
-        meanFrameDuration,
-        meanRenderDuration,
+        meanFrameDuration: meanFrameDuration.toString().replace('.', ','),
+        meanRenderDuration: meanRenderDuration.toString().replace('.', ','),
         rendererType: this.config.rendererType,
         dataset: this.config.dataset.name,
         imageWidth: this.viewport.image.width,
