@@ -51,7 +51,6 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
   contentStyle: any = {};
   prefix = 'user$';
   userInput = '';
-  scrollTop: number;
   title = TerminalComponent.appName;
 
   private commandIndex = 0;
@@ -139,7 +138,7 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
 
   ngAfterContentInit(): void {
     const terminal: HTMLElement = this.terminalElementRef.nativeElement;
-    new MutationObserver((): number => this.scrollTop = terminal.clientHeight)
+    new MutationObserver((): number => terminal.scrollTop = terminal.scrollHeight)
       .observe(terminal, {
         childList: true,
         subtree: true,

@@ -1,19 +1,29 @@
 import {
-  AfterContentInit, Component, ComponentRef, ElementRef, EventEmitter, HostListener, Input, Output, Renderer2, ViewChild
+  AfterContentInit,
+  Component,
+  ComponentRef,
+  ElementRef,
+  EventEmitter,
+  HostListener,
+  Input,
+  Output,
+  Renderer2,
+  ViewChild,
 } from '@angular/core';
 
 import { MOUSE_BUTTON } from '../../constants';
 import { DOMUtils } from '../dom-utils';
+
 import { WindowManagerService } from './window-manager.service';
 
-const ANIMATION_DURATION = 200;
-const DOM_UPDATE_DELAY = 10;
-const LEFT_OFFSET = 60;
+const ANIMATION_DURATION: number = 200;
+const DOM_UPDATE_DELAY: number = 10;
+const LEFT_OFFSET: number = 60;
 
 @Component({
   selector: 'app-window',
   templateUrl: './window.component.html',
-  styleUrls: ['./window.component.scss']
+  styleUrls: ['./window.component.scss'],
 })
 export class WindowComponent implements AfterContentInit {
   @ViewChild('content') contentElementRef: ElementRef;
@@ -23,10 +33,10 @@ export class WindowComponent implements AfterContentInit {
 
   @Input()
   set height(height: number) {
-    this._height = height;
+    this.effectiveHeight = height;
 
     if (this.contentInitialized) {
-      this.startAnimation().ready(() => this.setSize(this._width, height));
+      this.startAnimation().ready(() => this.setSize(this.effectiveWidth, height));
     }
   }
 
@@ -37,28 +47,21 @@ export class WindowComponent implements AfterContentInit {
   @Input() minWidth = 100;
   @Input() resizable = true;
 
-  @Input()
-  set scrollTop(value: number) {
-    if (this.content) {
-      this.content.scrollTop = value;
-    }
-  }
-
   @Input() titleBackground: string;
   @Input() titleColor: string;
 
   @Input()
   set width(width: number) {
-    this._width = width;
+    this.effectiveWidth = width;
 
     if (this.contentInitialized) {
-      this.startAnimation().ready(() => this.setSize(width, this._height));
+      this.startAnimation().ready(() => this.setSize(width, this.effectiveHeight));
     }
   }
 
   @Input() windowTitle: string;
 
-  @Output() resize = new EventEmitter<{ width: number, height: number }>();
+  @Output() resize = new EventEmitter<{ width: number; height: number }>();
 
   active = false;
   animate = false;
@@ -69,11 +72,11 @@ export class WindowComponent implements AfterContentInit {
   visible = true;
   zIndex: number;
 
-  private _height: number;
-  private _width: number;
   private content: HTMLElement;
   private contentInitialized = false;
   private contentRatio: number;
+  private effectiveHeight: number;
+  private effectiveWidth: number;
   private lastDisplayProperties: any = {};
   private minimizedTopPosition: number;
   private window: HTMLElement;
@@ -85,7 +88,7 @@ export class WindowComponent implements AfterContentInit {
     this.windowManagerService.closeWindow(this.id);
   }
 
-  hide() {
+  hide(): void {
     if (this.visible) {
       this.startAnimation()
         .ready(() => {
@@ -123,15 +126,51 @@ export class WindowComponent implements AfterContentInit {
     this.windowManagerService.hideWindow(this.id);
   }
 
+  ngAfterContentInit(): void {
+    let size: any = {};
+
+    this.content = this.contentElementRef.nativeElement;
+    this.window = this.windowElementRef.nativeElement;
+
+    if (!this.effectiveWidth || !this.effectiveHeight) {
+      size = this.getSize();
+    }
+
+    const width: number = this.effectiveWidth || size.width;
+    const height: number = this.effectiveHeight || size.height;
+
+    this.setSize(width, height);
+
+    size = this.getSize();
+    const x: number = Math.round((window.innerWidth - size.width) * 0.5);
+    const y: number = Math.round((window.innerHeight - size.height) * 0.2);
+
+    this.setPosition(x, y);
+
+    if (this.keepContentRatio) {
+      const contentSize: any = this.getContentSize();
+      this.contentRatio = contentSize.width / contentSize.height;
+    }
+
+    this.contentInitialized = true;
+  }
+
+  @HostListener('window:resize')
+  resizeHandler(): void {
+    if (this.maximized) {
+      this.setMaxSize();
+    }
+  }
+
   select(): void {
     this.windowManagerService.selectWindow(this.id);
   }
 
-  setMinimizedTopPosition(top: number) {
+  setMinimizedTopPosition(top: number): void {
     this.minimizedTopPosition = top;
   }
 
-  show() {
+  show(): void {
     if (!this.visible && this.lastDisplayProperties.minimize) {
       this.startAnimation()
         .ready(() => {
@@ -159,7 +198,7 @@ export class WindowComponent implements AfterContentInit {
     const windowBoundingRect: any = this.window.getBoundingClientRect();
     const dx: number = windowBoundingRect.left - downEvent.clientX;
     const dy: number = windowBoundingRect.top - downEvent.clientY;
-    let maximized = this.maximized;
+    let maximized: boolean = this.maximized;
 
     this.setSelectable(false);
 
@@ -192,16 +231,16 @@ export class WindowComponent implements AfterContentInit {
 
     this.setSelectable(false);
 
-    const startSize = this.getSize();
+    const startSize: any = this.getSize();
 
     const cancelMouseMove: () => void = this.renderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
-      const width = startSize.width + moveEvent.clientX - downEvent.clientX;
-      const height = startSize.height + moveEvent.clientY - downEvent.clientY;
+      const width: number = startSize.width + moveEvent.clientX - downEvent.clientX;
+      const height: number = startSize.height + moveEvent.clientY - downEvent.clientY;
       this.setSize(width, height);
     });
 
     const cancelMouseUp: () => void = this.renderer.listen('window', 'mouseup', () => {
-      const size = this.getSize();
+      const size: any = this.getSize();
       this.setSize(size.width, size.height);
       this.setSelectable(true);
       cancelMouseMove();
@@ -209,23 +248,23 @@ export class WindowComponent implements AfterContentInit {
     });
   }
 
-  private getContentSize(): { width: number, height: number } {
+  private getContentSize(): { width: number; height: number } {
     return {
       width: this.content.clientWidth,
-      height: this.content.clientHeight
+      height: this.content.clientHeight,
     };
   }
 
-  private getSize(): { width: number, height: number } {
+  private getSize(): { width: number; height: number } {
     return {
       width: this.window.clientWidth,
-      height: this.window.clientHeight
+      height: this.window.clientHeight,
     };
   }
 
   private setMaxSize(): void {
-    const maxWidth = window.innerWidth - LEFT_OFFSET;
-    const maxHeight = window.innerHeight;
+    const maxWidth: number = window.innerWidth - LEFT_OFFSET;
+    const maxHeight: number = window.innerHeight;
     this.setSize(maxWidth, maxHeight, true);
   }
 
@@ -233,17 +272,17 @@ export class WindowComponent implements AfterContentInit {
 
     if (!force) {
       // This cannot be done when showing again a minimized window because its dimensions are null
-      const xMin = -this.getSize().width + 90;
-      const yMin = -1;
-      const xMax = window.innerWidth - 30;
-      const yMax = window.innerHeight - 21;
+      const xMin: number = -this.getSize().width + 90;
+      const yMin: number = -1;
+      const xMax: number = window.innerWidth - 30;
+      const yMax: number = window.innerHeight - 21;
 
       x = Math.min(Math.max(x, xMin), xMax);
       y = Math.min(Math.max(y, yMin), yMax);
     }
 
-    this.setStyle('left', x + 'px');
-    this.setStyle('top', y + 'px');
+    this.setStyle('left', `${x}px`);
+    this.setStyle('top', `${y}px`);
   }
 
   private setSelectable(selectable: boolean): void {
@@ -271,16 +310,16 @@ export class WindowComponent implements AfterContentInit {
       }
 
       if (this.contentRatio) {
-        const size = this.getSize();
-        const contentSize = this.getContentSize();
-        const dx = size.width - contentSize.width;
-        const dy = size.height - contentSize.height;
+        const size: any = this.getSize();
+        const contentSize: any = this.getContentSize();
+        const dx: number = size.width - contentSize.width;
+        const dy: number = size.height - contentSize.height;
         height = Math.round((width - dx) / this.contentRatio) + dy;
       }
     }
 
-    this.setStyle('width', width + 'px');
-    this.setStyle('height', height + 'px');
+    this.setStyle('width', `${width}px`);
+    this.setStyle('height', `${height}px`);
 
     this.resize.emit({width, height});
   }
@@ -293,15 +332,15 @@ export class WindowComponent implements AfterContentInit {
     let finished: () => void;
     let ready: () => void;
 
-    const windowAnimation = {
-      finished: (finishedCallback: () => void) => {
+    const windowAnimation: WindowAnimation = {
+      finished: (finishedCallback: () => void): WindowAnimation => {
         finished = finishedCallback;
         return windowAnimation;
       },
-      ready: (readyCallback: () => void) => {
+      ready: (readyCallback: () => void): WindowAnimation => {
         ready = readyCallback;
         return windowAnimation;
-      }
+      },
     };
 
     this.animate = true;
@@ -323,45 +362,9 @@ export class WindowComponent implements AfterContentInit {
 
     return windowAnimation;
   }
-
-  @HostListener('window:resize')
-  resizeHandler(): void {
-    if (this.maximized) {
-      this.setMaxSize();
-    }
-  }
-
-  ngAfterContentInit(): void {
-    let size: any = {};
-
-    this.content = this.contentElementRef.nativeElement;
-    this.window = this.windowElementRef.nativeElement;
-
-    if (!this._width || !this._height) {
-      size = this.getSize();
-    }
-
-    const width = this._width || size.width;
-    const height = this._height || size.height;
-
-    this.setSize(width, height);
-
-    size = this.getSize();
-    const x: number = Math.round((window.innerWidth - size.width) * 0.5);
-    const y: number = Math.round((window.innerHeight - size.height) * 0.2);
-
-    this.setPosition(x, y);
-
-    if (this.keepContentRatio) {
-      const contentSize = this.getContentSize();
-      this.contentRatio = contentSize.width / contentSize.height;
-    }
-
-    this.contentInitialized = true;
-  }
 }
 
 interface WindowAnimation {
-  finished: (finishedCallback: () => void) => WindowAnimation;
-  ready: (readyCallback: () => void) => WindowAnimation;
+  finished(finishedCallback: () => void): WindowAnimation;
+  ready(readyCallback: () => void): WindowAnimation;
 }
