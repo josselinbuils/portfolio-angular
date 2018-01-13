@@ -1,6 +1,7 @@
+$background-color: #111625;
 $primary-color: #007ad8;
-$secondary-color: #3c3c3c;
-$text-color: #efefef;
+$secondary-color: lighten($background-color, 10%);
+$text-color: lighten($background-color, 80%);
 
 * {
   user-select: none;
@@ -116,9 +117,33 @@ audio {
         }
 
         tr {
-          border-bottom: 1px solid $secondary-color;
+          border-bottom: 1px solid lighten($background-color, 5%);
           color: $text-color;
 
+          .col-album {
+            width: 20%;
+          }
+
+          .col-artist {
+            width: 20%;
+          }
+
+          .col-duration {
+            width: 9%;
+            padding-right: 10px;
+          }
+
+          .col-preview {
+            width: 32px;
+            padding-left: 7px;
+          }
+
+          .col-release {
+            width: 15%;
+          }
+        }
+
+        tbody tr {
           &.active {
             color: $primary-color;
 
@@ -138,41 +163,25 @@ audio {
             }
           }
 
-          &:hover .inline-music-preview {
-            background-color: transparent;
-            background-image: none !important;
+          &:hover {
+            background: lighten($background-color, 2%);
 
-            i {
-              display: inherit;
+            .inline-music-preview {
+              background-color: transparent;
+              background-image: none !important;
+
+              i {
+                display: inherit;
+              }
+
+              i:active {
+                color: $primary-color;
+              }
+
+              i:hover:not(:active) {
+                color: lighten($text-color, 10%);
+              }
             }
-
-            i:active {
-              color: $primary-color;
-            }
-
-            i:hover:not(:active) {
-              color: lighten($text-color, 10%);
-            }
-          }
-
-          .col-album {
-            width: 20%;
-          }
-
-          .col-artist {
-            width: 20%;
-          }
-
-          .col-duration {
-            width: 9%;
-          }
-
-          .col-preview {
-            width: 32px;
-          }
-
-          .col-release {
-            width: 15%;
           }
 
           .inline-music-preview {
@@ -229,7 +238,7 @@ audio {
 
       .brand {
         font-size: 0.8em;
-        color: $secondary-color !important;
+        color: lighten($secondary-color, 10%) !important;
         cursor: pointer;
         text-decoration: none;
         margin-top: 5px;
