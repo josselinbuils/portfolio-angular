@@ -1,4 +1,6 @@
-@import '~font-awesome/css/font-awesome.css';
+$fa-font-path: '~font-awesome/fonts';
+
+@import '~font-awesome/scss/font-awesome';
 
 a, a:hover, a:focus, a:active {
   color: inherit !important;
