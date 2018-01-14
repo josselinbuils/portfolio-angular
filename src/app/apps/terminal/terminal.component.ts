@@ -6,6 +6,7 @@ import {
 import { WindowInstance } from '../../platform/window/window-instance';
 import { WindowManagerService } from '../../platform/window/window-manager.service';
 import { WindowComponent } from '../../platform/window/window.component';
+import { DicomViewerComponent } from '../dicom-viewer/dicom-viewer.component';
 
 import { AboutComponent } from './executors/about/about.component';
 import { BashErrorComponent } from './executors/bash-error/bash-error.component';
@@ -30,6 +31,7 @@ const executors: any = {
   about: AboutComponent,
   help: HelpComponent,
   projects: ProjectsComponent,
+  dicomviewer: DicomViewerComponent,
   skills: SkillsComponent,
   work: WorkComponent,
 };
