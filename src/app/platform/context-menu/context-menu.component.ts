@@ -20,13 +20,13 @@ export class ContextMenuComponent {
 
   private destroyMouseDownListener: () => void;
 
-  constructor(private contextMenuService: ContextMenuService, private renderer: Renderer2) {
-    contextMenuService.showSubject.subscribe(descriptor => {
+  constructor(contextMenuService: ContextMenuService, private renderer: Renderer2) {
+    contextMenuService.showSubject.subscribe((descriptor: ContextMenuDescriptor) => {
       descriptor.event.preventDefault();
 
       this.descriptor = descriptor;
 
-      if (descriptor.position) {
+      if (descriptor.position !== undefined) {
         this.style['top.px'] = descriptor.position.top;
         this.style['left.px'] = descriptor.position.left;
       } else {
@@ -34,7 +34,7 @@ export class ContextMenuComponent {
         this.style['left.px'] = descriptor.event.clientX;
       }
 
-      if (descriptor.style) {
+      if (descriptor.style !== undefined) {
         Object.assign(this.style, descriptor.style);
       }
 
@@ -60,7 +60,7 @@ export class ContextMenuComponent {
       return;
     }
 
-    const isContextMenuChild = !!DOMUtils.closest(<HTMLElement> event.target, '.context-menu');
+    const isContextMenuChild: boolean = DOMUtils.closest(<HTMLElement> event.target, '.context-menu') !== undefined;
 
     if (!isContextMenuChild) {
       this.hideMenu();

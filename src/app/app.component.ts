@@ -1,5 +1,5 @@
 import {
-  AfterContentInit, Component, ElementRef, HostListener, Renderer2, ViewChild, ViewContainerRef,
+  AfterContentInit, Component, HostListener, Renderer2, ViewChild, ViewContainerRef,
 } from '@angular/core';
 
 import { TerminalComponent } from './apps/terminal/terminal.component';
@@ -12,15 +12,25 @@ import { WindowManagerService } from './platform/window/window-manager.service';
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent implements AfterContentInit {
-  @ViewChild('selection') selectionElementRef: ElementRef;
   @ViewChild('windows', {read: ViewContainerRef}) windowsViewContainerRef: ViewContainerRef;
 
   selectionStyle: any = null;
 
-  private selection: HTMLElement;
-
   constructor(private renderer: Renderer2, private viewContainerRef: ViewContainerRef,
               private windowManagerService: WindowManagerService) {
+  }
+
+  ngAfterContentInit(): void {
+    this.windowManagerService.setViewContainerRef(this.windowsViewContainerRef);
+    this.windowManagerService.openWindow(TerminalComponent);
+  }
+
+  @HostListener('mousedown', ['$event'])
+  mouseDownListener(event: MouseEvent): void {
+    if (event.target === this.viewContainerRef.element.nativeElement) {
+      this.windowManagerService.unselectAllWindows();
+      this.startSelect(event);
+    }
   }
 
   private startSelect(downEvent: MouseEvent): void {
@@ -52,19 +62,5 @@ export class AppComponent implements AfterContentInit {
       cancelMouseMove();
       cancelMouseUp();
     });
-  }
-
-  @HostListener('mousedown', ['$event'])
-  mouseDownListener(event: MouseEvent): void {
-    if (event.target === this.viewContainerRef.element.nativeElement) {
-      this.windowManagerService.unselectAllWindows();
-      this.startSelect(event);
-    }
-  }
-
-  ngAfterContentInit() {
-    this.windowManagerService.setViewContainerRef(this.windowsViewContainerRef);
-    this.windowManagerService.openWindow(TerminalComponent);
-    this.selection = this.selectionElementRef.nativeElement;
   }
 }

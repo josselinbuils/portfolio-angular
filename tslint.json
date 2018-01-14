@@ -12,7 +12,6 @@
       true,
       "check-space"
     ],
-    "completed-docs": true,
     "curly": true,
     "cyclomatic-complexity": true,
     "deprecation": true,
@@ -26,8 +25,7 @@
     ],
     "import-blacklist": [
       true,
-      "rxjs",
-      "lodash"
+      "rxjs"
     ],
     "import-spacing": true,
     "interface-name": [
@@ -35,10 +33,6 @@
       "never-prefix"
     ],
     "interface-over-type-literal": true,
-    "jsdoc-format": [
-      true,
-      "check-multiline-start"
-    ],
     "label-position": true,
     "match-default-export-name": true,
     "max-classes-per-file": [
@@ -120,14 +114,13 @@
     ],
     "no-unnecessary-initializer": true,
     "no-unnecessary-qualifier": true,
-    "no-unsafe-any": true,
     "no-unsafe-finally": true,
     "no-unused-expression": true,
     "no-unused-variable": [
       true,
       "check-parameters"
     ],
-    "no-use-before-declare": true,
+    "no-use-before-declare": false,
     "no-var-keyword": true,
     "number-literal-format": true,
     "object-literal-key-quotes": [
@@ -135,11 +128,6 @@
       "as-needed"
     ],
     "object-literal-shorthand": true,
-    "object-literal-sort-keys": [
-      true,
-      "ignore-case",
-      "match-declaration-order"
-    ],
     "one-line": true,
     "one-variable-per-declaration": true,
     "only-arrow-functions": [
@@ -150,14 +138,8 @@
       true,
       {
         "import-sources-order": "case-insensitive",
-        "grouped-imports": true,
-        "named-imports-order": "case-insensitive",
-        "module-source-path": "full"
+        "named-imports-order": "case-insensitive"
       }
-    ],
-    "prefer-conditional-expression": [
-      true,
-      "check-else-if"
     ],
     "prefer-const": true,
     "prefer-for-of": true,

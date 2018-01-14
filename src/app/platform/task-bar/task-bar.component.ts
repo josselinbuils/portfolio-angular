@@ -28,7 +28,7 @@ export class TaskBarComponent {
   constructor(private contextMenuService: ContextMenuService, private viewContainerRef: ViewContainerRef,
               private windowManagerService: WindowManagerService) {
 
-    windowManagerService.windowInstancesSubject.subscribe(windowInstances => {
+    windowManagerService.windowInstancesSubject.subscribe((windowInstances: WindowInstance[]) => {
       this.removeOutdatedTasks(windowInstances);
       this.addNewTasks(windowInstances);
       this.removeDuplicatedTasks();
@@ -36,16 +36,16 @@ export class TaskBarComponent {
   }
 
   addNewTasks(windowInstances: WindowInstance[]): void {
-    windowInstances.forEach(windowInstance => {
-      const refTask = this.tasks.find(task => windowInstance instanceof task.component);
+    windowInstances.forEach((windowInstance: WindowInstance) => {
+      const refTask: Task = this.tasks.find((task: Task) => windowInstance instanceof task.component);
 
-      if (!refTask) {
+      if (refTask === undefined) {
         throw Error('Unknown task');
       }
 
-      let newTask;
+      let newTask: Task;
 
-      if (!refTask.instance) {
+      if (refTask.instance === undefined) {
         refTask.instance = windowInstance;
         newTask = refTask;
       } else if (refTask.instance !== windowInstance) {
@@ -53,10 +53,10 @@ export class TaskBarComponent {
         newTask = this.tasks[this.tasks.length - 1];
       }
 
-      if (newTask) {
+      if (newTask instanceof Task) {
         setTimeout(() => {
-          const taskClientRect = document.getElementById(newTask.id).getBoundingClientRect();
-          const topPosition = Math.round(taskClientRect.top + taskClientRect.height / 3);
+          const taskClientRect: { top: number; height: number } = document.getElementById(newTask.id).getBoundingClientRect();
+          const topPosition: number = Math.round(taskClientRect.top + taskClientRect.height / 3);
           windowInstance.windowComponent.setMinimizedTopPosition(topPosition);
         });
       }
@@ -64,23 +64,23 @@ export class TaskBarComponent {
   }
 
   openContextMenu(task: Task, event: MouseEvent): void {
-    const taskBarElement = this.viewContainerRef.element.nativeElement;
-    const taskElement = DOMUtils.closest(<HTMLElement> event.target, '.task');
+    const taskBarElement: HTMLElement = this.viewContainerRef.element.nativeElement;
+    const taskElement: HTMLElement = DOMUtils.closest(<HTMLElement> event.target, '.task');
 
-    const left = taskBarElement.getBoundingClientRect().right;
-    const top = taskElement.getBoundingClientRect().top;
+    const left: number = taskBarElement.getBoundingClientRect().right;
+    const top: number = taskElement.getBoundingClientRect().top;
 
     const items: ContextMenuItem[] = [{
       iconClass: task.iconClass,
       title: task.name,
-      click: () => this.windowManagerService.openWindow(task.component),
+      click: (): void => this.windowManagerService.openWindow(task.component),
     }];
 
-    if (task.instance) {
+    if (task.instance instanceof Task) {
       items.push({
         iconClass: 'fa-close',
         title: 'Close',
-        click: () => this.windowManagerService.closeWindow(task.instance.windowComponent.id),
+        click: (): void => this.windowManagerService.closeWindow(task.instance.windowComponent.id),
       });
     }
 
@@ -94,18 +94,18 @@ export class TaskBarComponent {
       style: {
         'border-top-left-radius': 0,
         'border-bottom-left-radius': 0,
-        'min-height': taskElement.clientHeight + 'px',
+        'min-height': `${taskElement.clientHeight}px`,
       },
     });
   }
 
   // Tasks can be duplicated if several instances of the same component are opened and one of the first ones is stopped
   removeDuplicatedTasks(): void {
-    for (let i = this.tasks.length - 1; i > 0; i--) {
-      for (let j = 0; j < i; j++) {
-        const instance = this.tasks[j].instance;
+    for (let i: number = this.tasks.length - 1; i > 0; i--) {
+      for (let j: number = 0; j < i; j++) {
+        const instance: WindowInstance = this.tasks[j].instance;
 
-        if (instance && instance === this.tasks[i].instance) {
+        if (instance instanceof WindowInstance && instance === this.tasks[i].instance) {
           this.tasks.splice(i, 1);
         }
       }
@@ -113,10 +113,10 @@ export class TaskBarComponent {
   }
 
   removeOutdatedTasks(windowInstances: WindowInstance[]): void {
-    this.tasks.forEach((task, index) => {
-      if (task.instance && windowInstances.indexOf(task.instance) === -1) {
+    this.tasks.forEach((task: Task, index: number) => {
+      if (task.instance instanceof WindowInstance && windowInstances.indexOf(task.instance) === -1) {
         if (task.pinned) {
-          task.instance = null;
+          delete task.instance;
         } else {
           this.tasks.splice(index, 1);
         }
@@ -124,9 +124,9 @@ export class TaskBarComponent {
     });
   }
 
-  run(task: Task) {
-    if (task.instance) {
-      const id = task.instance.windowComponent.id;
+  run(task: Task): void {
+    if (task.instance instanceof WindowInstance) {
+      const id: number = task.instance.windowComponent.id;
 
       if (this.windowManagerService.isWindowVisible(id)) {
         if (this.windowManagerService.isWindowSelected(id)) {

@@ -4,7 +4,6 @@ import {
 } from '@angular/core';
 
 import { WindowInstance } from '../../platform/window/window-instance';
-import { WindowManagerService } from '../../platform/window/window-manager.service';
 import { WindowComponent } from '../../platform/window/window.component';
 import { DicomViewerComponent } from '../dicom-viewer/dicom-viewer.component';
 
@@ -59,7 +58,7 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
   private commands: string[] = [];
   private components: ComponentRef<{}>[] = [];
 
-  constructor(private componentFactoryResolver: ComponentFactoryResolver, private windowManagerService: WindowManagerService) {
+  constructor(private componentFactoryResolver: ComponentFactoryResolver) {
   }
 
   @HostListener('window:keydown', ['$event'])
@@ -84,53 +83,7 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
       this.caretIndex++;
 
     } else if (!event.altKey && !event.ctrlKey && !event.metaKey) {
-      switch (event.keyCode) {
-
-        case KEY_CODE.BACK_SPACE:
-          event.preventDefault();
-          if (this.caretIndex > 0) {
-            this.userInput = this.userInput.slice(0, this.caretIndex - 1) + this.userInput.slice(this.caretIndex);
-            this.caretIndex--;
-          }
-          break;
-
-        case KEY_CODE.ENTER:
-          event.preventDefault();
-          this.exec(this.userInput);
-          this.userInput = '';
-          break;
-
-        case KEY_CODE.DOWN:
-          event.preventDefault();
-          if (this.commandIndex < (this.commands.length - 1)) {
-            this.commandIndex++;
-            this.userInput = this.commands[this.commandIndex];
-            this.caretIndex = this.userInput.length;
-          }
-          break;
-
-        case KEY_CODE.LEFT:
-          event.preventDefault();
-          if (this.caretIndex > 0) {
-            this.caretIndex--;
-          }
-          break;
-
-        case KEY_CODE.RIGHT:
-          event.preventDefault();
-          if (this.caretIndex < this.userInput.length) {
-            this.caretIndex++;
-          }
-          break;
-
-        case KEY_CODE.UP:
-          event.preventDefault();
-          if (this.commandIndex > 0) {
-            this.commandIndex--;
-            this.userInput = this.commands[this.commandIndex];
-            this.caretIndex = this.userInput.length;
-          }
-      }
+      this.navigate(event);
     }
   }
 
@@ -183,5 +136,55 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
     const componentRef: ComponentRef<{}> = this.commandsViewContainerRef.createComponent(componentFactory);
     (<Executor> componentRef.instance).args = args;
     this.components.push(componentRef);
+  }
+
+  private navigate(event: KeyboardEvent): void {
+    switch (event.keyCode) {
+
+      case KEY_CODE.BACK_SPACE:
+        event.preventDefault();
+        if (this.caretIndex > 0) {
+          this.userInput = this.userInput.slice(0, this.caretIndex - 1) + this.userInput.slice(this.caretIndex);
+          this.caretIndex--;
+        }
+        break;
+
+      case KEY_CODE.ENTER:
+        event.preventDefault();
+        this.exec(this.userInput);
+        this.userInput = '';
+        break;
+
+      case KEY_CODE.DOWN:
+        event.preventDefault();
+        if (this.commandIndex < (this.commands.length - 1)) {
+          this.commandIndex++;
+          this.userInput = this.commands[this.commandIndex];
+          this.caretIndex = this.userInput.length;
+        }
+        break;
+
+      case KEY_CODE.LEFT:
+        event.preventDefault();
+        if (this.caretIndex > 0) {
+          this.caretIndex--;
+        }
+        break;
+
+      case KEY_CODE.RIGHT:
+        event.preventDefault();
+        if (this.caretIndex < this.userInput.length) {
+          this.caretIndex++;
+        }
+        break;
+
+      case KEY_CODE.UP:
+        event.preventDefault();
+        if (this.commandIndex > 0) {
+          this.commandIndex--;
+          this.userInput = this.commands[this.commandIndex];
+          this.caretIndex = this.userInput.length;
+        }
+    }
   }
 }

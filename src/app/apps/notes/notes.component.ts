@@ -27,7 +27,9 @@ export class NotesComponent implements WindowInstance {
   title = NotesComponent.appName;
 
   constructor() {
-    this.notes = localStorage.getItem('notes') || 'Hello there 😃';
+    this.notes = typeof localStorage.getItem('notes') === 'string'
+      ? localStorage.getItem('notes')
+      : 'Hello there 😃';
   }
 
   saveNotes(): void {

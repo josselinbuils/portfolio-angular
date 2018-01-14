@@ -67,18 +67,20 @@ import 'intl';  // Run `npm install --save intl`.
  */
 import 'intl/locale-data/jsonp/en';
 
-if (!Element.prototype.matches) {
+if (Element.prototype.matches === undefined) {
   Element.prototype.matches =
-    (<any> Element).prototype.matchesSelector ||
-    (<any> Element).prototype.mozMatchesSelector ||
-    (<any> Element).prototype.msMatchesSelector ||
-    (<any> Element).prototype.oMatchesSelector ||
-    (<any> Element).prototype.webkitMatchesSelector ||
-    function (s: string): boolean {
-      const matches: any = (this.document || this.ownerDocument).querySelectorAll(s);
-      let i: number = matches.length;
-      while (--i >= 0 && matches.item(i) !== this) {
-      }
-      return i > -1;
-    };
+    [
+      (<any> Element).prototype.matchesSelector,
+      (<any> Element).prototype.mozMatchesSelector,
+      (<any> Element).prototype.msMatchesSelector,
+      (<any> Element).prototype.oMatchesSelector,
+      (<any> Element).prototype.webkitMatchesSelector,
+      function (s: string): boolean {
+        const matches: any = (this.document || this.ownerDocument).querySelectorAll(s);
+        let i: number = matches.length;
+        while (--i >= 0 && matches.item(i) !== this) {
+        }
+        return i > -1;
+      },
+    ].find((method: Function) => typeof method === 'function');
 }

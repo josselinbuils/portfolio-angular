@@ -37,14 +37,14 @@ export class RedditComponent implements OnInit, WindowInstance {
       .first()
       .toPromise();
 
-    this.data.forEach(link => {
+    this.data.forEach((link: any) => {
       link.since = moment(link.created_utc * 1000).fromNow();
       link.showSubreddit = path.indexOf('/r/') !== 0 || path.split('/')[2] === 'popular';
       link.previewUrl = get(link, 'preview.images[0].resolutions[1].url');
     });
   }
 
-  ngOnInit() {
-    this.load('/r/popular/hot');
+  async ngOnInit(): Promise<void> {
+    await this.load('/r/popular/hot');
   }
 }

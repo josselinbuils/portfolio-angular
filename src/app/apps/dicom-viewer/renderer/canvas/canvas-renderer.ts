@@ -9,7 +9,6 @@ export class CanvasRenderer implements Renderer {
   private jsRenderer: JsRenderer;
   private lut: any;
   private renderingContext: CanvasRenderingContext2D;
-  private renderingProperties: any;
 
   constructor(canvas: HTMLCanvasElement) {
     this.context = canvas.getContext('2d');
@@ -24,14 +23,14 @@ export class CanvasRenderer implements Renderer {
     this.context.fillStyle = 'black';
     this.context.fillRect(0, 0, viewport.width, viewport.height);
 
-    const {height, imageFormat, pixelData, rescaleIntercept, rescaleSlope, width} = viewport.image;
+    const {height, pixelData, rescaleIntercept, rescaleSlope, width} = viewport.image;
 
     if (!this.lut || this.lut.windowWidth !== viewport.windowWidth) {
       this.lut = this.jsRenderer.getVOILut(viewport);
     }
 
     const {
-      displayHeight, displayWidth, displayX0, displayX1, displayY0, displayY1, leftLimit, rightLimit, x0, x1, y0, y1,
+      displayHeight, displayWidth, displayX0, displayY0, leftLimit, rightLimit, x0, x1, y0, y1,
     } = getRenderingProperties(viewport);
 
     const imageY0: number = y0 < 0 ? Math.round(-y0 / viewport.zoom) : 0;
@@ -86,6 +85,6 @@ export class CanvasRenderer implements Renderer {
     this.context.drawImage(this.renderingContext.canvas, displayX0, displayY0, displayWidth, displayHeight);
   }
 
-  resize(viewport: Viewport): void {
+  resize(): void {
   }
 }

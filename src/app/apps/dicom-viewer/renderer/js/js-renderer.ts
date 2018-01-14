@@ -29,7 +29,7 @@ export class JsRenderer implements Renderer {
     this.context.fillStyle = 'black';
     this.context.fillRect(0, 0, viewport.width, viewport.height);
 
-    const {height, imageFormat, pixelData, rescaleIntercept, rescaleSlope, width} = viewport.image;
+    const {pixelData, rescaleIntercept, rescaleSlope, width} = viewport.image;
 
     if (!this.lut || this.lut.windowWidth !== viewport.windowWidth) {
       this.lut = this.getVOILut(viewport);
@@ -69,6 +69,6 @@ export class JsRenderer implements Renderer {
     }
   }
 
-  resize(viewport: Viewport): void {
+  resize(): void {
   }
 }

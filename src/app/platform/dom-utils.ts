@@ -5,9 +5,9 @@ export class DOMUtils {
    *
    * @see {@link https://api.jquery.com/closest|jQuery documentation}
    *
-   * @param {HTMLElement} element Element to check first
-   * @param {string} selector Selector to find
-   * @returns {HTMLElement|null} Element if found, null otherwise
+   * @param element Element to check first
+   * @param selector Selector to find
+   * @returns Element if found, null otherwise
    */
   static closest(element: HTMLElement, selector: string): HTMLElement {
 
@@ -15,8 +15,11 @@ export class DOMUtils {
       if ((<any> element).matches(selector)) {
         return element;
       }
-    } while (element = element.parentElement);
 
-    return null;
+      element = element.parentElement;
+
+    } while (element !== undefined);
+
+    return undefined;
   }
 }

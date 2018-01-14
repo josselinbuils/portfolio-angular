@@ -11,7 +11,7 @@ export class CommandComponent implements Executor, OnInit {
   args: string[];
   command: string;
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.command = this.args.join(' ');
   }
 }

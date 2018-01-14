@@ -59,7 +59,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
 
   back(): void {
 
-    if (this.canvas) {
+    if (this.canvas instanceof HTMLCanvasElement) {
       this.viewRenderer.removeChild(this.viewportElementRef.nativeElement, this.canvas);
     }
 
@@ -75,7 +75,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
 
   ngOnDestroy(): void {
 
-    if (this.renderer) {
+    if (this.renderer !== undefined) {
       this.renderer.destroy();
       delete this.renderer;
     }
@@ -89,14 +89,14 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
 
     size.height -= 42;
 
-    if (viewRenderer && viewport) {
+    if (viewRenderer instanceof Renderer2 && viewport !== undefined) {
       viewRenderer.setAttribute(this.canvas, 'width', size.width.toString());
       viewRenderer.setAttribute(this.canvas, 'height', size.height.toString());
 
       viewport.width = size.width;
       viewport.height = size.height;
 
-      if (this.renderer) {
+      if (this.renderer !== undefined) {
         this.renderer.resize(viewport);
       }
     }
@@ -116,7 +116,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     console.log(this.dicomProperties);
 
     const {
-      height, imageFormat, pixelRepresentation, rescaleIntercept, rescaleSlope, width, windowLevel, windowWidth,
+      height, imageFormat, rescaleIntercept, rescaleSlope, width, windowLevel, windowWidth,
     } = this.dicomProperties;
 
     let {pixelData} = this.dicomProperties;
@@ -300,11 +300,24 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       const patientName: string = dataset.string('x00100010');
       const photometricInterpretation: string = dataset.string('x00280004');
       const pixelRepresentation: number = dataset.uint16('x00280103');
-      const rescaleIntercept: number = dataset.intString('x00281052') || 0;
-      const rescaleSlope: number = dataset.floatString('x00281053') || 1;
+
+      const rescaleIntercept: number = typeof dataset.intString('x00281052') === 'number'
+        ? dataset.intString('x00281052')
+        : 0;
+
+      const rescaleSlope: number = typeof dataset.floatString('x00281053') === 'number'
+        ? dataset.floatString('x00281053')
+        : 1;
+
       const width: number = dataset.uint16('x00280011');
-      const windowLevel: number = dataset.intString('x00281050') || 30;
-      const windowWidth: number = dataset.intString('x00281051') || 400;
+
+      const windowLevel: number = typeof dataset.intString('x00281050') === 'number'
+        ? dataset.intString('x00281050')
+        : 30;
+
+      const windowWidth: number = typeof  dataset.intString('x00281051') === 'number'
+        ? dataset.intString('x00281051')
+        : 400;
 
       const imageFormat: string = this.getImageFormat(bitsAllocated, photometricInterpretation, pixelRepresentation);
 
@@ -351,11 +364,9 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   }
 
   private startRender(): void {
-    const {width, height} = this.dicomProperties;
-
     const render: () => void = (): void => {
 
-      if (!this.renderer) {
+      if (this.renderer === undefined) {
         return;
       }
 

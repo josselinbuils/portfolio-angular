@@ -132,12 +132,17 @@ export class WindowComponent implements AfterContentInit {
     this.content = this.contentElementRef.nativeElement;
     this.window = this.windowElementRef.nativeElement;
 
-    if (!this.effectiveWidth || !this.effectiveHeight) {
+    if (typeof this.effectiveWidth !== 'number' || typeof this.effectiveHeight !== 'number') {
       size = this.getSize();
     }
 
-    const width: number = this.effectiveWidth || size.width;
-    const height: number = this.effectiveHeight || size.height;
+    const width: number = typeof this.effectiveWidth === 'number'
+      ? this.effectiveWidth
+      : size.width;
+
+    const height: number = typeof this.effectiveHeight === 'number'
+      ? this.effectiveHeight
+      : size.height;
 
     this.setSize(width, height);
 
@@ -191,7 +196,7 @@ export class WindowComponent implements AfterContentInit {
 
     downEvent.preventDefault();
 
-    if (DOMUtils.closest(<HTMLElement> downEvent.target, '.button')) {
+    if (DOMUtils.closest(<HTMLElement> downEvent.target, '.button') !== undefined) {
       return;
     }
 
@@ -231,7 +236,7 @@ export class WindowComponent implements AfterContentInit {
 
     this.setSelectable(false);
 
-    const startSize: any = this.getSize();
+    const startSize: { width: number; height: number } = this.getSize();
 
     const cancelMouseMove: () => void = this.renderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
       const width: number = startSize.width + moveEvent.clientX - downEvent.clientX;
@@ -301,15 +306,15 @@ export class WindowComponent implements AfterContentInit {
       width = Math.max(width, this.minWidth);
       height = Math.max(height, this.minHeight);
 
-      if (this.maxWidth) {
+      if (typeof this.maxWidth === 'number') {
         width = Math.min(width, this.maxWidth);
       }
 
-      if (this.maxHeight) {
+      if (typeof this.maxHeight === 'number') {
         height = Math.min(height, this.maxHeight);
       }
 
-      if (this.contentRatio) {
+      if (typeof this.contentRatio === 'number') {
         const size: any = this.getSize();
         const contentSize: any = this.getContentSize();
         const dx: number = size.width - contentSize.width;
@@ -366,5 +371,6 @@ export class WindowComponent implements AfterContentInit {
 
 interface WindowAnimation {
   finished(finishedCallback: () => void): WindowAnimation;
+
   ready(readyCallback: () => void): WindowAnimation;
 }

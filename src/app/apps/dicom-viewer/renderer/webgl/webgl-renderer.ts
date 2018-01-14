@@ -7,19 +7,18 @@ import { VERTEX_SHADER_SRC } from './vertex-shader';
 
 export class WebGLRenderer implements Renderer {
 
-  private dicomProperties: any = {};
   private gl: WebGLRenderingContext;
   private program: WebGLProgram;
   private texture: WebGLTexture;
 
   constructor(canvas: HTMLCanvasElement) {
-    const gl: WebGLRenderingContext = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-
-    if (!gl) {
+    if (canvas.getContext('webgl') instanceof WebGLRenderingContext) {
+      this.gl = canvas.getContext('webgl');
+    } else if (canvas.getContext('experimental-webgl') instanceof WebGLRenderingContext) {
+      this.gl = canvas.getContext('experimental-webgl');
+    } else {
       throw new Error('Cannot retrieve WebGL context');
     }
-
-    this.gl = gl;
   }
 
   destroy(): void {
@@ -30,11 +29,9 @@ export class WebGLRenderer implements Renderer {
 
   render(viewport: Viewport): void {
     const gl: WebGLRenderingContext = this.gl;
-    const t: number = performance.now();
-
     const {height, imageFormat, rescaleIntercept, rescaleSlope, width} = viewport.image;
 
-    if (!this.program) {
+    if (this.program === undefined) {
       this.program = this.createProgram(imageFormat);
     }
 
@@ -64,7 +61,6 @@ export class WebGLRenderer implements Renderer {
       gl.uniform1f(windowLevelLocation, viewport.windowLevel);
     }
 
-    const imageLocation: WebGLUniformLocation = gl.getUniformLocation(this.program, 'u_image');
     const matrixLocation: WebGLUniformLocation = gl.getUniformLocation(this.program, 'u_matrix');
 
     // Convert dst pixel coordinates to clip space coordinates
@@ -83,10 +79,8 @@ export class WebGLRenderer implements Renderer {
   }
 
   resize(viewport: Viewport): void {
-    const gl: WebGLRenderingContext = this.gl;
-
-    if (gl) {
-      gl.viewport(0, 0, viewport.width, viewport.height);
+    if (this.gl instanceof WebGLRenderingContext) {
+      this.gl.viewport(0, 0, viewport.width, viewport.height);
     }
   }
 

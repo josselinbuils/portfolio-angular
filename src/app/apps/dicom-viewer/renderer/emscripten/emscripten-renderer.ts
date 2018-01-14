@@ -3,6 +3,7 @@ import { Viewport } from '../../models/viewport';
 import { Renderer } from '../renderer';
 import { createImageData, getRenderingProperties } from '../rendering-utils';
 
+import { OnInit } from '@angular/core';
 import { AsmRenderer } from './generated/asm-renderer';
 import { WasmRenderer } from './generated/wasm-renderer';
 
@@ -10,7 +11,7 @@ const renderingCore: any = {};
 renderingCore[RENDERER.ASM] = AsmRenderer;
 renderingCore[RENDERER.WASM] = WasmRenderer;
 
-export class EmscriptenRenderer implements Renderer {
+export class EmscriptenRenderer implements OnInit, Renderer {
 
   private context: CanvasRenderingContext2D;
 
@@ -23,12 +24,15 @@ export class EmscriptenRenderer implements Renderer {
   private renderingCore: any;
   private lut: any;
 
-  constructor(renderingCoreType: string, canvas: HTMLCanvasElement) {
-    this.loadRenderingCore(renderingCoreType);
+  constructor(private renderingCoreType: string, canvas: HTMLCanvasElement) {
     this.context = canvas.getContext('2d');
   }
 
   destroy(): void {
+  }
+
+  async ngOnInit(): Promise<void> {
+    await this.loadRenderingCore(this.renderingCoreType);
   }
 
   render(viewport: Viewport): void {
@@ -40,7 +44,7 @@ export class EmscriptenRenderer implements Renderer {
     this.context.fillStyle = 'black';
     this.context.fillRect(0, 0, viewport.width, viewport.height);
 
-    const {height, imageFormat, pixelData, rescaleIntercept, rescaleSlope, width} = viewport.image;
+    const {pixelData, rescaleIntercept, rescaleSlope, width} = viewport.image;
 
     if (!this.lut || this.lut.windowWidth !== viewport.windowWidth) {
 
@@ -98,7 +102,7 @@ export class EmscriptenRenderer implements Renderer {
     }
   }
 
-  resize(viewport: Viewport): void {
+  resize(): void {
   }
 
   private handleEmscriptenErrors(error: Error | string): Error {

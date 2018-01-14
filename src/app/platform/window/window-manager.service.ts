@@ -63,7 +63,7 @@ export class WindowManagerService {
     this.windows
       .filter((window: WindowComponent) => window.id !== id)
       .sort((a: WindowComponent, b: WindowComponent) => (a.zIndex < b.zIndex) ? -1 : 1)
-      .forEach((window: WindowComponent, index: number) => {
+      .forEach((window: WindowComponent) => {
         window.active = false;
         window.zIndex = ++i;
       });

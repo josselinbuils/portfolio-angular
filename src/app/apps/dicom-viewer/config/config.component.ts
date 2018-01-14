@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 
 import { HTTP_PREFIX } from '../../../env';
 import { RENDERER } from '../constants';
@@ -24,7 +24,7 @@ enum STEP {
   templateUrl: './config.component.html',
   styleUrls: ['./config.component.scss'],
 })
-export class ConfigComponent {
+export class ConfigComponent implements OnInit {
 
   @Output() config = new EventEmitter<Config>();
 
@@ -34,7 +34,6 @@ export class ConfigComponent {
   step: string = STEP.RENDERER;
 
   constructor(private http: HttpClient) {
-    this.loadDatasets();
   }
 
   back(): void {
@@ -51,6 +50,10 @@ export class ConfigComponent {
       dataset,
       rendererType: this.rendererType,
     });
+  }
+
+  async ngOnInit(): Promise<void> {
+    await this.loadDatasets();
   }
 
   private async loadDatasets(): Promise<void> {

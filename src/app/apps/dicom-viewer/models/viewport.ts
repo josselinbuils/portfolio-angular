@@ -12,8 +12,8 @@ export class Viewport {
   zoom: number;
 
   constructor(config: any) {
-    this.deltaX = config.deltaX || 0;
-    this.deltaY = config.deltaY || 0;
+    this.deltaX = typeof config.deltaX === 'number' ? config.deltaX : 0;
+    this.deltaY = typeof config.deltaY === 'number' ? config.deltaY : 0;
     this.height = config.height;
     this.image = config.image;
     this.width = config.width;
