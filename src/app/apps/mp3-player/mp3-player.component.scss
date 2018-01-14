@@ -85,23 +85,72 @@ audio {
       display: flex;
       flex-direction: column;
 
+      .header {
+        flex: 0 0 auto;
+        padding-right: 18px;
+
+        & > div {
+          display: flex;
+          justify-content: space-between;
+
+          .select {
+            $line-height: 1.6em;
+
+            display: inline-block;
+            width: 130px;
+            position: relative;
+            margin-left: auto;
+            float: right;
+
+            i {
+              position: absolute;
+              top: 8px;
+              right: 10px;
+              pointer-events: none;
+              line-height: $line-height;
+              margin-top: 2px;
+            }
+
+            select {
+              -webkit-appearance: none;
+              -moz-appearance: none;
+              background: transparent;
+              padding: 8px 30px 8px 10px;
+              border: 1px solid $secondary-color;
+              border-radius: 5px;
+              color: $text-color;
+              width: 100%;
+              outline: none;
+              font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+              font-size: 1em;
+              line-height: $line-height;
+
+              option {
+                background: $background-color;
+              }
+            }
+          }
+
+          h2 {
+            margin: auto 0;
+          }
+        }
+
+        table {
+          width: 100%;
+          margin-top: 10px;
+
+          th {
+            padding: 3px 15px 10px 0;
+            text-align: left;
+          }
+        }
+      }
+
       table {
         width: calc(100% - 10px);
         border-collapse: collapse;
         table-layout: fixed;
-
-        &.header {
-          width: calc(100% - 18px);
-          flex: 0 0 auto;
-
-          th {
-            padding: 3px 15px 10px 0;
-          }
-
-          th {
-            text-align: left;
-          }
-        }
 
         td {
           @extend .text-ellipsis;

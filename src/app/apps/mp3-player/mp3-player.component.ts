@@ -6,6 +6,8 @@ import { HTTP_PREFIX } from '../../env';
 import { WindowInstance } from '../../platform/window/window-instance';
 import { WindowComponent } from '../../platform/window/window.component';
 
+import { Item } from './item';
+
 const size: any = {
   min: {
     width: 330,
@@ -33,10 +35,10 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
   @ViewChild(WindowComponent) windowComponent: WindowComponent;
 
   audioElement: any;
+  currentItem: any;
   currentMusic: any = {};
-  currentPath: string;
 
-  items: any[] = [
+  items: Item[] = [
     {name: 'Top 50', path: '/tracks'},
     {
       name: 'Genres',
@@ -53,6 +55,12 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
         {name: 'Soundtrack', path: '/tracks/soundtrack'},
       ],
     },
+  ];
+
+  orders: { name: string; order: string }[] = [
+    {name: 'Top All', order: 'popularity_total'},
+    {name: 'Top Month', order: 'popularity_month'},
+    {name: 'Top Week', order: 'popularity_week'},
   ];
 
   musicList: any[] = [];
@@ -73,17 +81,17 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
   constructor(private http: HttpClient, private renderer: Renderer2) {
   }
 
-  async loadMusicList(path: string): Promise<void> {
+  async loadMusicList(item: Item, order: string = 'popularity_total'): Promise<void> {
 
-    if (typeof path !== 'string') {
+    if (item === undefined || typeof item.path !== 'string') {
       return Promise.resolve();
     }
 
-    this.currentPath = path;
+    this.currentItem = item;
     this.musicList = [];
 
     this.musicList = <any[]> await this.http
-      .get(`${HTTP_PREFIX}/api/jamendo${path}`)
+      .get(`${HTTP_PREFIX}/api/jamendo${item.path}/${order}`)
       .first()
       .toPromise();
 
@@ -145,7 +153,7 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
   }
 
   async ngOnInit(): Promise<void> {
-    await this.loadMusicList(this.items[0].path);
+    await this.loadMusicList(this.items[0]);
     this.loadMusic(this.musicList[0]);
   }
 
@@ -158,7 +166,7 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
   }
 
   playMusic(music: any): void {
-    if (music !== this.currentMusic) {
+    if (music.id !== this.currentMusic.id) {
       this.loadMusic(music);
     }
     this.play();

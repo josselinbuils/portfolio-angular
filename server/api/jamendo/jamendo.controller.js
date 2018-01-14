@@ -6,20 +6,19 @@ const Logger = require('../../logger');
 
 validateConfig();
 
-const baseUrl = `https://api.jamendo.com/v3.0/tracks/?client_id=${jamendo.clientId}&format=json`;
-
 module.exports = class JamendoController {
 
   static getTracks(req, res) {
     const tag = req.params.tag;
+    const order = req.params.order;
 
     const options = {limit: 50};
 
     if (tag) {
       options.tags = tag;
-      options.boost = 'popularity_total';
+      options.boost = order;
     } else {
-      options.order = 'popularity_total';
+      options.order = order;
     }
 
     get('/tracks', options)
