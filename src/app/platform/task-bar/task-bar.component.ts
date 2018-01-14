@@ -1,28 +1,28 @@
 import { Component, ViewContainerRef } from '@angular/core';
 
-import { ContextMenuItem } from '../context-menu/context-menu-item';
-import { ContextMenuService } from '../context-menu/context-menu.service';
-import { DicomViewerComponent } from '../../apps/dicom-viewer/dicom-viewer.component';
-import { DOMUtils } from '../dom-utils';
 import { Mp3PlayerComponent } from '../../apps/mp3-player/mp3-player.component';
 import { NotesComponent } from '../../apps/notes/notes.component';
 import { RedditComponent } from '../../apps/reddit/reddit.component';
-import { Task } from './task';
 import { TeraviaComponent } from '../../apps/teravia/teravia.component';
 import { TerminalComponent } from '../../apps/terminal/terminal.component';
+import { ContextMenuItem } from '../context-menu/context-menu-item';
+import { ContextMenuService } from '../context-menu/context-menu.service';
+import { DOMUtils } from '../dom-utils';
 import { WindowInstance } from '../window/window-instance';
 import { WindowManagerService } from '../window/window-manager.service';
+
+import { Task } from './task';
 
 @Component({
   selector: 'app-task-bar',
   templateUrl: './task-bar.component.html',
-  styleUrls: ['./task-bar.component.scss']
+  styleUrls: ['./task-bar.component.scss'],
 })
 export class TaskBarComponent {
 
   tasks: Task[] = [
     new Task(TerminalComponent, true), new Task(Mp3PlayerComponent, true), new Task(TeraviaComponent, true),
-    new Task(RedditComponent, true), new Task(NotesComponent, true), new Task(DicomViewerComponent, true)
+    new Task(RedditComponent, true), new Task(NotesComponent, true),
   ];
 
   constructor(private contextMenuService: ContextMenuService, private viewContainerRef: ViewContainerRef,
@@ -73,29 +73,29 @@ export class TaskBarComponent {
     const items: ContextMenuItem[] = [{
       iconClass: task.iconClass,
       title: task.name,
-      click: () => this.windowManagerService.openWindow(task.component)
+      click: () => this.windowManagerService.openWindow(task.component),
     }];
 
     if (task.instance) {
       items.push({
         iconClass: 'fa-close',
         title: 'Close',
-        click: () => this.windowManagerService.closeWindow(task.instance.windowComponent.id)
+        click: () => this.windowManagerService.closeWindow(task.instance.windowComponent.id),
       });
     }
 
     this.contextMenuService.show({
-      event: event,
-      items: items,
+      event,
+      items,
       position: {
-        left: left,
-        top: top
+        left,
+        top,
       },
       style: {
         'border-top-left-radius': 0,
         'border-bottom-left-radius': 0,
-        'min-height': taskElement.clientHeight + 'px'
-      }
+        'min-height': taskElement.clientHeight + 'px',
+      },
     });
   }
 

@@ -3,24 +3,24 @@ import { AfterContentInit, Component, ElementRef, OnDestroy, OnInit, Renderer2, 
 import * as moment from 'moment';
 
 import { HTTP_PREFIX } from '../../env';
-import { WindowComponent } from '../../platform/window/window.component';
 import { WindowInstance } from '../../platform/window/window-instance';
+import { WindowComponent } from '../../platform/window/window.component';
 
 const size = {
   min: {
     width: 330,
-    height: 150
+    height: 150,
   },
   max: {
     width: 950,
-    height: 530
-  }
+    height: 530,
+  },
 };
 
 @Component({
   selector: 'app-mp3-player',
   templateUrl: './mp3-player.component.html',
-  styleUrls: ['./mp3-player.component.scss']
+  styleUrls: ['./mp3-player.component.scss'],
 })
 export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, WindowInstance {
   static appName = 'MP3Player';
@@ -50,9 +50,9 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
         {name: 'Pop', path: '/tracks/pop'},
         {name: 'Reggae', path: '/tracks/reggae'},
         {name: 'Rock', path: '/tracks/rock'},
-        {name: 'Soundtrack', path: '/tracks/soundtrack'}
-      ]
-    }
+        {name: 'Soundtrack', path: '/tracks/soundtrack'},
+      ],
+    },
   ];
 
   musicList: any[] = [];

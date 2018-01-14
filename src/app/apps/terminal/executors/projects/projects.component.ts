@@ -1,26 +1,26 @@
-import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Component, OnInit } from '@angular/core';
 import * as moment from 'moment';
 import 'rxjs/add/operator/first';
 import 'rxjs/add/operator/toPromise';
 
 const projects = [
   'malv-api', 'mal-viewer', 'myo-bot-hub', 'myo-bot-site', 'path-finding', 'pizza-day', 'portfolio', 'reverse-proxy',
-  'robot', 'teravia', 'youbi-sms'
+  'robot', 'teravia', 'youbi-sms',
 ];
 
 const previews = {
   'path-finding': {image: 'path-finding.jpg'},
   'myo-bot-hub': {image: 'myo-bot-hub.jpg'},
   'myo-bot-site': {image: 'myo-bot-site.jpg'},
-  'teravia': {image: 'teravia.jpg'},
-  'youbi-sms': {image: 'youbi-sms.jpg'}
+  teravia: {image: 'teravia.jpg'},
+  'youbi-sms': {image: 'youbi-sms.jpg'},
 };
 
 @Component({
   selector: 'app-projects',
   templateUrl: './projects.component.html',
-  styleUrls: ['./projects.component.scss']
+  styleUrls: ['./projects.component.scss'],
 })
 export class ProjectsComponent implements OnInit {
   repositories: any[];
@@ -42,7 +42,7 @@ export class ProjectsComponent implements OnInit {
           language: repos.language,
           name: repos.name,
           updated: moment(repos.pushed_at).fromNow(),
-          url: repos.html_url
+          url: repos.html_url,
         };
       });
   }

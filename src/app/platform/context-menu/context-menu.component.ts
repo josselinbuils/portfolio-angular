@@ -1,15 +1,16 @@
 import { Component, Renderer2 } from '@angular/core';
 
 import { MOUSE_BUTTON } from '../../constants';
-import { ContextMenuItem } from './context-menu-item';
-import { ContextMenuDescriptor } from './context-menu-descriptor';
-import { ContextMenuService } from './context-menu.service';
 import { DOMUtils } from '../dom-utils';
+
+import { ContextMenuDescriptor } from './context-menu-descriptor';
+import { ContextMenuItem } from './context-menu-item';
+import { ContextMenuService } from './context-menu.service';
 
 @Component({
   selector: 'app-context-menu',
   templateUrl: './context-menu.component.html',
-  styleUrls: ['./context-menu.component.scss']
+  styleUrls: ['./context-menu.component.scss'],
 })
 export class ContextMenuComponent {
 

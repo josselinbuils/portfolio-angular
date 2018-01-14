@@ -4,13 +4,13 @@ import { get } from 'lodash';
 import * as moment from 'moment';
 
 import { HTTP_PREFIX } from '../../env';
-import { WindowComponent } from '../../platform/window/window.component';
 import { WindowInstance } from '../../platform/window/window-instance';
+import { WindowComponent } from '../../platform/window/window.component';
 
 @Component({
   selector: 'app-reddit',
   templateUrl: './reddit.component.html',
-  styleUrls: ['./reddit.component.scss']
+  styleUrls: ['./reddit.component.scss'],
 })
 export class RedditComponent implements OnInit, WindowInstance {
   static appName = 'Reddit';

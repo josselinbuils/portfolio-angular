@@ -1,15 +1,15 @@
 import {
-  AfterContentInit, Component, ElementRef, HostListener, Renderer2, ViewChild, ViewContainerRef
+  AfterContentInit, Component, ElementRef, HostListener, Renderer2, ViewChild, ViewContainerRef,
 } from '@angular/core';
 
-import { MOUSE_BUTTON } from './constants';
 import { TerminalComponent } from './apps/terminal/terminal.component';
+import { MOUSE_BUTTON } from './constants';
 import { WindowManagerService } from './platform/window/window-manager.service';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.css'],
 })
 export class AppComponent implements AfterContentInit {
   @ViewChild('selection') selectionElementRef: ElementRef;
@@ -37,7 +37,7 @@ export class AppComponent implements AfterContentInit {
     this.selectionStyle = {
       display: 'block',
       width: 0,
-      height: 0
+      height: 0,
     };
 
     const cancelMouseMove: () => void = this.renderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {

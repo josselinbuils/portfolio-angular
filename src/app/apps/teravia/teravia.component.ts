@@ -1,11 +1,12 @@
 import { Component, ViewChild } from '@angular/core';
-import { WindowComponent } from '../../platform/window/window.component';
+
 import { WindowInstance } from '../../platform/window/window-instance';
+import { WindowComponent } from '../../platform/window/window.component';
 
 @Component({
   selector: 'app-teravia',
   templateUrl: './teravia.component.html',
-  styleUrls: ['./teravia.component.scss']
+  styleUrls: ['./teravia.component.scss'],
 })
 export class TeraviaComponent implements WindowInstance {
   static appName = 'Teravia';

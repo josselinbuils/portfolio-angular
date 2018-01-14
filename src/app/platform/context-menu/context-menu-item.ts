@@ -1,5 +1,5 @@
 export interface ContextMenuItem {
-  click: () => void;
+  click(): void;
   iconClass?: string;
   title: string;
 }
