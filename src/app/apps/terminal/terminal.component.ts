@@ -5,13 +5,13 @@ import {
 
 import { WindowInstance } from '../../platform/window/window-instance';
 import { WindowComponent } from '../../platform/window/window.component';
-import { DicomViewerComponent } from '../dicom-viewer/dicom-viewer.component';
 
 import { AboutComponent } from './executors/about/about.component';
 import { BashErrorComponent } from './executors/bash-error/bash-error.component';
 import { CommandComponent } from './executors/command/command.component';
 import { Executor } from './executors/executor';
 import { HelpComponent } from './executors/help/help.component';
+import { OpenComponent } from './executors/open/open.component';
 import { ProjectsComponent } from './executors/projects/projects.component';
 import { SkillsComponent } from './executors/skills/skills.component';
 import { WorkComponent } from './executors/work/work.component';
@@ -29,8 +29,8 @@ enum KEY_CODE {
 const executors: any = {
   about: AboutComponent,
   help: HelpComponent,
+  open: OpenComponent,
   projects: ProjectsComponent,
-  dicomviewer: DicomViewerComponent,
   skills: SkillsComponent,
   work: WorkComponent,
 };

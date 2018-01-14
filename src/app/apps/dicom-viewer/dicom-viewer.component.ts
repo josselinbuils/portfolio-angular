@@ -76,7 +76,9 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   ngOnDestroy(): void {
 
     if (this.renderer !== undefined) {
-      this.renderer.destroy();
+      if (typeof this.renderer.destroy === 'function') {
+        this.renderer.destroy();
+      }
       delete this.renderer;
     }
 
@@ -89,14 +91,14 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
 
     size.height -= 42;
 
-    if (viewRenderer instanceof Renderer2 && viewport !== undefined) {
+    if (viewRenderer !== undefined && viewport !== undefined) {
       viewRenderer.setAttribute(this.canvas, 'width', size.width.toString());
       viewRenderer.setAttribute(this.canvas, 'height', size.height.toString());
 
       viewport.width = size.width;
       viewport.height = size.height;
 
-      if (this.renderer !== undefined) {
+      if (this.renderer !== undefined && typeof this.renderer.resize === 'function') {
         this.renderer.resize(viewport);
       }
     }
@@ -134,6 +136,11 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
 
     try {
       this.renderer = new renderer[this.config.rendererType](this.canvas);
+
+      if (typeof this.renderer.init === 'function') {
+        await this.renderer.init();
+      }
+
     } catch (error) {
       this.handleError(new Error(`Unable to instantiate ${this.config.rendererType} renderer: ${error.message}`));
     }

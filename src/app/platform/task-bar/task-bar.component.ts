@@ -1,4 +1,4 @@
-import { Component, ViewContainerRef } from '@angular/core';
+import { Component, Type, ViewContainerRef } from '@angular/core';
 
 import { Mp3PlayerComponent } from '../../apps/mp3-player/mp3-player.component';
 import { NotesComponent } from '../../apps/notes/notes.component';
@@ -37,10 +37,11 @@ export class TaskBarComponent {
 
   addNewTasks(windowInstances: WindowInstance[]): void {
     windowInstances.forEach((windowInstance: WindowInstance) => {
-      const refTask: Task = this.tasks.find((task: Task) => windowInstance instanceof task.component);
+      let refTask: Task = this.tasks.find((task: Task) => windowInstance instanceof task.component);
 
       if (refTask === undefined) {
-        throw Error('Unknown task');
+        refTask = new Task(<Type<{}>> windowInstance.constructor);
+        this.tasks.push(refTask);
       }
 
       let newTask: Task;
@@ -105,7 +106,7 @@ export class TaskBarComponent {
       for (let j: number = 0; j < i; j++) {
         const instance: WindowInstance = this.tasks[j].instance;
 
-        if (instance instanceof WindowInstance && instance === this.tasks[i].instance) {
+        if (instance !== undefined && instance === this.tasks[i].instance) {
           this.tasks.splice(i, 1);
         }
       }
@@ -114,7 +115,7 @@ export class TaskBarComponent {
 
   removeOutdatedTasks(windowInstances: WindowInstance[]): void {
     this.tasks.forEach((task: Task, index: number) => {
-      if (task.instance instanceof WindowInstance && windowInstances.indexOf(task.instance) === -1) {
+      if (task.instance !== undefined && windowInstances.indexOf(task.instance) === -1) {
         if (task.pinned) {
           delete task.instance;
         } else {
@@ -125,7 +126,7 @@ export class TaskBarComponent {
   }
 
   run(task: Task): void {
-    if (task.instance instanceof WindowInstance) {
+    if (task.instance !== undefined) {
       const id: number = task.instance.windowComponent.id;
 
       if (this.windowManagerService.isWindowVisible(id)) {

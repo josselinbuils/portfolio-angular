@@ -3,7 +3,6 @@ import { Viewport } from '../../models/viewport';
 import { Renderer } from '../renderer';
 import { createImageData, getRenderingProperties } from '../rendering-utils';
 
-import { OnInit } from '@angular/core';
 import { AsmRenderer } from './generated/asm-renderer';
 import { WasmRenderer } from './generated/wasm-renderer';
 
@@ -11,7 +10,7 @@ const renderingCore: any = {};
 renderingCore[RENDERER.ASM] = AsmRenderer;
 renderingCore[RENDERER.WASM] = WasmRenderer;
 
-export class EmscriptenRenderer implements OnInit, Renderer {
+export class EmscriptenRenderer implements Renderer {
 
   private context: CanvasRenderingContext2D;
 
@@ -28,10 +27,7 @@ export class EmscriptenRenderer implements OnInit, Renderer {
     this.context = canvas.getContext('2d');
   }
 
-  destroy(): void {
-  }
-
-  async ngOnInit(): Promise<void> {
+  async init(): Promise<void> {
     await this.loadRenderingCore(this.renderingCoreType);
   }
 
@@ -100,9 +96,6 @@ export class EmscriptenRenderer implements OnInit, Renderer {
         throw this.handleEmscriptenErrors(error);
       }
     }
-  }
-
-  resize(): void {
   }
 
   private handleEmscriptenErrors(error: Error | string): Error {

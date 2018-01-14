@@ -11,7 +11,7 @@ export class Task {
 
   constructor(
     public component: Type<{}>,
-    public pinned: boolean,
+    public pinned: boolean = false,
     public instance?: WindowInstance,
   ) {
     this.iconClass = (<any> this.component).iconClass;

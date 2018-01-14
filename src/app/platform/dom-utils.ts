@@ -18,7 +18,7 @@ export class DOMUtils {
 
       element = element.parentElement;
 
-    } while (element !== undefined);
+    } while (element instanceof HTMLElement);
 
     return undefined;
   }

@@ -16,9 +16,6 @@ export class CanvasRenderer implements Renderer {
     this.jsRenderer = new JsRenderer(canvas);
   }
 
-  destroy(): void {
-  }
-
   render(viewport: Viewport): void {
     this.context.fillStyle = 'black';
     this.context.fillRect(0, 0, viewport.width, viewport.height);
@@ -83,8 +80,5 @@ export class CanvasRenderer implements Renderer {
     this.context.imageSmoothingEnabled = false;
 
     this.context.drawImage(this.renderingContext.canvas, displayX0, displayY0, displayWidth, displayHeight);
-  }
-
-  resize(): void {
   }
 }

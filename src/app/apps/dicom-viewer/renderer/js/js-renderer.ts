@@ -11,9 +11,6 @@ export class JsRenderer implements Renderer {
     this.context = canvas.getContext('2d');
   }
 
-  destroy(): void {
-  }
-
   getVOILut(viewport: Viewport): { table: number[]; windowWidth: number } {
     const table: number[] = [];
     const windowWidth: number = viewport.windowWidth;
@@ -67,8 +64,5 @@ export class JsRenderer implements Renderer {
       const imageDataInstance: ImageData = createImageData(this.context, imageData, displayWidth, displayHeight);
       this.context.putImageData(imageDataInstance, displayX0, displayY0);
     }
-  }
-
-  resize(): void {
   }
 }
