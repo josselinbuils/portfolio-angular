@@ -104,7 +104,7 @@ audio {
 
             i {
               position: absolute;
-              top: 8px;
+              top: 6px;
               right: 10px;
               pointer-events: none;
               line-height: $line-height;
@@ -115,7 +115,7 @@ audio {
               -webkit-appearance: none;
               -moz-appearance: none;
               background: transparent;
-              padding: 8px 30px 8px 10px;
+              padding: 6px 30px 6px 10px;
               border: 1px solid $secondary-color;
               border-radius: 5px;
               color: $text-color;
