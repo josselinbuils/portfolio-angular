@@ -66,11 +66,9 @@
   }
 }
 
-@media (max-width: 640px) {
-  :host {
-    top: auto;
-    right: 0;
-    height: 60px;
-    width: auto;
-  }
+:host-context(.orientation-portrait) {
+  top: auto;
+  right: 0;
+  height: 60px;
+  width: auto;
 }

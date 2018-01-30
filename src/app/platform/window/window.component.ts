@@ -92,14 +92,19 @@ export class WindowComponent implements AfterContentInit {
 
   hide(): void {
     if (this.visible) {
-      this.startAnimation()
-        .ready(() => {
-          this.lastDisplayProperties.minimize = this.window.getBoundingClientRect();
-          this.minimized = true;
-          this.setSize(0, 0, true);
-          this.setPosition(60, this.minimizedTopPosition);
-        })
-        .finished(() => this.visible = false);
+      if (this.deviceManagerService.isMobile()) {
+        this.minimized = true;
+        this.visible = false;
+      } else {
+        this.startAnimation()
+          .ready(() => {
+            this.lastDisplayProperties.minimize = this.window.getBoundingClientRect();
+            this.minimized = true;
+            this.setSize(0, 0, true);
+            this.setPosition(60, this.minimizedTopPosition);
+          })
+          .finished(() => this.visible = false);
+      }
     }
   }
 
@@ -168,7 +173,7 @@ export class WindowComponent implements AfterContentInit {
 
   @HostListener('window:resize')
   resizeHandler(): void {
-    if (this.maximized) {
+    if (this.maximized && !this.deviceManagerService.isMobile()) {
       this.setMaxSize();
     }
   }
@@ -182,15 +187,20 @@ export class WindowComponent implements AfterContentInit {
   }
 
   show(): void {
-    if (!this.visible && this.lastDisplayProperties.minimize) {
-      this.startAnimation()
-        .ready(() => {
-          const {left, top, width, height} = this.lastDisplayProperties.minimize;
-          this.minimized = false;
-          this.setSize(width, height);
-          this.setPosition(left, top, true);
-        })
-        .finished(() => this.visible = true);
+    if (!this.visible) {
+      if (this.deviceManagerService.isMobile()) {
+        this.minimized = false;
+        this.visible = true;
+      } else if (this.lastDisplayProperties.minimize) {
+        this.startAnimation()
+          .ready(() => {
+            const {left, top, width, height} = this.lastDisplayProperties.minimize;
+            this.minimized = false;
+            this.setSize(width, height);
+            this.setPosition(left, top, true);
+          })
+          .finished(() => this.visible = true);
+      }
     }
   }
 

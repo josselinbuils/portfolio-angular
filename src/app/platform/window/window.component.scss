@@ -113,12 +113,29 @@
   }
 }
 
-@media (max-width: 640px) {
+:host-context(.mobile-device) {
   .window {
     width: auto;
     height: auto;
     top: 0;
     right: 0;
+
+    .titlebar {
+      display: none;
+    }
+  }
+}
+
+
+:host-context(.orientation-landscape) {
+  .window {
+    bottom: 0;
+    left: 60px;
+  }
+}
+
+:host-context(.orientation-portrait) {
+  .window {
     bottom: 60px;
     left: 0;
   }

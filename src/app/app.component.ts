@@ -5,6 +5,7 @@ import {
 import { TerminalComponent } from './apps/terminal/terminal.component';
 import { MOUSE_BUTTON } from './constants';
 import { WindowManagerService } from './platform/window/window-manager.service';
+import { DeviceManagerService } from './platform/device-manager.service';
 
 @Component({
   selector: 'app-root',
@@ -16,11 +17,17 @@ export class AppComponent implements AfterContentInit {
 
   selectionStyle: any = null;
 
-  constructor(private renderer: Renderer2, private viewContainerRef: ViewContainerRef,
-              private windowManagerService: WindowManagerService) {
+  constructor(private deviceManagerService: DeviceManagerService, private renderer: Renderer2,
+              private viewContainerRef: ViewContainerRef, private windowManagerService: WindowManagerService) {
   }
 
   ngAfterContentInit(): void {
+
+    if (this.deviceManagerService.isMobile()) {
+      this.renderer.addClass(document.body, 'mobile-device');
+      this.setOrientation();
+    }
+
     this.windowManagerService.setViewContainerRef(this.windowsViewContainerRef);
     this.windowManagerService.openWindow(TerminalComponent);
   }
@@ -31,6 +38,19 @@ export class AppComponent implements AfterContentInit {
       this.windowManagerService.unselectAllWindows();
       this.startSelect(event);
     }
+  }
+
+  @HostListener('window:resize')
+  resizeHandler(): void {
+    if (this.deviceManagerService.isMobile()) {
+      this.renderer.removeClass(document.body, 'orientation-landscape');
+      this.renderer.removeClass(document.body, 'orientation-portrait');
+      this.setOrientation();
+    }
+  }
+
+  private setOrientation(): void {
+    this.renderer.addClass(document.body, `orientation-${this.deviceManagerService.getOrientation()}`);
   }
 
   private startSelect(downEvent: MouseEvent): void {
