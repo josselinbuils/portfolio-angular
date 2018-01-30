@@ -12,6 +12,7 @@ import {
 } from '@angular/core';
 
 import { MOUSE_BUTTON } from '../../constants';
+import { DeviceManagerService } from '../device-manager.service';
 import { DOMUtils } from '../dom-utils';
 
 import { WindowManagerService } from './window-manager.service';
@@ -81,7 +82,8 @@ export class WindowComponent implements AfterContentInit {
   private minimizedTopPosition: number;
   private window: HTMLElement;
 
-  constructor(private renderer: Renderer2, private windowManagerService: WindowManagerService) {
+  constructor(private deviceManagerService: DeviceManagerService, private renderer: Renderer2,
+              private windowManagerService: WindowManagerService) {
   }
 
   close(): void {
@@ -132,29 +134,33 @@ export class WindowComponent implements AfterContentInit {
     this.content = this.contentElementRef.nativeElement;
     this.window = this.windowElementRef.nativeElement;
 
-    if (typeof this.effectiveWidth !== 'number' || typeof this.effectiveHeight !== 'number') {
+    if (this.deviceManagerService.isMobile()) {
+      this.maximized = true;
+    } else {
+      if (typeof this.effectiveWidth !== 'number' || typeof this.effectiveHeight !== 'number') {
+        size = this.getSize();
+      }
+
+      const width: number = typeof this.effectiveWidth === 'number'
+        ? this.effectiveWidth
+        : size.width;
+
+      const height: number = typeof this.effectiveHeight === 'number'
+        ? this.effectiveHeight
+        : size.height;
+
+      this.setSize(width, height);
+
       size = this.getSize();
-    }
+      const x: number = Math.round((window.innerWidth - size.width) * 0.5);
+      const y: number = Math.round((window.innerHeight - size.height) * 0.2);
 
-    const width: number = typeof this.effectiveWidth === 'number'
-      ? this.effectiveWidth
-      : size.width;
+      this.setPosition(x, y);
 
-    const height: number = typeof this.effectiveHeight === 'number'
-      ? this.effectiveHeight
-      : size.height;
-
-    this.setSize(width, height);
-
-    size = this.getSize();
-    const x: number = Math.round((window.innerWidth - size.width) * 0.5);
-    const y: number = Math.round((window.innerHeight - size.height) * 0.2);
-
-    this.setPosition(x, y);
-
-    if (this.keepContentRatio) {
-      const contentSize: any = this.getContentSize();
-      this.contentRatio = contentSize.width / contentSize.height;
+      if (this.keepContentRatio) {
+        const contentSize: any = this.getContentSize();
+        this.contentRatio = contentSize.width / contentSize.height;
+      }
     }
 
     this.contentInitialized = true;

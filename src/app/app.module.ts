@@ -12,6 +12,7 @@ import { TeraviaComponent } from './apps/teravia/teravia.component';
 import { TerminalModule } from './apps/terminal/terminal.module';
 import { ContextMenuComponent } from './platform/context-menu/context-menu.component';
 import { ContextMenuService } from './platform/context-menu/context-menu.service';
+import { DeviceManagerService } from './platform/device-manager.service';
 import { TaskBarComponent } from './platform/task-bar/task-bar.component';
 import { WindowModule } from './platform/window/window.module';
 
@@ -41,6 +42,7 @@ import { WindowModule } from './platform/window/window.module';
   ],
   providers: [
     ContextMenuService,
+    DeviceManagerService,
   ],
   bootstrap: [
     AppComponent,

@@ -112,3 +112,14 @@
     cursor: default;
   }
 }
+
+@media (max-width: 640px) {
+  .window {
+    width: auto;
+    height: auto;
+    top: 0;
+    right: 0;
+    bottom: 60px;
+    left: 0;
+  }
+}

@@ -13,6 +13,8 @@
 }
 
 .task {
+  display: inline-block;
+  width: 60px;
   height: 60px;
   line-height: 60px;
   font-size: 32px;
@@ -61,5 +63,14 @@
     left: 0;
     bottom: 0;
     height: 3px;
+  }
+}
+
+@media (max-width: 640px) {
+  :host {
+    top: auto;
+    right: 0;
+    height: 60px;
+    width: auto;
   }
 }

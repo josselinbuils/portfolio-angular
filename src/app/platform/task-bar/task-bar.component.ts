@@ -77,7 +77,7 @@ export class TaskBarComponent {
       click: (): void => this.windowManagerService.openWindow(task.component),
     }];
 
-    if (task.instance instanceof Task) {
+    if (task.instance !== undefined) {
       items.push({
         iconClass: 'fa-close',
         title: 'Close',

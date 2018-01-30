@@ -225,7 +225,6 @@
       }
     ],
     "type-literal-delimiter": true,
-    "typeof-compare": true,
     "unified-signatures": true,
     "use-default-type-parameter": true,
     "use-isnan": true,
