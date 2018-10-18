@@ -1,8 +1,7 @@
 import {
-  ComponentFactory, ComponentFactoryResolver, ComponentRef, Injectable, Type,
-  ViewContainerRef,
+  ComponentFactory, ComponentFactoryResolver, ComponentRef, Injectable, Type, ViewContainerRef,
 } from '@angular/core';
-import { BehaviorSubject } from 'rxjs/Rx';
+import { BehaviorSubject } from 'rxjs';
 
 import { WindowInstance } from './window-instance';
 import { WindowComponent } from './window.component';

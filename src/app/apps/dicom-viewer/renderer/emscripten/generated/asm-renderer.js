@@ -76,8 +76,6 @@ if (ENVIRONMENT_IS_NODE) {
   var nodePath;
 
   Module['read'] = function shell_read(filename, binary) {
-    if (!nodeFS) nodeFS = require('fs');
-    if (!nodePath) nodePath = require('path');
     filename = nodePath['normalize'](filename);
     var ret = nodeFS['readFileSync'](filename);
     return binary ? ret : ret.toString();
@@ -1679,26 +1677,26 @@ function copyTempDouble(ptr) {
 // {{PRE_LIBRARY}}
 
 
-  
+
   function ___setErrNo(value) {
       if (Module['___errno_location']) HEAP32[((Module['___errno_location']())>>2)]=value;
       else Module.printErr('failed to set errno from JS');
       return value;
-    } 
+    }
 
-   
 
-   
+
+
 
   function ___lock() {}
 
-  
+
   function _emscripten_memcpy_big(dest, src, num) {
       HEAPU8.set(HEAPU8.subarray(src, src+num), dest);
       return dest;
-    } 
+    }
 
-  
+
   var SYSCALLS={varargs:0,get:function (varargs) {
         SYSCALLS.varargs += 4;
         var ret = HEAP32[(((SYSCALLS.varargs)-(4))>>2)];
@@ -5214,7 +5212,7 @@ function _memcpy(dest, src, num) {
     return ret|0;
 }
 
-  
+
 function dynCall_ii(index,a1) {
   index = index|0;
   a1=a1|0;

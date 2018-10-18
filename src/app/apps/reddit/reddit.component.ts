@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { get } from 'lodash';
 import * as moment from 'moment';
+import { first } from 'rxjs/operators';
 
 import { HTTP_PREFIX } from '../../env';
 import { WindowInstance } from '../../platform/window/window-instance';
@@ -33,8 +34,8 @@ export class RedditComponent implements OnInit, WindowInstance {
 
     this.data = null;
     this.data = <any[]> await this.http
-      .get(`${HTTP_PREFIX}/api/reddit${path}`)
-      .first()
+      .get(`${HTTP_PREFIX}/api/reddit${path}`).pipe(
+        first())
       .toPromise();
 
     this.data.forEach((link: any) => {

@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { AfterContentInit, Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
 import * as moment from 'moment';
+import { first } from 'rxjs/operators';
 
 import { HTTP_PREFIX } from '../../env';
 import { WindowInstance } from '../../platform/window/window-instance';
@@ -91,8 +92,8 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
     this.musicList = [];
 
     this.musicList = <any[]> await this.http
-      .get(`${HTTP_PREFIX}/api/jamendo${item.path}/${order}`)
-      .first()
+      .get(`${HTTP_PREFIX}/api/jamendo${item.path}/${order}`).pipe(
+        first())
       .toPromise();
 
     this.musicList.forEach((music: any) => {

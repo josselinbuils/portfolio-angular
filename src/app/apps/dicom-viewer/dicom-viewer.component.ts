@@ -1,6 +1,5 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, ElementRef, OnDestroy, Renderer2, ViewChild } from '@angular/core';
-import 'rxjs/add/operator/toPromise';
 
 import { MOUSE_BUTTON } from '../../constants';
 import { WindowInstance } from '../../platform/window/window-instance';

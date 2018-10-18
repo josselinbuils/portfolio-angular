@@ -1,8 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import * as moment from 'moment';
-import 'rxjs/add/operator/first';
-import 'rxjs/add/operator/toPromise';
+import { first } from 'rxjs/operators';
 
 const projects: string[] = [
   'malv-api', 'mal-viewer', 'myo-bot-hub', 'myo-bot-site', 'path-finding', 'pizza-day', 'portfolio', 'reverse-proxy',
@@ -29,8 +28,8 @@ export class ProjectsComponent implements OnInit {
   }
 
   async ngOnInit(): Promise<void> {
-    this.repositories = (<any[]> await this.http.get('https://api.github.com/users/josselinbuils/repos')
-      .first()
+    this.repositories = (<any[]> await this.http.get('https://api.github.com/users/josselinbuils/repos').pipe(
+      first())
       .toPromise())
       .filter((repos: any) => projects.indexOf(repos.name) !== -1)
       .sort((a: any, b: any) => new Date(a.pushed_at).getTime() - new Date(b.pushed_at).getTime())

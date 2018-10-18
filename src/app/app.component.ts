@@ -4,8 +4,8 @@ import {
 
 import { TerminalComponent } from './apps/terminal/terminal.component';
 import { MOUSE_BUTTON } from './constants';
-import { WindowManagerService } from './platform/window/window-manager.service';
 import { DeviceManagerService } from './platform/device-manager.service';
+import { WindowManagerService } from './platform/window/window-manager.service';
 
 @Component({
   selector: 'app-root',
