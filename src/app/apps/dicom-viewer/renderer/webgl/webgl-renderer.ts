@@ -7,7 +7,7 @@ import { VERTEX_SHADER_SRC } from './vertex-shader';
 
 export class WebGLRenderer implements Renderer {
 
-  private gl: WebGLRenderingContext;
+  private readonly gl: WebGLRenderingContext;
   private program: WebGLProgram;
   private texture: WebGLTexture;
 

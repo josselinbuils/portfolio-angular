@@ -5,14 +5,13 @@ import { createImageData, getRenderingProperties } from '../rendering-utils';
 
 export class CanvasRenderer implements Renderer {
 
-  private context: CanvasRenderingContext2D;
-  private jsRenderer: JsRenderer;
+  private readonly context: CanvasRenderingContext2D;
+  private readonly jsRenderer: JsRenderer;
   private lut: any;
-  private renderingContext: CanvasRenderingContext2D;
+  private readonly renderingContext = (document.createElement('canvas') as HTMLCanvasElement).getContext('2d');
 
   constructor(canvas: HTMLCanvasElement) {
     this.context = canvas.getContext('2d');
-    this.renderingContext = document.createElement('canvas').getContext('2d');
     this.jsRenderer = new JsRenderer(canvas);
   }
 
@@ -48,13 +47,13 @@ export class CanvasRenderer implements Renderer {
 
     if (length > 0) {
       const imageData: Uint8ClampedArray = new Uint8ClampedArray(length);
-      let dataIndex: number = 0;
+      let dataIndex = 0;
 
       for (let y: number = imageY0; y <= imageY1; y++) {
         for (let x: number = imageX0; x < imageX1; x++) {
           const pixelDataIndex: number = y * width + x;
           const rawValue: number = pixelData[pixelDataIndex] * rescaleSlope + rescaleIntercept;
-          let intensity: number = 0;
+          let intensity = 0;
 
           if (rawValue >= rightLimit) {
             intensity = 255;

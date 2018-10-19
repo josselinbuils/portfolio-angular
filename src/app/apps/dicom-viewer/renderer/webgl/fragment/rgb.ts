@@ -1,4 +1,4 @@
-export const RGB_FRAGMENT_SHADER_SRC: string = `
+export const RGB_FRAGMENT_SHADER_SRC = `
   precision mediump float;
 
   uniform sampler2D u_image;

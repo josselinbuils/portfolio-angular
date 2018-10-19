@@ -15,14 +15,14 @@ import { JsRenderer } from './renderer/js/js-renderer';
 import { Renderer } from './renderer/renderer';
 import { WebGLRenderer } from './renderer/webgl/webgl-renderer';
 
-const DELTA_LIMIT: number = 0.02;
-const ZOOM_LIMIT: number = 0.07;
-const ZOOM_MAX: number = 5;
-const ZOOM_MIN: number = 0.2;
-const ZOOM_SENSIBILITY: number = 3;
-const WINDOW_LEVEL_SENSIBILITY: number = 3;
-const WINDOW_WIDTH_SENSIBILITY: number = 5;
-const WINDOW_WIDTH_MIN: number = 1;
+const DELTA_LIMIT = 0.02;
+const ZOOM_LIMIT = 0.07;
+const ZOOM_MAX = 5;
+const ZOOM_MIN = 0.2;
+const ZOOM_SENSIBILITY = 3;
+const WINDOW_LEVEL_SENSIBILITY = 3;
+const WINDOW_WIDTH_SENSIBILITY = 5;
+const WINDOW_WIDTH_MIN = 1;
 
 @Component({
   selector: 'app-dicom-viewer',
@@ -41,9 +41,9 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   dicomProperties: any = {};
   errorMessage: string;
   fps = 0;
-  loading: boolean = false;
+  loading = false;
   meanRenderDuration: number;
-  showConfig: boolean = true;
+  showConfig = true;
   title = DicomViewerComponent.appName;
   viewport: Viewport;
 
@@ -53,8 +53,8 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   private renderer: Renderer;
   private statsInterval: number;
 
-  constructor(private http: HttpClient, private viewRenderer: Renderer2) {
-  }
+  constructor(private readonly http: HttpClient,
+              private readonly viewRenderer: Renderer2) {}
 
   back(): void {
 
@@ -343,7 +343,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   }
 
   private getImageFormat(bitsAllocated: number, photometricInterpretation: string, pixelRepresentation: number): string {
-    let format: string = '';
+    let format = '';
 
     if (photometricInterpretation === PHOTOMETRIC_INTERPRETATION.RGB) {
       format = 'rgb';

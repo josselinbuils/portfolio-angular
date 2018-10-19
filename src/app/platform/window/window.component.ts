@@ -17,9 +17,9 @@ import { DOMUtils } from '../dom-utils';
 
 import { WindowManagerService } from './window-manager.service';
 
-const ANIMATION_DURATION: number = 200;
-const DOM_UPDATE_DELAY: number = 10;
-const LEFT_OFFSET: number = 60;
+const ANIMATION_DURATION = 200;
+const DOM_UPDATE_DELAY = 10;
+const LEFT_OFFSET = 60;
 
 @Component({
   selector: 'app-window',
@@ -78,13 +78,13 @@ export class WindowComponent implements AfterContentInit {
   private contentRatio: number;
   private effectiveHeight: number;
   private effectiveWidth: number;
-  private lastDisplayProperties: any = {};
+  private readonly lastDisplayProperties: any = {};
   private minimizedTopPosition: number;
   private window: HTMLElement;
 
-  constructor(private deviceManagerService: DeviceManagerService, private renderer: Renderer2,
-              private windowManagerService: WindowManagerService) {
-  }
+  constructor(private readonly deviceManagerService: DeviceManagerService,
+              private readonly renderer: Renderer2,
+              private readonly windowManagerService: WindowManagerService) {}
 
   close(): void {
     this.windowManagerService.closeWindow(this.id);
@@ -294,7 +294,7 @@ export class WindowComponent implements AfterContentInit {
     if (!force) {
       // This cannot be done when showing again a minimized window because its dimensions are null
       const xMin: number = -this.getSize().width + 90;
-      const yMin: number = -1;
+      const yMin = -1;
       const xMax: number = window.innerWidth - 30;
       const yMax: number = window.innerHeight - 21;
 

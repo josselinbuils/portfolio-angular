@@ -4,7 +4,7 @@ import { createImageData, getRenderingProperties } from '../rendering-utils';
 
 export class JsRenderer implements Renderer {
 
-  private context: CanvasRenderingContext2D;
+  private readonly context: CanvasRenderingContext2D;
   private lut: any;
 
   constructor(canvas: HTMLCanvasElement) {
@@ -15,7 +15,7 @@ export class JsRenderer implements Renderer {
     const table: number[] = [];
     const windowWidth: number = viewport.windowWidth;
 
-    for (let i: number = 0; i < windowWidth; i++) {
+    for (let i = 0; i < windowWidth; i++) {
       table[i] = Math.floor(i / windowWidth * 256);
     }
 
@@ -40,13 +40,13 @@ export class JsRenderer implements Renderer {
 
     if (length > 0) {
       const imageData: Uint8ClampedArray = new Uint8ClampedArray(length);
-      let dataIndex: number = 0;
+      let dataIndex = 0;
 
       for (let y: number = displayY0; y <= displayY1; y++) {
         for (let x: number = displayX0; x <= displayX1; x++) {
           const pixelDataIndex: number = Math.round((y - y0) / viewport.zoom) * width + Math.round((x - x0) / viewport.zoom);
           const rawValue: number = pixelData[pixelDataIndex] * rescaleSlope + rescaleIntercept;
-          let intensity: number = 0;
+          let intensity = 0;
 
           if (rawValue >= rightLimit) {
             intensity = 255;

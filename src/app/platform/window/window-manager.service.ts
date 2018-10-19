@@ -10,12 +10,11 @@ import { WindowComponent } from './window.component';
 export class WindowManagerService {
   windowInstancesSubject: BehaviorSubject<WindowInstance[]> = new BehaviorSubject<WindowInstance[]>(<WindowInstance[]> []);
 
-  private windows: WindowComponent[] = [];
+  private readonly windows: WindowComponent[] = [];
   private id = -1;
   private viewContainerRef: ViewContainerRef;
 
-  constructor(private componentFactoryResolver: ComponentFactoryResolver) {
-  }
+  constructor(private readonly componentFactoryResolver: ComponentFactoryResolver) {}
 
   closeWindow(id: number): void {
     const index: number = this.windows.findIndex((w: WindowComponent) => w.id === id);
@@ -57,7 +56,7 @@ export class WindowManagerService {
   }
 
   selectWindow(id: number): void {
-    let i: number = 0;
+    let i = 0;
 
     this.windows
       .filter((window: WindowComponent) => window.id !== id)

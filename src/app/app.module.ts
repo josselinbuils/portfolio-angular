@@ -48,5 +48,4 @@ import { WindowModule } from './platform/window/window.module';
     AppComponent,
   ],
 })
-export class AppModule {
-}
+export class AppModule {}

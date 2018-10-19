@@ -21,5 +21,4 @@ import { WindowComponent } from './window.component';
     WindowManagerService,
   ],
 })
-export class WindowModule {
-}
+export class WindowModule {}

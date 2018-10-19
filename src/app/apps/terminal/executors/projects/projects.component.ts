@@ -24,8 +24,7 @@ const previews: any = {
 export class ProjectsComponent implements OnInit {
   repositories: any[];
 
-  constructor(private http: HttpClient) {
-  }
+  constructor(private readonly http: HttpClient) {}
 
   async ngOnInit(): Promise<void> {
     this.repositories = (<any[]> await this.http.get('https://api.github.com/users/josselinbuils/repos').pipe(

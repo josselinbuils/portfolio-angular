@@ -25,8 +25,9 @@ export class TaskBarComponent {
     new Task(RedditComponent, true), new Task(NotesComponent, true),
   ];
 
-  constructor(private contextMenuService: ContextMenuService, private viewContainerRef: ViewContainerRef,
-              private windowManagerService: WindowManagerService) {
+  constructor(private readonly contextMenuService: ContextMenuService,
+              private readonly viewContainerRef: ViewContainerRef,
+              private readonly windowManagerService: WindowManagerService) {
 
     windowManagerService.windowInstancesSubject.subscribe((windowInstances: WindowInstance[]) => {
       this.removeOutdatedTasks(windowInstances);
@@ -54,7 +55,7 @@ export class TaskBarComponent {
         newTask = this.tasks[this.tasks.length - 1];
       }
 
-      if (newTask instanceof Task) {
+      if (newTask !== undefined) {
         setTimeout(() => {
           const taskClientRect: { top: number; height: number } = document.getElementById(newTask.id).getBoundingClientRect();
           const topPosition: number = Math.round(taskClientRect.top + taskClientRect.height / 3);
@@ -103,7 +104,7 @@ export class TaskBarComponent {
   // Tasks can be duplicated if several instances of the same component are opened and one of the first ones is stopped
   removeDuplicatedTasks(): void {
     for (let i: number = this.tasks.length - 1; i > 0; i--) {
-      for (let j: number = 0; j < i; j++) {
+      for (let j = 0; j < i; j++) {
         const instance: WindowInstance = this.tasks[j].instance;
 
         if (instance !== undefined && instance === this.tasks[i].instance) {

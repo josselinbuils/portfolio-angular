@@ -17,9 +17,10 @@ export class AppComponent implements AfterContentInit {
 
   selectionStyle: any = null;
 
-  constructor(private deviceManagerService: DeviceManagerService, private renderer: Renderer2,
-              private viewContainerRef: ViewContainerRef, private windowManagerService: WindowManagerService) {
-  }
+  constructor(private readonly deviceManagerService: DeviceManagerService,
+              private readonly renderer: Renderer2,
+              private readonly viewContainerRef: ViewContainerRef,
+              private readonly windowManagerService: WindowManagerService) {}
 
   ngAfterContentInit(): void {
 

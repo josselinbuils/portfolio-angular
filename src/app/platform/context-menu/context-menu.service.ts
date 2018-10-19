@@ -7,9 +7,6 @@ import { ContextMenuDescriptor } from './context-menu-descriptor';
 export class ContextMenuService {
   showSubject: Subject<any> = new Subject<any>();
 
-  constructor() {
-  }
-
   show(descriptor: ContextMenuDescriptor): void {
     this.showSubject.next(descriptor);
   }

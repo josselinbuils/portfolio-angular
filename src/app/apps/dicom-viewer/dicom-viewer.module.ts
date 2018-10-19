@@ -25,5 +25,4 @@ import { DicomViewerComponent } from './dicom-viewer.component';
     DicomViewerComponent,
   ],
 })
-export class DicomViewerModule {
-}
+export class DicomViewerModule {}

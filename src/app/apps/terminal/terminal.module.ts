@@ -46,5 +46,4 @@ import { TerminalComponent } from './terminal.component';
     TerminalComponent,
   ],
 })
-export class TerminalModule {
-}
+export class TerminalModule {}

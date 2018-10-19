@@ -6,7 +6,7 @@ export const FORMATTER: any = {
   uint16: 'texture.a * 256.0 + texture.r',
 };
 
-export const GRAYSCALE_FRAGMENT_SHADER_SRC: string = `
+export const GRAYSCALE_FRAGMENT_SHADER_SRC = `
   precision mediump float;
 
   uniform float rescaleSlope;

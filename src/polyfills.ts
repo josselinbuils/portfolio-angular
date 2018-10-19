@@ -67,8 +67,7 @@ if (Element.prototype.matches === undefined) {
       function (s: string): boolean {
         const matches: any = (this.document || this.ownerDocument).querySelectorAll(s);
         let i: number = matches.length;
-        while (--i >= 0 && matches.item(i) !== this) {
-        }
+        while (--i >= 0 && matches.item(i) !== this) {}
         return i > -1;
       },
     ].find((method: Function) => typeof method === 'function');

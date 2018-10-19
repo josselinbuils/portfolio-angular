@@ -20,7 +20,9 @@ export class ContextMenuComponent {
 
   private destroyMouseDownListener: () => void;
 
-  constructor(contextMenuService: ContextMenuService, private renderer: Renderer2) {
+  constructor(contextMenuService: ContextMenuService,
+              private readonly renderer: Renderer2) {
+
     contextMenuService.showSubject.subscribe((descriptor: ContextMenuDescriptor) => {
       descriptor.event.preventDefault();
 

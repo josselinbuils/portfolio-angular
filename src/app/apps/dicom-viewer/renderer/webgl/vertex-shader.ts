@@ -1,4 +1,4 @@
-export const VERTEX_SHADER_SRC: string = `
+export const VERTEX_SHADER_SRC = `
   attribute vec2 a_position;
 
   uniform vec2 u_resolution;

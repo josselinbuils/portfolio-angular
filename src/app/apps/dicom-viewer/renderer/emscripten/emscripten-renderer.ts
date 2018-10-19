@@ -12,7 +12,7 @@ renderingCore[RENDERER.WASM] = WasmRenderer;
 
 export class EmscriptenRenderer implements Renderer {
 
-  private context: CanvasRenderingContext2D;
+  private readonly context: CanvasRenderingContext2D;
 
   private coreRender: (table: number, rawImageData: number, renderedImageData: number, sliceWidth: number, x0: number,
                        y0: number, displayX0: number, displayX1: number, displayY0: number, displayY1: number,
@@ -23,7 +23,8 @@ export class EmscriptenRenderer implements Renderer {
   private renderingCore: any;
   private lut: any;
 
-  constructor(private renderingCoreType: string, canvas: HTMLCanvasElement) {
+  constructor(private readonly renderingCoreType: string,
+              canvas: HTMLCanvasElement) {
     this.context = canvas.getContext('2d');
   }
 

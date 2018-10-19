@@ -25,8 +25,7 @@ export class RedditComponent implements OnInit, WindowInstance {
   subreddits = ['angularjs', 'CrappyDesign', 'docker', 'javascript', 'node', 'ProgrammerHumor', 'todayilearned'];
   title = RedditComponent.appName;
 
-  constructor(private http: HttpClient) {
-  }
+  constructor(private readonly http: HttpClient) {}
 
   async load(path: string): Promise<any> {
     this.path = path;

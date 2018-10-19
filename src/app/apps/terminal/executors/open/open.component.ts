@@ -17,8 +17,7 @@ export class OpenComponent implements OnInit, Executor {
   args: string[];
   error: string;
 
-  constructor(private windowManagerService: WindowManagerService) {
-  }
+  constructor(private readonly windowManagerService: WindowManagerService) {}
 
   ngOnInit(): void {
     const appName: string = this.args[0];

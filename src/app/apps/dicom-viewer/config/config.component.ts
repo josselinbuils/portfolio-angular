@@ -33,8 +33,7 @@ export class ConfigComponent implements OnInit {
   rendererType: string;
   step: string = STEP.RENDERER;
 
-  constructor(private http: HttpClient) {
-  }
+  constructor(private readonly http: HttpClient) {}
 
   back(): void {
     this.step = STEP.RENDERER;

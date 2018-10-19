@@ -79,8 +79,8 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
 
   private currentTimeInterval: any;
 
-  constructor(private http: HttpClient, private renderer: Renderer2) {
-  }
+  constructor(private readonly http: HttpClient,
+              private readonly renderer: Renderer2) {}
 
   async loadMusicList(item: Item, order: string = 'popularity_total'): Promise<void> {
 
@@ -136,7 +136,7 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
       this.progress = Math.round(this.audioElement.currentTime / this.audioElement.duration * 10000) / 100;
     });
 
-    let lastCurrentTimeSeconds: number = 0;
+    let lastCurrentTimeSeconds = 0;
 
     this.currentTimeInterval = setInterval(() => {
       const currentTimeSeconds: number = Math.round(this.audioElement.currentTime);

@@ -55,11 +55,10 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
   title = TerminalComponent.appName;
 
   private commandIndex = 0;
-  private commands: string[] = [];
+  private readonly commands: string[] = [];
   private components: ComponentRef<{}>[] = [];
 
-  constructor(private componentFactoryResolver: ComponentFactoryResolver) {
-  }
+  constructor(private readonly componentFactoryResolver: ComponentFactoryResolver) {}
 
   @HostListener('window:keydown', ['$event'])
   keyboardListener(event: KeyboardEvent): void {

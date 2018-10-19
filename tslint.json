@@ -14,19 +14,22 @@
     ],
     "curly": true,
     "cyclomatic-complexity": true,
-    "deprecation": true,
-    "eofline": true,
+    "deprecation": {
+      "severity": "warn"
+    },
     "encoding": true,
+    "eofline": true,
     "forin": true,
+    "import-blacklist": [
+      true,
+      "rxjs/Rx"
+    ],
+    "import-spacing": true,
     "indent": [
       true,
       "spaces",
       2
     ],
-    "import-blacklist": [
-      true
-    ],
-    "import-spacing": true,
     "interface-name": [
       true,
       "never-prefix"
@@ -112,17 +115,10 @@
     ],
     "no-trailing-whitespace": true,
     "no-unnecessary-callback-wrapper": true,
-    "no-unnecessary-class": [
-      "allow-static-only"
-    ],
     "no-unnecessary-initializer": true,
     "no-unnecessary-qualifier": true,
     "no-unsafe-finally": true,
     "no-unused-expression": true,
-    "no-unused-variable": [
-      true,
-      "check-parameters"
-    ],
     "no-use-before-declare": false,
     "no-var-keyword": true,
     "number-literal-format": true,
@@ -140,10 +136,7 @@
     "ordered-imports": [
       true,
       {
-        "import-sources-order": "case-insensitive",
-        "grouped-imports": true,
-        "named-imports-order": "case-insensitive",
-        "module-source-path": "full"
+        "grouped-imports": true
       }
     ],
     "prefer-conditional-expression": [
@@ -154,6 +147,7 @@
     "prefer-for-of": true,
     "prefer-object-spread": true,
     "prefer-method-signature": true,
+    "prefer-readonly": true,
     "prefer-switch": [
       true,
       {
