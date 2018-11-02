@@ -3,10 +3,10 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "ng": "ng",
-    "start": "node server.js",
     "build": "ng build --prod",
-    "lint": "ng lint --type-check"
+    "lint": "ng lint --type-check",
+    "ng": "ng",
+    "start": "node server.js"
   },
   "private": true,
   "dependencies": {

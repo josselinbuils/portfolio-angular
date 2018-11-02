@@ -6,6 +6,7 @@ export class JsRenderer implements Renderer {
 
   private readonly context: CanvasRenderingContext2D;
   private lut: any;
+  private readonly renderingContext = (document.createElement('canvas') as HTMLCanvasElement).getContext('2d');
 
   constructor(canvas: HTMLCanvasElement) {
     this.context = canvas.getContext('2d');
@@ -109,12 +110,14 @@ export class JsRenderer implements Renderer {
         }
       }
 
+      this.renderingContext.canvas.width = croppedImageWidth;
+      this.renderingContext.canvas.height = croppedImageHeight;
+
       const imageData = new Uint8ClampedArray(imageData32.buffer);
-      const imageDataInstance: ImageData = createImageData(this.context, imageData, croppedImageWidth, croppedImageHeight);
-      this.context.putImageData(imageDataInstance, 0, 0);
-      this.context.drawImage(
-        this.context.canvas, 0, 0, croppedImageWidth, croppedImageHeight, displayX0, displayY0, displayWidth, displayHeight,
-      );
+      const imageDataInstance: ImageData = createImageData(this.renderingContext, imageData, croppedImageWidth, croppedImageHeight);
+
+      this.renderingContext.putImageData(imageDataInstance, 0, 0);
+      this.context.drawImage(this.renderingContext.canvas, displayX0, displayY0, displayWidth, displayHeight);
     }
   }
 }
