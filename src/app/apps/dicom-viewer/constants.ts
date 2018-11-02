@@ -1,18 +1,16 @@
-export enum PHOTOMETRIC_INTERPRETATION {
-  MONOCHROME1 = 'MONOCHROME1',
-  MONOCHROME2 = 'MONOCHROME2',
+export enum PhotometricInterpretation {
+  Monochrome1 = 'MONOCHROME1',
+  Monochrome2 = 'MONOCHROME2',
   RGB = 'RGB',
 }
 
-export enum PIXEL_REPRESENTATION {
-  SIGNED = 1,
-  UNSIGNED = 0,
+export enum PixelRepresentation {
+  Signed = 1,
+  Unsigned = 0,
 }
 
-export enum RENDERER {
-  ASM = 'Asm.js',
-  CANVAS = 'Canvas',
-  JS = 'JavaScript',
-  WASM = 'WebAssembly',
-  WEBGL = 'WebGL',
+export enum RendererType {
+  JavaScript = 'JavaScript',
+  WebAssembly = 'WebAssembly',
+  WebGL = 'WebGL',
 }

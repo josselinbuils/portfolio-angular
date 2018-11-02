@@ -1,16 +1,10 @@
-import { RENDERER } from '../../constants';
+import loadCoreRenderer from '../../../../../assets/wasm-renderer';
+
 import { Viewport } from '../../models/viewport';
 import { Renderer } from '../renderer';
 import { createImageData, getRenderingProperties } from '../rendering-utils';
 
-import { AsmRenderer } from './generated/asm-renderer';
-import { WasmRenderer } from './generated/wasm-renderer';
-
-const renderingCore: any = {};
-renderingCore[RENDERER.ASM] = AsmRenderer;
-renderingCore[RENDERER.WASM] = WasmRenderer;
-
-export class EmscriptenRenderer implements Renderer {
+export class WasmRenderer implements Renderer {
 
   private readonly context: CanvasRenderingContext2D;
 
@@ -19,17 +13,16 @@ export class EmscriptenRenderer implements Renderer {
                        zoom: number, leftLimit: number, rightLimit: number, rescaleSlope: number,
                        rescaleIntercept: number) => void;
 
-  private fillTable: (table: number, windowWidth: number, invert: number) => void;
+  private fillTable: (table: number, windowWidth: number) => void;
   private renderingCore: any;
-  private lut: any;
+  private lut?: { table: Uint8Array; windowWidth: number };
 
-  constructor(private readonly renderingCoreType: string,
-              canvas: HTMLCanvasElement) {
+  constructor(canvas: HTMLCanvasElement) {
     this.context = canvas.getContext('2d');
   }
 
   async init(): Promise<void> {
-    await this.loadRenderingCore(this.renderingCoreType);
+    await this.loadRenderingCore();
   }
 
   render(viewport: Viewport): void {
@@ -43,17 +36,17 @@ export class EmscriptenRenderer implements Renderer {
 
     const {pixelData, rescaleIntercept, rescaleSlope, width} = viewport.image;
 
-    if (!this.lut || this.lut.windowWidth !== viewport.windowWidth) {
+    if (this.lut === undefined || this.lut.windowWidth !== viewport.windowWidth) {
 
-      if (this.lut) {
+      if (this.lut !== undefined) {
         this.renderingCore._free(this.lut.table.byteOffset);
       }
 
-      const pointer: number = this.renderingCore._malloc(viewport.windowWidth);
-      const table: Uint8Array = new Uint8Array(this.renderingCore.HEAPU8.buffer, pointer, viewport.windowWidth);
+      const pointer = this.renderingCore._malloc(viewport.windowWidth) as number;
+      const table = new Uint8Array(this.renderingCore.HEAPU8.buffer, pointer, viewport.windowWidth);
 
       try {
-        this.fillTable(table.byteOffset, viewport.windowWidth, 0);
+        this.fillTable(table.byteOffset, viewport.windowWidth);
       } catch (error) {
         throw this.handleEmscriptenErrors(error);
       }
@@ -72,22 +65,20 @@ export class EmscriptenRenderer implements Renderer {
 
     if (length > 0) {
       try {
-        const rawDataPointer: number = this.renderingCore._malloc(pixelData.byteLength);
-        const rawData: Uint8Array = new Uint8Array(this.renderingCore.HEAPU8.buffer, rawDataPointer, pixelData.byteLength);
+        const rawDataPointer = this.renderingCore._malloc(pixelData.byteLength) as number;
+        const rawData = new Uint8Array(this.renderingCore.HEAPU8.buffer, rawDataPointer, pixelData.byteLength);
         rawData.set(new Uint8Array(pixelData.buffer, pixelData.byteOffset));
 
-        const renderedDataLength: number = displayWidth * displayHeight * 4;
-        const renderedDataPointer: number = this.renderingCore._malloc(renderedDataLength);
-        const renderedData: Uint8ClampedArray = new Uint8ClampedArray(
-          this.renderingCore.HEAPU8.buffer, renderedDataPointer, renderedDataLength,
-        );
+        const renderedDataLength = displayWidth * displayHeight * 4;
+        const renderedDataPointer = this.renderingCore._malloc(renderedDataLength);
+        const renderedData = new Uint8ClampedArray(this.renderingCore.HEAPU8.buffer, renderedDataPointer, renderedDataLength);
 
         this.coreRender(
           this.lut.table.byteOffset, rawData.byteOffset, renderedData.byteOffset, width, x0, y0, displayX0, displayX1,
           displayY0, displayY1, viewport.zoom, leftLimit, rightLimit, rescaleSlope, rescaleIntercept,
         );
 
-        const imageData: ImageData = createImageData(this.context, renderedData, displayWidth, displayHeight);
+        const imageData = createImageData(this.context, renderedData, displayWidth, displayHeight);
         this.context.putImageData(imageData, displayX0, displayY0);
 
         this.renderingCore._free(rawData.byteOffset);
@@ -107,9 +98,14 @@ export class EmscriptenRenderer implements Renderer {
     return error;
   }
 
-  private async loadRenderingCore(renderingCoreType: string): Promise<void> {
+  private async loadRenderingCore(): Promise<void> {
     try {
-      this.renderingCore = await renderingCore[renderingCoreType]();
+      this.renderingCore = await new Promise<any>(resolve => {
+        loadCoreRenderer().then(module => {
+          delete module.then;
+          resolve(module);
+        });
+      });
       this.fillTable = this.renderingCore.cwrap('fillTable', null, ['number', 'number']);
       this.coreRender = this.renderingCore.cwrap('render', null, [
         'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number',

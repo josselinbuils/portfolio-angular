@@ -6,13 +6,12 @@ import { WindowInstance } from '../../platform/window/window-instance';
 import { WindowComponent } from '../../platform/window/window.component';
 
 import { Config } from './config/config';
-import { PHOTOMETRIC_INTERPRETATION, PIXEL_REPRESENTATION, RENDERER } from './constants';
+import { PhotometricInterpretation, PixelRepresentation, RendererType } from './constants';
 import { Image } from './models/image';
 import { Viewport } from './models/viewport';
-import { CanvasRenderer } from './renderer/canvas/canvas-renderer';
-import { EmscriptenRenderer } from './renderer/emscripten/emscripten-renderer';
 import { JsRenderer } from './renderer/js/js-renderer';
 import { Renderer } from './renderer/renderer';
+import { WasmRenderer } from './renderer/wasm/wasm-renderer';
 import { WebGLRenderer } from './renderer/webgl/webgl-renderer';
 
 const DELTA_LIMIT = 0.02;
@@ -123,11 +122,9 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     let {pixelData} = this.dicomProperties;
 
     const renderer: any = {};
-    renderer[RENDERER.ASM] = EmscriptenRenderer.bind(this, RENDERER.ASM);
-    renderer[RENDERER.CANVAS] = CanvasRenderer;
-    renderer[RENDERER.JS] = JsRenderer;
-    renderer[RENDERER.WASM] = EmscriptenRenderer.bind(this, RENDERER.WASM);
-    renderer[RENDERER.WEBGL] = WebGLRenderer;
+    renderer[RendererType.JavaScript] = JsRenderer;
+    renderer[RendererType.WebAssembly] = WasmRenderer;
+    renderer[RendererType.WebGL] = WebGLRenderer;
 
     this.canvas = this.viewRenderer.createElement('canvas');
     this.viewRenderer.appendChild(this.viewportElementRef.nativeElement, this.canvas);
@@ -144,7 +141,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       this.handleError(new Error(`Unable to instantiate ${this.config.rendererType} renderer: ${error.message}`));
     }
 
-    if (this.config.rendererType !== RENDERER.WEBGL) {
+    if (this.config.rendererType !== RendererType.WebGL) {
       const arrayType: any = {
         int8: Int8Array,
         int16: Int16Array,
@@ -154,7 +151,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       pixelData = new arrayType[imageFormat](pixelData.buffer, pixelData.byteOffset);
     }
 
-    if ([RENDERER.ASM, RENDERER.WASM].includes(this.config.rendererType)) {
+    if (this.config.rendererType === RendererType.WebAssembly) {
       pixelData = new Int32Array(pixelData);
     }
 
@@ -345,10 +342,10 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   private getImageFormat(bitsAllocated: number, photometricInterpretation: string, pixelRepresentation: number): string {
     let format = '';
 
-    if (photometricInterpretation === PHOTOMETRIC_INTERPRETATION.RGB) {
+    if (photometricInterpretation === PhotometricInterpretation.RGB) {
       format = 'rgb';
     } else if (photometricInterpretation.indexOf('MONOCHROME') === 0) {
-      if (pixelRepresentation === PIXEL_REPRESENTATION.UNSIGNED) {
+      if (pixelRepresentation === PixelRepresentation.Unsigned) {
         format += 'u';
       }
       format += `int${bitsAllocated <= 8 ? '8' : '16'}`;

@@ -2,16 +2,14 @@ import { HttpClient } from '@angular/common/http';
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 
 import { HTTP_PREFIX } from '../../../env';
-import { RENDERER } from '../constants';
+import { RendererType } from '../constants';
 
 import { Config } from './config';
 
-const RENDERERS: any[] = [
-  {type: RENDERER.ASM, logo: 'asmjs.png'},
-  {type: RENDERER.CANVAS, logo: 'canvas.png'},
-  {type: RENDERER.JS, logo: 'javascript.png'},
-  {type: RENDERER.WASM, logo: 'webassembly.png'},
-  {type: RENDERER.WEBGL, logo: 'webgl.png'},
+const RENDERERS: { type: RendererType; logo: string }[] = [
+  {type: RendererType.JavaScript, logo: 'javascript.png'},
+  {type: RendererType.WebAssembly, logo: 'webassembly.png'},
+  {type: RendererType.WebGL, logo: 'webgl.png'},
 ];
 
 enum STEP {

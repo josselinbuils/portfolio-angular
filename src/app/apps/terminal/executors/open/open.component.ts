@@ -1,10 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Type } from '@angular/core';
 
 import { WindowManagerService } from '../../../../platform/window/window-manager.service';
 import { DicomViewerComponent } from '../../../dicom-viewer/dicom-viewer.component';
 import { Executor } from '../executor';
 
-const apps: any = {
+const apps: { [name: string]: Type<{}> } = {
   dicomviewer: DicomViewerComponent,
 };
 
