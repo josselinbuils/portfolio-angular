@@ -8,6 +8,6 @@ RUN git clone https://github.com/josselinbuils/portfolio.git && \
 
 WORKDIR portfolio
 
-COPY portfolio/config.json server/config.json
+COPY /home/ubuntu/docker/portfolio/config.json server/config.json
 
 CMD npm run build && npm run start
