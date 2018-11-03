@@ -14,8 +14,8 @@ export class Task {
     public pinned: boolean = false,
     public instance?: WindowInstance,
   ) {
-    this.iconClass = (<any> this.component).iconClass;
+    this.iconClass = (this.component as any).iconClass;
     this.id = `task_${++Task.id}`;
-    this.name = (<any> this.component).appName;
+    this.name = (this.component as any).appName;
   }
 }

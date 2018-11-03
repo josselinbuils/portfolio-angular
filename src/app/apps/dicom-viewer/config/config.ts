@@ -1,4 +1,6 @@
+import { DatasetDescriptor } from './dataset-descriptor';
+
 export interface Config {
-  dataset: string;
+  dataset: DatasetDescriptor;
   rendererType: string;
 }

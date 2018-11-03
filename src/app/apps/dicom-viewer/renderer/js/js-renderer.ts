@@ -5,7 +5,7 @@ import { createImageData, getRenderingProperties } from '../rendering-utils';
 export class JsRenderer implements Renderer {
 
   private readonly context: CanvasRenderingContext2D;
-  private lut: any;
+  private lut?: { table: number[]; windowWidth: number };
   private readonly renderingContext = (document.createElement('canvas') as HTMLCanvasElement).getContext('2d');
 
   constructor(canvas: HTMLCanvasElement) {
@@ -14,20 +14,20 @@ export class JsRenderer implements Renderer {
 
   getVOILut(viewport: Viewport): { table: number[]; windowWidth: number } {
     const table: number[] = [];
-    const windowWidth: number = viewport.windowWidth;
+    const windowWidth = viewport.windowWidth;
 
     for (let i = 0; i < windowWidth; i++) {
       table[i] = Math.floor(i / windowWidth * 256);
     }
 
-    return {table, windowWidth};
+    return { table, windowWidth };
   }
 
   render(viewport: Viewport): void {
     this.context.fillStyle = 'black';
     this.context.fillRect(0, 0, viewport.width, viewport.height);
 
-    if (!this.lut || this.lut.windowWidth !== viewport.windowWidth) {
+    if (this.lut === undefined || this.lut.windowWidth !== viewport.windowWidth) {
       this.lut = this.getVOILut(viewport);
     }
 
@@ -39,7 +39,7 @@ export class JsRenderer implements Renderer {
   }
 
   private renderCanvasPixels(viewport: Viewport): void {
-    const {pixelData, rescaleIntercept, rescaleSlope, width} = viewport.image;
+    const { pixelData, rescaleIntercept, rescaleSlope, width } = viewport.image;
     const {
       displayHeight, displayWidth, displayX0, displayX1, displayY0, displayY1, leftLimit, rightLimit, x0, y0,
     } = getRenderingProperties(viewport);
@@ -68,13 +68,13 @@ export class JsRenderer implements Renderer {
       }
 
       const imageData = new Uint8ClampedArray(imageData32.buffer);
-      const imageDataInstance: ImageData = createImageData(this.context, imageData, displayWidth, displayHeight);
+      const imageDataInstance = createImageData(this.context, imageData, displayWidth, displayHeight);
       this.context.putImageData(imageDataInstance, displayX0, displayY0);
     }
   }
 
   private renderImagePixels(viewport: Viewport): void {
-    const {height, pixelData, rescaleIntercept, rescaleSlope, width} = viewport.image;
+    const { height, pixelData, rescaleIntercept, rescaleSlope, width } = viewport.image;
     const {
       displayHeight, displayWidth, displayX0, displayY0, leftLimit, rightLimit, x0, x1, y0, y1,
     } = getRenderingProperties(viewport);
@@ -114,7 +114,8 @@ export class JsRenderer implements Renderer {
       this.renderingContext.canvas.height = croppedImageHeight;
 
       const imageData = new Uint8ClampedArray(imageData32.buffer);
-      const imageDataInstance: ImageData = createImageData(this.renderingContext, imageData, croppedImageWidth, croppedImageHeight);
+      const imageDataInstance = createImageData(this.renderingContext, imageData, croppedImageWidth,
+        croppedImageHeight);
 
       this.renderingContext.putImageData(imageDataInstance, 0, 0);
       this.context.drawImage(this.renderingContext.canvas, displayX0, displayY0, displayWidth, displayHeight);

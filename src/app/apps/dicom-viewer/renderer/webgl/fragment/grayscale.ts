@@ -1,4 +1,4 @@
-export const FORMATTER: any = {
+export const FORMATTER: { [imageFormat: string]: string } = {
   // High byte value always < 0.5 on signed numbers (most significant bit is used to store the sign)
   int8: 'texture.r - step(0.5, texture.r)',
   int16: '(texture.a - step(0.5, texture.a)) * 256.0 + texture.r',

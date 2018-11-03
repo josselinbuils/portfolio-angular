@@ -13,9 +13,9 @@ import { WindowManagerService } from './platform/window/window-manager.service';
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent implements AfterContentInit {
-  @ViewChild('windows', {read: ViewContainerRef}) windowsViewContainerRef: ViewContainerRef;
+  @ViewChild('windows', { read: ViewContainerRef }) windowsViewContainerRef: ViewContainerRef;
 
-  selectionStyle: any = null;
+  selectionStyle?: { [key: string]: number | string };
 
   constructor(private readonly deviceManagerService: DeviceManagerService,
               private readonly renderer: Renderer2,
@@ -62,8 +62,8 @@ export class AppComponent implements AfterContentInit {
 
     downEvent.preventDefault();
 
-    const startX: number = downEvent.clientX;
-    const startY: number = downEvent.clientY;
+    const startX = downEvent.clientX;
+    const startY = downEvent.clientY;
 
     this.selectionStyle = {
       display: 'block',
@@ -71,15 +71,15 @@ export class AppComponent implements AfterContentInit {
       height: 0,
     };
 
-    const cancelMouseMove: () => void = this.renderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
+    const cancelMouseMove = this.renderer.listen('window', 'mousemove', moveEvent => {
       this.selectionStyle['left.px'] = Math.min(startX, moveEvent.clientX);
       this.selectionStyle['top.px'] = Math.min(startY, moveEvent.clientY);
       this.selectionStyle['width.px'] = Math.abs(moveEvent.clientX - startX);
       this.selectionStyle['height.px'] = Math.abs(moveEvent.clientY - startY);
     });
 
-    const cancelMouseUp: () => void = this.renderer.listen('window', 'mouseup', () => {
-      this.selectionStyle = null;
+    const cancelMouseUp = this.renderer.listen('window', 'mouseup', () => {
+      delete this.selectionStyle;
       cancelMouseMove();
       cancelMouseUp();
     });

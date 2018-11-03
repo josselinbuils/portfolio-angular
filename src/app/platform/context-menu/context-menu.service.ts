@@ -5,7 +5,7 @@ import { ContextMenuDescriptor } from './context-menu-descriptor';
 
 @Injectable()
 export class ContextMenuService {
-  showSubject: Subject<any> = new Subject<any>();
+  showSubject = new Subject<ContextMenuDescriptor>();
 
   show(descriptor: ContextMenuDescriptor): void {
     this.showSubject.next(descriptor);

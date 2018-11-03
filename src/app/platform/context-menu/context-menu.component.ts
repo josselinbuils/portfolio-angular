@@ -1,6 +1,7 @@
 import { Component, Renderer2 } from '@angular/core';
 
-import { MOUSE_BUTTON } from '../../constants';
+import { MOUSE_BUTTON } from 'app/constants';
+
 import { DOMUtils } from '../dom-utils';
 
 import { ContextMenuDescriptor } from './context-menu-descriptor';
@@ -16,14 +17,14 @@ export class ContextMenuComponent {
 
   descriptor: ContextMenuDescriptor;
   show = false;
-  style: any = {};
+  style: { [name: string]: number } = {};
 
   private destroyMouseDownListener: () => void;
 
   constructor(contextMenuService: ContextMenuService,
               private readonly renderer: Renderer2) {
 
-    contextMenuService.showSubject.subscribe((descriptor: ContextMenuDescriptor) => {
+    contextMenuService.showSubject.subscribe(descriptor => {
       descriptor.event.preventDefault();
 
       this.descriptor = descriptor;
@@ -62,7 +63,7 @@ export class ContextMenuComponent {
       return;
     }
 
-    const isContextMenuChild: boolean = DOMUtils.closest(<HTMLElement> event.target, '.context-menu') !== undefined;
+    const isContextMenuChild = DOMUtils.closest(<HTMLElement> event.target, '.context-menu') !== undefined;
 
     if (!isContextMenuChild) {
       this.hideMenu();

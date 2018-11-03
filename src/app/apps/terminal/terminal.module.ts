@@ -2,7 +2,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
-import { WindowModule } from '../../platform/window/window.module';
+import { WindowModule } from 'app/platform/window/window.module';
 
 import { AboutComponent } from './executors/about/about.component';
 import { BashErrorComponent } from './executors/bash-error/bash-error.component';

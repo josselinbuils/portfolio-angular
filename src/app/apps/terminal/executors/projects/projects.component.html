@@ -1,10 +1,10 @@
-<p class="loading" *ngIf="!repositories">Loading...</p>
-<a class="card" *ngFor="let repos of repositories" [href]="repos.url" target="_blank">
-  <p>{{repos.name}}<span class="language">{{repos.language}}</span></p>
+<p class="loading" *ngIf="!projects">Loading...</p>
+<a class="card" *ngFor="let project of projects" [href]="project.url" target="_blank">
+  <p>{{project.name}}<span class="language">{{project.language}}</span></p>
   <div class="preview">
-    <img [src]="repos.imageURL" *ngIf="repos.imageURL" />
-    <i class="fa fa-camera" aria-hidden="true" *ngIf="!repos.imageURL"></i>
+    <img [src]="project.imageURL" *ngIf="project.imageURL" />
+    <i class="fa fa-camera" aria-hidden="true" *ngIf="!project.imageURL"></i>
   </div>
-  <p class="description">{{repos.description}}</p>
-  <p class="updated">Updated {{repos.updated}}</p>
+  <p class="description">{{project.description}}</p>
+  <p class="updated">Updated {{project.updated}}</p>
 </a>

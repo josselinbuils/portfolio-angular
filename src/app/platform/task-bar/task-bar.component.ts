@@ -1,10 +1,11 @@
 import { Component, Type, ViewContainerRef } from '@angular/core';
 
-import { Mp3PlayerComponent } from '../../apps/mp3-player/mp3-player.component';
-import { NotesComponent } from '../../apps/notes/notes.component';
-import { RedditComponent } from '../../apps/reddit/reddit.component';
-import { TeraviaComponent } from '../../apps/teravia/teravia.component';
-import { TerminalComponent } from '../../apps/terminal/terminal.component';
+import { Mp3PlayerComponent } from 'app/apps/mp3-player/mp3-player.component';
+import { NotesComponent } from 'app/apps/notes/notes.component';
+import { RedditComponent } from 'app/apps/reddit/reddit.component';
+import { TeraviaComponent } from 'app/apps/teravia/teravia.component';
+import { TerminalComponent } from 'app/apps/terminal/terminal.component';
+
 import { ContextMenuItem } from '../context-menu/context-menu-item';
 import { ContextMenuService } from '../context-menu/context-menu.service';
 import { DOMUtils } from '../dom-utils';
@@ -29,7 +30,7 @@ export class TaskBarComponent {
               private readonly viewContainerRef: ViewContainerRef,
               private readonly windowManagerService: WindowManagerService) {
 
-    windowManagerService.windowInstancesSubject.subscribe((windowInstances: WindowInstance[]) => {
+    windowManagerService.windowInstancesSubject.subscribe(windowInstances => {
       this.removeOutdatedTasks(windowInstances);
       this.addNewTasks(windowInstances);
       this.removeDuplicatedTasks();
@@ -37,8 +38,8 @@ export class TaskBarComponent {
   }
 
   addNewTasks(windowInstances: WindowInstance[]): void {
-    windowInstances.forEach((windowInstance: WindowInstance) => {
-      let refTask: Task = this.tasks.find((task: Task) => windowInstance instanceof task.component);
+    windowInstances.forEach(windowInstance => {
+      let refTask = this.tasks.find(task => windowInstance instanceof task.component);
 
       if (refTask === undefined) {
         refTask = new Task(<Type<{}>> windowInstance.constructor);
@@ -57,8 +58,8 @@ export class TaskBarComponent {
 
       if (newTask !== undefined) {
         setTimeout(() => {
-          const taskClientRect: { top: number; height: number } = document.getElementById(newTask.id).getBoundingClientRect();
-          const topPosition: number = Math.round(taskClientRect.top + taskClientRect.height / 3);
+          const taskClientRect = document.getElementById(newTask.id).getBoundingClientRect();
+          const topPosition = Math.round(taskClientRect.top + taskClientRect.height / 3);
           windowInstance.windowComponent.setMinimizedTopPosition(topPosition);
         });
       }
@@ -66,23 +67,23 @@ export class TaskBarComponent {
   }
 
   openContextMenu(task: Task, event: MouseEvent): void {
-    const taskBarElement: HTMLElement = this.viewContainerRef.element.nativeElement;
-    const taskElement: HTMLElement = DOMUtils.closest(<HTMLElement> event.target, '.task');
+    const taskBarElement = this.viewContainerRef.element.nativeElement;
+    const taskElement = DOMUtils.closest(<HTMLElement> event.target, '.task');
 
-    const left: number = taskBarElement.getBoundingClientRect().right;
-    const top: number = taskElement.getBoundingClientRect().top;
+    const left = taskBarElement.getBoundingClientRect().right;
+    const top = taskElement.getBoundingClientRect().top;
 
     const items: ContextMenuItem[] = [{
       iconClass: task.iconClass,
       title: task.name,
-      click: (): void => this.windowManagerService.openWindow(task.component),
+      click: () => this.windowManagerService.openWindow(task.component),
     }];
 
     if (task.instance !== undefined) {
       items.push({
         iconClass: 'fa-close',
         title: 'Close',
-        click: (): void => this.windowManagerService.closeWindow(task.instance.windowComponent.id),
+        click: () => this.windowManagerService.closeWindow(task.instance.windowComponent.id),
       });
     }
 
@@ -103,9 +104,9 @@ export class TaskBarComponent {
 
   // Tasks can be duplicated if several instances of the same component are opened and one of the first ones is stopped
   removeDuplicatedTasks(): void {
-    for (let i: number = this.tasks.length - 1; i > 0; i--) {
+    for (let i = this.tasks.length - 1; i > 0; i--) {
       for (let j = 0; j < i; j++) {
-        const instance: WindowInstance = this.tasks[j].instance;
+        const instance = this.tasks[j].instance;
 
         if (instance !== undefined && instance === this.tasks[i].instance) {
           this.tasks.splice(i, 1);
@@ -115,7 +116,7 @@ export class TaskBarComponent {
   }
 
   removeOutdatedTasks(windowInstances: WindowInstance[]): void {
-    this.tasks.forEach((task: Task, index: number) => {
+    this.tasks.forEach((task, index) => {
       if (task.instance !== undefined && windowInstances.indexOf(task.instance) === -1) {
         if (task.pinned) {
           delete task.instance;
@@ -128,7 +129,7 @@ export class TaskBarComponent {
 
   run(task: Task): void {
     if (task.instance !== undefined) {
-      const id: number = task.instance.windowComponent.id;
+      const id = task.instance.windowComponent.id;
 
       if (this.windowManagerService.isWindowVisible(id)) {
         if (this.windowManagerService.isWindowSelected(id)) {

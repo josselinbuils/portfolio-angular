@@ -4,9 +4,9 @@ import { get } from 'lodash';
 import * as moment from 'moment';
 import { first } from 'rxjs/operators';
 
-import { HTTP_PREFIX } from '../../env';
-import { WindowInstance } from '../../platform/window/window-instance';
-import { WindowComponent } from '../../platform/window/window.component';
+import { HTTP_PREFIX } from 'app/env';
+import { WindowInstance } from 'app/platform/window/window-instance';
+import { WindowComponent } from 'app/platform/window/window.component';
 
 @Component({
   selector: 'app-reddit',
@@ -37,7 +37,7 @@ export class RedditComponent implements OnInit, WindowInstance {
         first())
       .toPromise();
 
-    this.data.forEach((link: any) => {
+    this.data.forEach(link => {
       link.since = moment(link.created_utc * 1000).fromNow();
       link.showSubreddit = path.indexOf('/r/') !== 0 || path.split('/')[2] === 'popular';
       link.previewUrl = get(link, 'preview.images[0].resolutions[1].url');

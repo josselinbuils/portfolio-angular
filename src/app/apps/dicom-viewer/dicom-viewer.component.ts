@@ -1,12 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, ElementRef, OnDestroy, Renderer2, ViewChild } from '@angular/core';
 
-import { MOUSE_BUTTON } from '../../constants';
-import { WindowInstance } from '../../platform/window/window-instance';
-import { WindowComponent } from '../../platform/window/window.component';
+import { MOUSE_BUTTON } from 'app/constants';
+import { WindowInstance } from 'app/platform/window/window-instance';
+import { WindowComponent } from 'app/platform/window/window.component';
 
 import { Config } from './config/config';
-import { PhotometricInterpretation, PixelRepresentation, RendererType } from './constants';
+import { ImageFormat, PhotometricInterpretation, PixelRepresentation, RendererType } from './constants';
+import { DicomProperties } from './dicom-properties';
 import { Image } from './models/image';
 import { Viewport } from './models/viewport';
 import { JsRenderer } from './renderer/js/js-renderer';
@@ -32,12 +33,12 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   static appName = 'DICOM Viewer';
   static iconClass = 'fa-heartbeat';
 
-  @ViewChild('viewportElement') viewportElementRef: ElementRef;
+  @ViewChild('viewportElement') viewportElementRef: ElementRef<HTMLDivElement>;
   @ViewChild(WindowComponent) windowComponent: WindowComponent;
 
   canvas: HTMLCanvasElement;
-  config: any = {};
-  dicomProperties: any = {};
+  config?: Config;
+  dicomProperties: DicomProperties;
   errorMessage: string;
   fps = 0;
   loading = false;
@@ -47,13 +48,12 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   viewport: Viewport;
 
   private frameDurations: number[];
-  private lastTime: number = performance.now();
+  private lastTime = performance.now();
   private renderDurations: number[];
   private renderer: Renderer;
   private statsInterval: number;
 
-  constructor(private readonly http: HttpClient,
-              private readonly viewRenderer: Renderer2) {}
+  constructor(private readonly http: HttpClient, private readonly viewRenderer: Renderer2) {}
 
   back(): void {
 
@@ -66,8 +66,8 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     delete this.errorMessage;
     delete this.dicomProperties;
     delete this.viewport;
+    delete this.config;
 
-    this.config = {};
     this.showConfig = true;
   }
 
@@ -84,8 +84,8 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   }
 
   onResize(size: { width: number; height: number }): void {
-    const viewRenderer: Renderer2 = this.viewRenderer;
-    const viewport: Viewport = this.viewport;
+    const viewRenderer = this.viewRenderer;
+    const viewport = this.viewport;
 
     size.height -= 42;
 
@@ -116,22 +116,24 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     console.log(this.dicomProperties);
 
     const {
-      height, imageFormat, rescaleIntercept, rescaleSlope, width, windowLevel, windowWidth,
+      height, imageFormat, pixelDataBuffer, rescaleIntercept, rescaleSlope, width, windowLevel, windowWidth,
     } = this.dicomProperties;
-
-    let {pixelData} = this.dicomProperties;
-
-    const renderer: any = {};
-    renderer[RendererType.JavaScript] = JsRenderer;
-    renderer[RendererType.WebAssembly] = WasmRenderer;
-    renderer[RendererType.WebGL] = WebGLRenderer;
 
     this.canvas = this.viewRenderer.createElement('canvas');
     this.viewRenderer.appendChild(this.viewportElementRef.nativeElement, this.canvas);
     this.viewRenderer.listen(this.canvas, 'mousedown', this.startTool.bind(this));
 
     try {
-      this.renderer = new renderer[this.config.rendererType](this.canvas);
+      switch (this.config.rendererType) {
+        case RendererType.JavaScript:
+          this.renderer = new JsRenderer(this.canvas);
+          break;
+        case RendererType.WebAssembly:
+          this.renderer = new WasmRenderer(this.canvas);
+          break;
+        case RendererType.WebGL:
+          this.renderer = new WebGLRenderer(this.canvas);
+      }
 
       if (typeof this.renderer.init === 'function') {
         await this.renderer.init();
@@ -141,29 +143,25 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       this.handleError(new Error(`Unable to instantiate ${this.config.rendererType} renderer: ${error.message}`));
     }
 
-    if (this.config.rendererType !== RendererType.WebGL) {
-      const arrayType: any = {
-        int8: Int8Array,
-        int16: Int16Array,
-        uint8: Uint8Array,
-        uint16: Uint16Array,
-      };
-      pixelData = new arrayType[imageFormat](pixelData.buffer, pixelData.byteOffset);
-    }
+    let pixelData: ArrayBufferView;
 
     if (this.config.rendererType === RendererType.WebAssembly) {
-      pixelData = new Int32Array(pixelData);
+      pixelData = new Int32Array(pixelDataBuffer);
+    } else if (this.config.rendererType !== RendererType.WebGL) {
+      const arrayType = {
+        int8: Int8Array, int16: Int16Array, uint8: Uint8Array, uint16: Uint16Array,
+      };
+      pixelData = new arrayType[imageFormat](pixelDataBuffer);
     }
 
-    const image: Image = new Image({height, imageFormat, pixelData, rescaleIntercept, rescaleSlope, width});
+    const image = new Image({ height, imageFormat, pixelData, rescaleIntercept, rescaleSlope, width });
 
-    this.viewport = new Viewport({image, windowLevel, windowWidth});
+    this.viewport = new Viewport({ image, windowLevel, windowWidth });
 
-    const windowNativeElement: HTMLElement = this.windowComponent.windowElementRef.nativeElement;
+    const windowNativeElement = this.windowComponent.windowElementRef.nativeElement;
 
     this.onResize({
-      width: windowNativeElement.clientWidth,
-      height: windowNativeElement.clientHeight,
+      width: windowNativeElement.clientWidth, height: windowNativeElement.clientHeight,
     });
 
     this.viewport.zoom = Math.min(this.viewport.height / image.height, 1);
@@ -175,12 +173,12 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   startPan(downEvent: MouseEvent): void {
     downEvent.preventDefault();
 
-    const canvas: HTMLCanvasElement = this.canvas;
-    const viewport: Viewport = this.viewport;
-    const startX: number = downEvent.clientX - viewport.deltaX * canvas.clientWidth;
-    const startY: number = downEvent.clientY - viewport.deltaY * canvas.clientHeight;
+    const canvas = this.canvas;
+    const viewport = this.viewport;
+    const startX = downEvent.clientX - viewport.deltaX * canvas.clientWidth;
+    const startY = downEvent.clientY - viewport.deltaY * canvas.clientHeight;
 
-    const cancelMouseMove: () => void = this.viewRenderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
+    const cancelMouseMove = this.viewRenderer.listen('window', 'mousemove', moveEvent => {
 
       viewport.deltaX = (moveEvent.clientX - startX) / canvas.clientWidth;
       viewport.deltaY = (moveEvent.clientY - startY) / canvas.clientHeight;
@@ -191,7 +189,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       }
     });
 
-    const cancelMouseUp: () => void = this.viewRenderer.listen('window', 'mouseup', () => {
+    const cancelMouseUp = this.viewRenderer.listen('window', 'mouseup', () => {
       cancelMouseMove();
       cancelMouseUp();
     });
@@ -213,12 +211,12 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   startZoom(downEvent: MouseEvent): void {
     downEvent.preventDefault();
 
-    const isMacOS: boolean = navigator.platform.indexOf('Mac') !== -1;
-    const viewport: Viewport = this.viewport;
-    const startY: number = downEvent.clientY;
-    const startZoom: number = viewport.zoom;
+    const isMacOS = navigator.platform.indexOf('Mac') !== -1;
+    const viewport = this.viewport;
+    const startY = downEvent.clientY;
+    const startZoom = viewport.zoom;
 
-    const cancelMouseMove: () => void = this.viewRenderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
+    const cancelMouseMove = this.viewRenderer.listen('window', 'mousemove', moveEvent => {
       viewport.zoom = startZoom - (moveEvent.clientY - startY) * ZOOM_SENSIBILITY / this.canvas.clientHeight;
       viewport.zoom = Math.min(Math.max(viewport.zoom, ZOOM_MIN), ZOOM_MAX);
 
@@ -229,7 +227,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
 
       // Helps to fit the viewport of image is centered
       if (viewport.deltaX === 0 && viewport.deltaY === 0) {
-        const fitViewportZoom: number = viewport.height / viewport.image.height;
+        const fitViewportZoom = viewport.height / viewport.image.height;
 
         if (Math.abs(viewport.zoom - fitViewportZoom) < ZOOM_LIMIT) {
           viewport.zoom = fitViewportZoom;
@@ -237,7 +235,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       }
     });
 
-    const cancelContextMenu: () => void = this.viewRenderer.listen('window', 'contextmenu', () => {
+    const cancelContextMenu = this.viewRenderer.listen('window', 'contextmenu', () => {
       if (!isMacOS) {
         cancelMouseMove();
       }
@@ -247,7 +245,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     });
 
     if (isMacOS) {
-      const cancelMouseUp: () => void = this.viewRenderer.listen('window', 'mouseup', () => {
+      const cancelMouseUp = this.viewRenderer.listen('window', 'mouseup', () => {
         cancelMouseMove();
         cancelMouseUp();
       });
@@ -257,19 +255,19 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   startWindowing(downEvent: MouseEvent): void {
     downEvent.preventDefault();
 
-    const startX: number = downEvent.clientX;
-    const startY: number = downEvent.clientY;
+    const startX = downEvent.clientX;
+    const startY = downEvent.clientY;
 
-    const startWindowWidth: number = this.viewport.windowWidth;
-    const startWindowLevel: number = this.viewport.windowLevel;
+    const startWindowWidth = this.viewport.windowWidth;
+    const startWindowLevel = this.viewport.windowLevel;
 
-    const cancelMouseMove: () => void = this.viewRenderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
+    const cancelMouseMove = this.viewRenderer.listen('window', 'mousemove', moveEvent => {
       this.viewport.windowWidth = startWindowWidth + (moveEvent.clientX - startX) * WINDOW_WIDTH_SENSIBILITY;
       this.viewport.windowLevel = startWindowLevel - (moveEvent.clientY - startY) * WINDOW_LEVEL_SENSIBILITY;
       this.viewport.windowWidth = Math.max(this.viewport.windowWidth, WINDOW_WIDTH_MIN);
     });
 
-    const cancelMouseUp: () => void = this.viewRenderer.listen('window', 'mouseup', () => {
+    const cancelMouseUp = this.viewRenderer.listen('window', 'mouseup', () => {
       cancelMouseMove();
       cancelMouseUp();
     });
@@ -277,8 +275,8 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
 
   private async getDicomData(dataset: string): Promise<Uint8Array> {
     try {
-      const dicomData: ArrayBuffer = await this.http
-        .get(`/assets/dicom/${dataset}`, {responseType: 'arraybuffer'})
+      const dicomData = await this.http
+        .get(`/assets/dicom/${dataset}`, { responseType: 'arraybuffer' })
         .toPromise();
 
       return new Uint8Array(dicomData);
@@ -288,50 +286,35 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     }
   }
 
-  private getDicomProperties(rawDicomData: Uint8Array): any {
-    let dataset: any;
+  private getDicomProperties(rawDicomData: Uint8Array): DicomProperties {
+    let dataset: Dataset;
 
     try {
-      dataset = (<any> window).dicomParser.parseDicom(rawDicomData);
+      dataset = (window as any).dicomParser.parseDicom(rawDicomData);
     } catch (error) {
       throw new Error(`Unable to parse dicom: ${error.message || error}`);
     }
 
     try {
-      const bitsAllocated: number = dataset.uint16('x00280100');
-      const height: number = dataset.uint16('x00280010');
-      const patientName: string = dataset.string('x00100010');
-      const photometricInterpretation: string = dataset.string('x00280004');
-      const pixelRepresentation: number = dataset.uint16('x00280103');
-
-      const rescaleIntercept: number = typeof dataset.intString('x00281052') === 'number'
-        ? dataset.intString('x00281052')
-        : 0;
-
-      const rescaleSlope: number = typeof dataset.floatString('x00281053') === 'number'
-        ? dataset.floatString('x00281053')
-        : 1;
-
-      const width: number = dataset.uint16('x00280011');
-
-      const windowLevel: number = typeof dataset.intString('x00281050') === 'number'
-        ? dataset.intString('x00281050')
-        : 30;
-
-      const windowWidth: number = typeof  dataset.intString('x00281051') === 'number'
-        ? dataset.intString('x00281051')
-        : 400;
-
-      const imageFormat: string = this.getImageFormat(bitsAllocated, photometricInterpretation, pixelRepresentation);
-
-      const pixelDataElement: any = dataset.elements.x7fe00010;
-      const pixelData: Uint8Array = (<any> window).dicomParser.sharedCopy(
-        rawDicomData, pixelDataElement.dataOffset, pixelDataElement.length,
-      );
+      const bitsAllocated = dataset.uint16('x00280100');
+      const height = dataset.uint16('x00280010');
+      const patientName = dataset.string('x00100010');
+      const photometricInterpretation = dataset.string('x00280004') as PhotometricInterpretation;
+      const pixelRepresentation = dataset.uint16('x00280103');
+      const rescaleIntercept = typeof dataset.intString('x00281052') === 'number' ? dataset.intString('x00281052') : 0;
+      const rescaleSlope = typeof dataset.floatString('x00281053') === 'number' ? dataset.floatString('x00281053') : 1;
+      const width = dataset.uint16('x00280011');
+      const windowLevel = typeof dataset.intString('x00281050') === 'number' ? dataset.intString('x00281050') : 30;
+      const windowWidth = typeof  dataset.intString('x00281051') === 'number' ? dataset.intString('x00281051') : 400;
+      const imageFormat = this.getImageFormat(bitsAllocated, photometricInterpretation, pixelRepresentation);
+      const pixelDataElement = dataset.elements.x7fe00010;
+      const pixelDataBuffer = (window as any).dicomParser
+        .sharedCopy(rawDicomData, pixelDataElement.dataOffset, pixelDataElement.length)
+        .buffer;
 
       return {
-        bitsAllocated, height, imageFormat, patientName, photometricInterpretation, pixelData, pixelRepresentation,
-        rescaleIntercept, rescaleSlope, width, windowLevel, windowWidth,
+        bitsAllocated, height, imageFormat, patientName, photometricInterpretation, pixelDataBuffer,
+        pixelRepresentation, rescaleIntercept, rescaleSlope, width, windowLevel, windowWidth,
       };
 
     } catch (error) {
@@ -339,21 +322,22 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     }
   }
 
-  private getImageFormat(bitsAllocated: number, photometricInterpretation: string, pixelRepresentation: number): string {
-    let format = '';
+  private getImageFormat(bitsAllocated: number, photometricInterpretation: PhotometricInterpretation,
+                         pixelRepresentation: PixelRepresentation): ImageFormat {
+    let format: string;
 
     if (photometricInterpretation === PhotometricInterpretation.RGB) {
       format = 'rgb';
-    } else if (photometricInterpretation.indexOf('MONOCHROME') === 0) {
+    } else if ((photometricInterpretation as string).indexOf('MONOCHROME') === 0) {
       if (pixelRepresentation === PixelRepresentation.Unsigned) {
-        format += 'u';
+        format = 'u';
       }
       format += `int${bitsAllocated <= 8 ? '8' : '16'}`;
     } else {
       throw new Error('Unsupported photometric interpretation');
     }
 
-    return format;
+    return format as ImageFormat;
   }
 
   private handleError(error: Error): Error {
@@ -367,14 +351,14 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   }
 
   private startRender(): void {
-    const render: () => void = (): void => {
+    const render = () => {
 
       if (this.renderer === undefined) {
         return;
       }
 
       if (this.windowComponent.active) {
-        const t: number = performance.now();
+        const t = performance.now();
 
         try {
           this.renderer.render(this.viewport);
@@ -397,8 +381,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
 
     this.statsInterval = window.setInterval(() => {
       if (this.frameDurations.length > 0) {
-        const meanFrameDuration: number = this.frameDurations
-          .reduce((sum: number, d: number) => sum + d, 0) / this.frameDurations.length;
+        const meanFrameDuration = this.frameDurations.reduce((sum, d) => sum + d, 0) / this.frameDurations.length;
         this.fps = Math.round(1000 / meanFrameDuration);
         this.frameDurations = [];
       } else {
@@ -406,8 +389,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       }
 
       if (this.renderDurations.length > 0) {
-        this.meanRenderDuration = this.renderDurations
-          .reduce((sum: number, d: number) => sum + d, 0) / this.renderDurations.length;
+        this.meanRenderDuration = this.renderDurations.reduce((sum, d) => sum + d, 0) / this.renderDurations.length;
         this.renderDurations = [];
       } else {
         this.meanRenderDuration = 0;
@@ -416,4 +398,18 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
 
     render();
   }
+}
+
+interface Dataset {
+  fileName: string;
+
+  elements: { [tag: string]: { dataOffset: number; length: number } };
+
+  floatString(tag: string): number;
+
+  intString(tag: string): number;
+
+  string(tag: string): string;
+
+  uint16(tag: string): number;
 }

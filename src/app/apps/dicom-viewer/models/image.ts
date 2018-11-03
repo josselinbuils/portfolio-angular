@@ -1,8 +1,10 @@
+import { ImageFormat } from 'app/apps/dicom-viewer/constants';
+
 export class Image {
 
   height: number;
-  imageFormat: string;
-  pixelData: Int8Array | Uint8Array | Int16Array | Uint16Array | Int32Array;
+  imageFormat: ImageFormat;
+  pixelData: ArrayBufferView;
   rescaleIntercept: number;
   rescaleSlope: number;
   width: number;

@@ -1,7 +1,7 @@
 import { Component, ViewChild } from '@angular/core';
 
-import { WindowInstance } from '../../platform/window/window-instance';
-import { WindowComponent } from '../../platform/window/window.component';
+import { WindowInstance } from 'app/platform/window/window-instance';
+import { WindowComponent } from 'app/platform/window/window.component';
 
 @Component({
   selector: 'app-teravia',

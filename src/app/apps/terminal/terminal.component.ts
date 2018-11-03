@@ -1,10 +1,10 @@
 import {
-  AfterContentInit, Component, ComponentFactory, ComponentFactoryResolver, ComponentRef, ElementRef, HostListener,
-  OnInit, Type, ViewChild, ViewContainerRef,
+  AfterContentInit, Component, ComponentFactoryResolver, ComponentRef, ElementRef, HostListener, OnInit, Type,
+  ViewChild, ViewContainerRef,
 } from '@angular/core';
 
-import { WindowInstance } from '../../platform/window/window-instance';
-import { WindowComponent } from '../../platform/window/window.component';
+import { WindowInstance } from 'app/platform/window/window-instance';
+import { WindowComponent } from 'app/platform/window/window.component';
 
 import { AboutComponent } from './executors/about/about.component';
 import { BashErrorComponent } from './executors/bash-error/bash-error.component';
@@ -26,7 +26,7 @@ enum KEY_CODE {
   UP = 38,
 }
 
-const executors: any = {
+const executors = {
   about: AboutComponent,
   help: HelpComponent,
   open: OpenComponent,
@@ -44,12 +44,11 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
   static appName = 'Terminal';
   static iconClass = 'fa-terminal';
 
-  @ViewChild('commands', {read: ViewContainerRef}) commandsViewContainerRef: ViewContainerRef;
-  @ViewChild('terminal') terminalElementRef: ElementRef;
+  @ViewChild('commands', { read: ViewContainerRef }) commandsViewContainerRef: ViewContainerRef;
+  @ViewChild('terminal') terminalElementRef: ElementRef<HTMLDivElement>;
   @ViewChild(WindowComponent) windowComponent: WindowComponent;
 
   caretIndex = 0;
-  contentStyle: any = {};
   prefix = 'user$';
   userInput = '';
   title = TerminalComponent.appName;
@@ -91,8 +90,8 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
   }
 
   ngAfterContentInit(): void {
-    const terminal: HTMLElement = this.terminalElementRef.nativeElement;
-    new MutationObserver((): number => terminal.scrollTop = terminal.scrollHeight)
+    const terminal = this.terminalElementRef.nativeElement;
+    new MutationObserver(() => terminal.scrollTop = terminal.scrollHeight)
       .observe(terminal, {
         childList: true,
         subtree: true,
@@ -100,12 +99,12 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
   }
 
   private clear(): void {
-    this.components.forEach((component: ComponentRef<{}>) => component.destroy());
+    this.components.forEach(component => component.destroy());
     this.components = [];
   }
 
   private exec(str: string): void {
-    const command: string = str.trim().split(' ')[0];
+    const command = str.trim().split(' ')[0];
 
     this.loadComponent(CommandComponent, [this.prefix, str]);
 
@@ -131,8 +130,8 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
   }
 
   private loadComponent(component: Type<{}>, args: any[]): void {
-    const componentFactory: ComponentFactory<{}> = this.componentFactoryResolver.resolveComponentFactory(component);
-    const componentRef: ComponentRef<{}> = this.commandsViewContainerRef.createComponent(componentFactory);
+    const componentFactory = this.componentFactoryResolver.resolveComponentFactory(component);
+    const componentRef = this.commandsViewContainerRef.createComponent(componentFactory);
     (<Executor> componentRef.instance).args = args;
     this.components.push(componentRef);
   }

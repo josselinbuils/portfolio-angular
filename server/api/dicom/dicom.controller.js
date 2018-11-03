@@ -26,7 +26,6 @@ function getFiles() {
     .map(fileName => {
       const name = fileName.replace(/\.[a-z]+$/, '');
       const preview = previews.find(p => p.includes(name));
-
-      return {fileName, name: name, preview};
+      return {fileName, name, preview};
     });
 }

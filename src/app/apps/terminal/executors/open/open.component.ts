@@ -1,7 +1,8 @@
 import { Component, OnInit, Type } from '@angular/core';
 
-import { WindowManagerService } from '../../../../platform/window/window-manager.service';
-import { DicomViewerComponent } from '../../../dicom-viewer/dicom-viewer.component';
+import { DicomViewerComponent } from 'app/apps/dicom-viewer/dicom-viewer.component';
+import { WindowManagerService } from 'app/platform/window/window-manager.service';
+
 import { Executor } from '../executor';
 
 const apps: { [name: string]: Type<{}> } = {
@@ -20,7 +21,7 @@ export class OpenComponent implements OnInit, Executor {
   constructor(private readonly windowManagerService: WindowManagerService) {}
 
   ngOnInit(): void {
-    const appName: string = this.args[0];
+    const appName = this.args[0];
 
     if (apps[appName] !== undefined) {
       this.windowManagerService.openWindow(apps[appName]);

@@ -1,20 +1,16 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 
-import { HTTP_PREFIX } from '../../../env';
+import { HTTP_PREFIX } from 'app/env';
+
 import { RendererType } from '../constants';
 
 import { Config } from './config';
+import { DatasetDescriptor } from './dataset-descriptor';
 
-const RENDERERS: { type: RendererType; logo: string }[] = [
-  {type: RendererType.JavaScript, logo: 'javascript.png'},
-  {type: RendererType.WebAssembly, logo: 'webassembly.png'},
-  {type: RendererType.WebGL, logo: 'webgl.png'},
-];
-
-enum STEP {
-  DATASET = 'dataset',
-  RENDERER = 'renderer',
+enum Step {
+  Dataset = 'dataset',
+  Renderer = 'renderer',
 }
 
 @Component({
@@ -26,23 +22,27 @@ export class ConfigComponent implements OnInit {
 
   @Output() config = new EventEmitter<Config>();
 
-  datasets: any[];
-  renderers: any[] = RENDERERS;
+  datasets: DatasetDescriptor[];
+  renderers = [
+    { type: RendererType.JavaScript, logo: 'javascript.png' },
+    { type: RendererType.WebAssembly, logo: 'webassembly.png' },
+    { type: RendererType.WebGL, logo: 'webgl.png' },
+  ];
   rendererType: string;
-  step: string = STEP.RENDERER;
+  step = Step.Renderer;
 
   constructor(private readonly http: HttpClient) {}
 
   back(): void {
-    this.step = STEP.RENDERER;
+    this.step = Step.Renderer;
   }
 
   chooseRenderer(rendererType: string): void {
     this.rendererType = rendererType;
-    this.step = STEP.DATASET;
+    this.step = Step.Dataset;
   }
 
-  chooseDataset(dataset: any): void {
+  chooseDataset(dataset: DatasetDescriptor): void {
     this.config.emit({
       dataset,
       rendererType: this.rendererType,
@@ -54,6 +54,6 @@ export class ConfigComponent implements OnInit {
   }
 
   private async loadDatasets(): Promise<void> {
-    this.datasets = <string[]> await this.http.get(`${HTTP_PREFIX}/api/dicom`).toPromise();
+    this.datasets = await this.http.get(`${HTTP_PREFIX}/api/dicom`).toPromise() as DatasetDescriptor[];
   }
 }

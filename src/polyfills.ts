@@ -57,18 +57,17 @@ import 'zone.js/dist/zone';  // Included with Angular CLI.
  */
 
 if (Element.prototype.matches === undefined) {
-  Element.prototype.matches =
-    [
-      (<any> Element).prototype.matchesSelector,
-      (<any> Element).prototype.mozMatchesSelector,
-      (<any> Element).prototype.msMatchesSelector,
-      (<any> Element).prototype.oMatchesSelector,
-      (<any> Element).prototype.webkitMatchesSelector,
-      function (s: string): boolean {
-        const matches: any = (this.document || this.ownerDocument).querySelectorAll(s);
-        let i: number = matches.length;
-        while (--i >= 0 && matches.item(i) !== this) {}
-        return i > -1;
-      },
-    ].find((method: Function) => typeof method === 'function');
+  Element.prototype.matches = [
+    (Element as any).prototype.matchesSelector,
+    (Element as any).prototype.mozMatchesSelector,
+    (Element as any).prototype.msMatchesSelector,
+    (Element as any).prototype.oMatchesSelector,
+    (Element as any).prototype.webkitMatchesSelector,
+    function (s: string): boolean {
+      const matches = (this.document || this.ownerDocument).querySelectorAll(s);
+      let i = matches.length;
+      while (--i >= 0 && matches.item(i) !== this) {}
+      return i > -1;
+    },
+  ].find(method => typeof method === 'function');
 }

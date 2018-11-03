@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 
 import { Executor } from '../executor';
 
-const commands: string[] = [
+const commands = [
   'cat', 'cd', 'chmod', 'chown', 'cp', 'kill', 'locate', 'ls', 'man', 'mkdir', 'mv', 'passwd', 'pwd', 'rm', 'rmdir',
   'ssh', 'su', 'sudo', 'touch', 'whereis', 'who',
 ];

@@ -1,17 +1,10 @@
 import {
-  AfterContentInit,
-  Component,
-  ComponentRef,
-  ElementRef,
-  EventEmitter,
-  HostListener,
-  Input,
-  Output,
-  Renderer2,
+  AfterContentInit, Component, ComponentRef, ElementRef, EventEmitter, HostListener, Input, Output, Renderer2,
   ViewChild,
 } from '@angular/core';
 
-import { MOUSE_BUTTON } from '../../constants';
+import { MOUSE_BUTTON } from 'app/constants';
+
 import { DeviceManagerService } from '../device-manager.service';
 import { DOMUtils } from '../dom-utils';
 
@@ -27,8 +20,8 @@ const LEFT_OFFSET = 60;
   styleUrls: ['./window.component.scss'],
 })
 export class WindowComponent implements AfterContentInit {
-  @ViewChild('content') contentElementRef: ElementRef;
-  @ViewChild('window') windowElementRef: ElementRef;
+  @ViewChild('content') contentElementRef: ElementRef<HTMLDivElement>;
+  @ViewChild('window') windowElementRef: ElementRef<HTMLDivElement>;
 
   @Input() background: string;
 
@@ -78,7 +71,7 @@ export class WindowComponent implements AfterContentInit {
   private contentRatio: number;
   private effectiveHeight: number;
   private effectiveWidth: number;
-  private readonly lastDisplayProperties: any = {};
+  private readonly lastDisplayProperties: { maximize?: ClientRect; minimize?: ClientRect } = {};
   private minimizedTopPosition: number;
   private window: HTMLElement;
 
@@ -117,7 +110,7 @@ export class WindowComponent implements AfterContentInit {
     this.startAnimation(animationDelay)
       .ready(() => {
         if (this.maximized) {
-          const {left, top, width, height} = this.lastDisplayProperties.maximize;
+          const { left, top, width, height } = this.lastDisplayProperties.maximize;
           this.setSize(width, height);
           this.setPosition(left, top);
         } else {
@@ -134,7 +127,7 @@ export class WindowComponent implements AfterContentInit {
   }
 
   ngAfterContentInit(): void {
-    let size: any = {};
+    let size: { width: number; height: number };
 
     this.content = this.contentElementRef.nativeElement;
     this.window = this.windowElementRef.nativeElement;
@@ -146,24 +139,24 @@ export class WindowComponent implements AfterContentInit {
         size = this.getSize();
       }
 
-      const width: number = typeof this.effectiveWidth === 'number'
+      const width = typeof this.effectiveWidth === 'number'
         ? this.effectiveWidth
         : size.width;
 
-      const height: number = typeof this.effectiveHeight === 'number'
+      const height = typeof this.effectiveHeight === 'number'
         ? this.effectiveHeight
         : size.height;
 
       this.setSize(width, height);
 
       size = this.getSize();
-      const x: number = Math.round((window.innerWidth - size.width) * 0.5);
-      const y: number = Math.round((window.innerHeight - size.height) * 0.2);
+      const x = Math.round((window.innerWidth - size.width) * 0.5);
+      const y = Math.round((window.innerHeight - size.height) * 0.2);
 
       this.setPosition(x, y);
 
       if (this.keepContentRatio) {
-        const contentSize: any = this.getContentSize();
+        const contentSize = this.getContentSize();
         this.contentRatio = contentSize.width / contentSize.height;
       }
     }
@@ -191,10 +184,10 @@ export class WindowComponent implements AfterContentInit {
       if (this.deviceManagerService.isMobile()) {
         this.minimized = false;
         this.visible = true;
-      } else if (this.lastDisplayProperties.minimize) {
+      } else if (this.lastDisplayProperties.minimize !== undefined) {
         this.startAnimation()
           .ready(() => {
-            const {left, top, width, height} = this.lastDisplayProperties.minimize;
+            const { left, top, width, height } = this.lastDisplayProperties.minimize;
             this.minimized = false;
             this.setSize(width, height);
             this.setPosition(left, top, true);
@@ -216,14 +209,14 @@ export class WindowComponent implements AfterContentInit {
       return;
     }
 
-    const windowBoundingRect: any = this.window.getBoundingClientRect();
-    const dx: number = windowBoundingRect.left - downEvent.clientX;
-    const dy: number = windowBoundingRect.top - downEvent.clientY;
-    let maximized: boolean = this.maximized;
+    const windowBoundingRect = this.window.getBoundingClientRect();
+    const dx = windowBoundingRect.left - downEvent.clientX;
+    const dy = windowBoundingRect.top - downEvent.clientY;
+    let maximized = this.maximized;
 
     this.setSelectable(false);
 
-    const cancelMouseMove: () => void = this.renderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
+    const cancelMouseMove = this.renderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
       if (maximized) {
         maximized = false;
         this.maximize(50);
@@ -231,7 +224,7 @@ export class WindowComponent implements AfterContentInit {
       this.setPosition(moveEvent.clientX + dx, moveEvent.clientY + dy);
     });
 
-    const cancelMouseUp: () => void = this.renderer.listen('window', 'mouseup', () => {
+    const cancelMouseUp = this.renderer.listen('window', 'mouseup', () => {
       this.setSelectable(true);
       cancelMouseMove();
       cancelMouseUp();
@@ -252,16 +245,16 @@ export class WindowComponent implements AfterContentInit {
 
     this.setSelectable(false);
 
-    const startSize: { width: number; height: number } = this.getSize();
+    const startSize = this.getSize();
 
-    const cancelMouseMove: () => void = this.renderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
-      const width: number = startSize.width + moveEvent.clientX - downEvent.clientX;
-      const height: number = startSize.height + moveEvent.clientY - downEvent.clientY;
+    const cancelMouseMove = this.renderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
+      const width = startSize.width + moveEvent.clientX - downEvent.clientX;
+      const height = startSize.height + moveEvent.clientY - downEvent.clientY;
       this.setSize(width, height);
     });
 
-    const cancelMouseUp: () => void = this.renderer.listen('window', 'mouseup', () => {
-      const size: any = this.getSize();
+    const cancelMouseUp = this.renderer.listen('window', 'mouseup', () => {
+      const size = this.getSize();
       this.setSize(size.width, size.height);
       this.setSelectable(true);
       cancelMouseMove();
@@ -284,8 +277,8 @@ export class WindowComponent implements AfterContentInit {
   }
 
   private setMaxSize(): void {
-    const maxWidth: number = window.innerWidth - LEFT_OFFSET;
-    const maxHeight: number = window.innerHeight;
+    const maxWidth = window.innerWidth - LEFT_OFFSET;
+    const maxHeight = window.innerHeight;
     this.setSize(maxWidth, maxHeight, true);
   }
 
@@ -293,10 +286,10 @@ export class WindowComponent implements AfterContentInit {
 
     if (!force) {
       // This cannot be done when showing again a minimized window because its dimensions are null
-      const xMin: number = -this.getSize().width + 90;
+      const xMin = -this.getSize().width + 90;
       const yMin = -1;
-      const xMax: number = window.innerWidth - 30;
-      const yMax: number = window.innerHeight - 21;
+      const xMax = window.innerWidth - 30;
+      const yMax = window.innerHeight - 21;
 
       x = Math.min(Math.max(x, xMin), xMax);
       y = Math.min(Math.max(y, yMin), yMax);
@@ -331,10 +324,10 @@ export class WindowComponent implements AfterContentInit {
       }
 
       if (typeof this.contentRatio === 'number') {
-        const size: any = this.getSize();
-        const contentSize: any = this.getContentSize();
-        const dx: number = size.width - contentSize.width;
-        const dy: number = size.height - contentSize.height;
+        const size = this.getSize();
+        const contentSize = this.getContentSize();
+        const dx = size.width - contentSize.width;
+        const dy = size.height - contentSize.height;
         height = Math.round((width - dx) / this.contentRatio) + dy;
       }
     }
@@ -342,10 +335,10 @@ export class WindowComponent implements AfterContentInit {
     this.setStyle('width', `${width}px`);
     this.setStyle('height', `${height}px`);
 
-    this.resize.emit({width, height});
+    this.resize.emit({ width, height });
   }
 
-  private setStyle(property: string, value: any): void {
+  private setStyle(property: string, value: number | string): void {
     this.renderer.setStyle(this.window, property, value);
   }
 

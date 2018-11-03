@@ -3,13 +3,11 @@ import { AfterContentInit, Component, ElementRef, OnDestroy, OnInit, Renderer2, 
 import * as moment from 'moment';
 import { first } from 'rxjs/operators';
 
-import { HTTP_PREFIX } from '../../env';
-import { WindowInstance } from '../../platform/window/window-instance';
-import { WindowComponent } from '../../platform/window/window.component';
+import { HTTP_PREFIX } from 'app/env';
+import { WindowInstance } from 'app/platform/window/window-instance';
+import { WindowComponent } from 'app/platform/window/window.component';
 
-import { Item } from './item';
-
-const size: any = {
+const size = {
   min: {
     width: 330,
     height: 150,
@@ -29,43 +27,43 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
   static appName = 'MP3Player';
   static iconClass = 'fa-headphones';
 
-  @ViewChild('audio') audioElementRef: ElementRef;
-  @ViewChild('currentTime') currentTimeElementRef: ElementRef;
-  @ViewChild('progressBar') progressElementRef: ElementRef;
-  @ViewChild('source') sourceElementRef: ElementRef;
+  @ViewChild('audio') audioElementRef: ElementRef<HTMLAudioElement>;
+  @ViewChild('currentTime') currentTimeElementRef: ElementRef<HTMLDivElement>;
+  @ViewChild('progressBar') progressElementRef: ElementRef<HTMLDivElement>;
+  @ViewChild('source') sourceElementRef: ElementRef<HTMLSourceElement>;
   @ViewChild(WindowComponent) windowComponent: WindowComponent;
 
-  audioElement: any;
-  currentItem: any;
-  currentMusic: any = {};
+  audioElement: HTMLAudioElement;
+  currentItem: Item;
+  currentMusic: Music;
 
   items: Item[] = [
-    {name: 'Top 50', path: '/tracks'},
+    { name: 'Top 50', path: '/tracks' },
     {
       name: 'Genres',
       items: [
-        {name: 'Classical', path: '/tracks/classical'},
-        {name: 'Dance', path: '/tracks/dance'},
-        {name: 'Electronic', path: '/tracks/electronic'},
-        {name: 'Folk', path: '/tracks/folk'},
-        {name: 'House', path: '/tracks/house'},
-        {name: 'Metal', path: '/tracks/metal'},
-        {name: 'Pop', path: '/tracks/pop'},
-        {name: 'Reggae', path: '/tracks/reggae'},
-        {name: 'Rock', path: '/tracks/rock'},
-        {name: 'Soundtrack', path: '/tracks/soundtrack'},
+        { name: 'Classical', path: '/tracks/classical' },
+        { name: 'Dance', path: '/tracks/dance' },
+        { name: 'Electronic', path: '/tracks/electronic' },
+        { name: 'Folk', path: '/tracks/folk' },
+        { name: 'House', path: '/tracks/house' },
+        { name: 'Metal', path: '/tracks/metal' },
+        { name: 'Pop', path: '/tracks/pop' },
+        { name: 'Reggae', path: '/tracks/reggae' },
+        { name: 'Rock', path: '/tracks/rock' },
+        { name: 'Soundtrack', path: '/tracks/soundtrack' },
       ],
     },
   ];
 
   orders: { name: string; order: string }[] = [
-    {name: 'Top All', order: 'popularity_total'},
-    {name: 'Top Month', order: 'popularity_month'},
-    {name: 'Top Week', order: 'popularity_week'},
+    { name: 'Top All', order: 'popularity_total' },
+    { name: 'Top Month', order: 'popularity_month' },
+    { name: 'Top Week', order: 'popularity_week' },
   ];
 
-  musicList: any[] = [];
-  playlist: any[] = [];
+  musicList: Music[] = [];
+  playlist: Music[] = [];
   progress = 0;
   random = false;
   repeat = false;
@@ -77,7 +75,7 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
     return this.showPlaylist ? Mp3PlayerComponent.appName : '';
   }
 
-  private currentTimeInterval: any;
+  private currentTimeInterval: number;
 
   constructor(private readonly http: HttpClient,
               private readonly renderer: Renderer2) {}
@@ -89,47 +87,46 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
     }
 
     this.currentItem = item;
-    this.musicList = [];
 
-    this.musicList = <any[]> await this.http
-      .get(`${HTTP_PREFIX}/api/jamendo${item.path}/${order}`).pipe(
-        first())
-      .toPromise();
+    this.musicList = await this.http
+      .get(`${HTTP_PREFIX}/api/jamendo${item.path}/${order}`)
+      .pipe(first())
+      .toPromise() as Music[];
 
-    this.musicList.forEach((music: any) => {
-      return music.readableDuration = moment.utc(music.duration * 1000).format('mm:ss');
+    this.musicList.forEach(music => {
+      music.readableDuration = moment.utc(music.duration * 1000).format('mm:ss');
     });
   }
 
-  next(): void {
+  async next(): Promise<void> {
 
     if (this.random) {
       return this.rand();
     }
 
-    let newIndex: number = this.playlist.indexOf(this.currentMusic) + 1;
+    let newIndex = this.playlist.indexOf(this.currentMusic) + 1;
 
     if (newIndex >= this.playlist.length) {
       newIndex = 0;
     }
 
-    const paused: boolean = this.audioElement.paused;
+    const paused = this.audioElement.paused;
 
     this.loadMusic(this.playlist[newIndex]);
 
     if (!paused) {
-      this.play();
+      await this.play();
     }
   }
 
   ngAfterContentInit(): void {
     this.audioElement = this.audioElementRef.nativeElement;
 
-    this.audioElement.addEventListener('ended', () => {
+    this.audioElement.addEventListener('ended', async () => {
       if (!this.repeat) {
-        this.next();
+        await this.next();
       }
-      this.play();
+      await this.play();
     });
 
     this.audioElement.addEventListener('timeupdate', () => {
@@ -139,10 +136,10 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
     let lastCurrentTimeSeconds = 0;
 
     this.currentTimeInterval = setInterval(() => {
-      const currentTimeSeconds: number = Math.round(this.audioElement.currentTime);
+      const currentTimeSeconds = Math.round(this.audioElement.currentTime);
 
       if (lastCurrentTimeSeconds !== currentTimeSeconds) {
-        const currentTimeElem: HTMLElement = this.currentTimeElementRef.nativeElement;
+        const currentTimeElem = this.currentTimeElementRef.nativeElement;
         currentTimeElem.innerText = moment.utc(currentTimeSeconds * 1000).format('mm:ss');
         lastCurrentTimeSeconds = currentTimeSeconds;
       }
@@ -158,66 +155,65 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
     this.loadMusic(this.musicList[0]);
   }
 
-  play(): void {
+  async play(): Promise<void> {
     if (this.audioElement.paused) {
-      this.audioElement.play();
+      await this.audioElement.play();
     } else {
       this.audioElement.pause();
     }
   }
 
-  playMusic(music: any): void {
+  async playMusic(music: Music): Promise<void> {
     if (music.id !== this.currentMusic.id) {
       this.loadMusic(music);
     }
-    this.play();
+    await this.play();
   }
 
-  prev(): void {
+  async prev(): Promise<void> {
 
     if (this.random) {
       return this.rand();
     }
 
-    let newIndex: number = this.playlist.indexOf(this.currentMusic) - 1;
+    let newIndex = this.playlist.indexOf(this.currentMusic) - 1;
 
     if (newIndex < 0) {
       newIndex = this.playlist.length - 1;
     }
 
-    const paused: boolean = this.audioElement.paused;
+    const paused = this.audioElement.paused;
 
     this.loadMusic(this.playlist[newIndex]);
 
     if (!paused) {
-      this.play();
+      await this.play();
     }
   }
 
-  rand(): void {
-    const newIndex: number = Math.round(this.playlist.length * Math.random());
-
-    const paused: boolean = this.audioElement.paused;
+  async rand(): Promise<void> {
+    const newIndex = Math.round(this.playlist.length * Math.random());
+    const paused = this.audioElement.paused;
 
     this.loadMusic(this.playlist[newIndex]);
 
     if (!paused) {
-      this.play();
+     await this.play();
     }
   }
 
   startSeek(downEvent: MouseEvent): void {
-    const progressBarWidth: number = this.progressElementRef.nativeElement.clientWidth;
-    const dx: number = downEvent.offsetX - downEvent.clientX;
+    const progressBarWidth = this.progressElementRef.nativeElement.clientWidth;
+    const dx = downEvent.offsetX - downEvent.clientX;
 
     this.seeking = true;
     this.setCurrentTime(downEvent.offsetX / progressBarWidth);
 
-    const cancelMouseMove: () => void = this.renderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
-      this.setCurrentTime((moveEvent.clientX + dx) / progressBarWidth);
+    const cancelMouseMove = this.renderer.listen('window', 'mousemove', moveEvent => {
+      this.setCurrentTime((moveEvent.clientX as number + dx) / progressBarWidth);
     });
 
-    const cancelMouseUp: () => void = this.renderer.listen('window', 'mouseup', () => {
+    const cancelMouseUp = this.renderer.listen('window', 'mouseup', () => {
       this.seeking = false;
       cancelMouseMove();
       cancelMouseUp();
@@ -229,7 +225,7 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
     this.size = this.showPlaylist ? size.max : size.min;
   }
 
-  private loadMusic(music: any): void {
+  private loadMusic(music: Music): void {
 
     if (!this.playlist.includes(music)) {
       this.playlist = this.musicList.slice();
@@ -244,7 +240,35 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
    * @param value 0 -> 1
    */
   private setCurrentTime(value: number): void {
-    const duration: number = this.audioElement.duration;
+    const duration = this.audioElement.duration;
     this.audioElement.currentTime = Math.min(Math.round(value * duration), duration - 1);
   }
+}
+
+export interface Item {
+  items?: Item[];
+  name: string;
+  path?: string;
+}
+
+interface Music {
+  album_id: string;
+  album_image: string;
+  album_name: string;
+  artist_id: string;
+  artist_idstr: string;
+  artist_name: string;
+  audio: string;
+  audiodownload: string;
+  duration: number;
+  id: string;
+  image: string;
+  license_ccurl: string;
+  name: string;
+  position: number;
+  prourl: string;
+  readableDuration: string;
+  releasedate: string;
+  shareurl: string;
+  shorturl: string;
 }

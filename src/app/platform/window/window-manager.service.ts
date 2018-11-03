@@ -1,6 +1,4 @@
-import {
-  ComponentFactory, ComponentFactoryResolver, ComponentRef, Injectable, Type, ViewContainerRef,
-} from '@angular/core';
+import { ComponentFactoryResolver, Injectable, Type, ViewContainerRef } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
 import { WindowInstance } from './window-instance';
@@ -8,7 +6,7 @@ import { WindowComponent } from './window.component';
 
 @Injectable()
 export class WindowManagerService {
-  windowInstancesSubject: BehaviorSubject<WindowInstance[]> = new BehaviorSubject<WindowInstance[]>(<WindowInstance[]> []);
+  windowInstancesSubject = new BehaviorSubject<WindowInstance[]>(<WindowInstance[]> []);
 
   private readonly windows: WindowComponent[] = [];
   private id = -1;
@@ -17,8 +15,8 @@ export class WindowManagerService {
   constructor(private readonly componentFactoryResolver: ComponentFactoryResolver) {}
 
   closeWindow(id: number): void {
-    const index: number = this.windows.findIndex((w: WindowComponent) => w.id === id);
-    const window: WindowComponent = this.windows[index];
+    const index = this.windows.findIndex(w => w.id === id);
+    const window = this.windows[index];
     this.windows.splice(index, 1);
     window.parentRef.destroy();
     this.publishWindowInstances();
@@ -38,10 +36,10 @@ export class WindowManagerService {
   }
 
   openWindow(component: Type<{}>): void {
-    const componentFactory: ComponentFactory<{}> = this.componentFactoryResolver.resolveComponentFactory(component);
-    const componentRef: ComponentRef<{}> = this.viewContainerRef.createComponent(componentFactory);
+    const componentFactory = this.componentFactoryResolver.resolveComponentFactory(component);
+    const componentRef = this.viewContainerRef.createComponent(componentFactory);
 
-    const window: WindowComponent = (<WindowInstance> componentRef.instance).windowComponent;
+    const window = (<WindowInstance> componentRef.instance).windowComponent;
     window.id = ++this.id;
     window.parentRef = componentRef;
 
@@ -59,14 +57,14 @@ export class WindowManagerService {
     let i = 0;
 
     this.windows
-      .filter((window: WindowComponent) => window.id !== id)
-      .sort((a: WindowComponent, b: WindowComponent) => (a.zIndex < b.zIndex) ? -1 : 1)
-      .forEach((window: WindowComponent) => {
+      .filter(window => window.id !== id)
+      .sort((a, b) => (a.zIndex < b.zIndex) ? -1 : 1)
+      .forEach(window => {
         window.active = false;
         window.zIndex = ++i;
       });
 
-    const activeWindow: WindowComponent = this.getWindowComponent(id);
+    const activeWindow = this.getWindowComponent(id);
     activeWindow.active = true;
     activeWindow.zIndex = ++i;
   }
@@ -76,7 +74,7 @@ export class WindowManagerService {
   }
 
   unselectAllWindows(): void {
-    this.windows.forEach((window: WindowComponent) => window.active = false);
+    this.windows.forEach(window => window.active = false);
   }
 
   unselectWindow(id: number): void {
@@ -84,13 +82,11 @@ export class WindowManagerService {
   }
 
   private getWindowComponent(id: number): WindowComponent {
-    return this.windows.find((window: WindowComponent) => window.id === id);
+    return this.windows.find(window => window.id === id);
   }
 
   private publishWindowInstances(): void {
-    const instances: WindowInstance[] = this.windows.map((window: WindowComponent) => {
-      return <WindowInstance> window.parentRef.instance;
-    });
+    const instances = this.windows.map(window => window.parentRef.instance as WindowInstance);
     this.windowInstancesSubject.next(instances);
   }
 }

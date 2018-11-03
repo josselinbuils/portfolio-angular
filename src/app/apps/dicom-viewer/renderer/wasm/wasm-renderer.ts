@@ -14,7 +14,7 @@ export class WasmRenderer implements Renderer {
                        rescaleIntercept: number) => void;
 
   private fillTable: (table: number, windowWidth: number) => void;
-  private renderingCore: any;
+  private renderingCore: RenderingCore;
   private lut?: { table: Uint8Array; windowWidth: number };
 
   constructor(canvas: HTMLCanvasElement) {
@@ -27,14 +27,14 @@ export class WasmRenderer implements Renderer {
 
   render(viewport: Viewport): void {
 
-    if (!this.renderingCore) {
+    if (this.renderingCore === undefined) {
       return;
     }
 
     this.context.fillStyle = 'black';
     this.context.fillRect(0, 0, viewport.width, viewport.height);
 
-    const {pixelData, rescaleIntercept, rescaleSlope, width} = viewport.image;
+    const { pixelData, rescaleIntercept, rescaleSlope, width } = viewport.image;
 
     if (this.lut === undefined || this.lut.windowWidth !== viewport.windowWidth) {
 
@@ -52,8 +52,7 @@ export class WasmRenderer implements Renderer {
       }
 
       this.lut = {
-        windowWidth: viewport.windowWidth,
-        table,
+        windowWidth: viewport.windowWidth, table,
       };
     }
 
@@ -61,7 +60,7 @@ export class WasmRenderer implements Renderer {
       displayHeight, displayWidth, displayX0, displayX1, displayY0, displayY1, leftLimit, rightLimit, x0, y0,
     } = getRenderingProperties(viewport);
 
-    const length: number = displayWidth * displayHeight * 4;
+    const length = displayWidth * displayHeight;
 
     if (length > 0) {
       try {
@@ -71,12 +70,12 @@ export class WasmRenderer implements Renderer {
 
         const renderedDataLength = displayWidth * displayHeight * 4;
         const renderedDataPointer = this.renderingCore._malloc(renderedDataLength);
-        const renderedData = new Uint8ClampedArray(this.renderingCore.HEAPU8.buffer, renderedDataPointer, renderedDataLength);
+        const renderedData = new Uint8ClampedArray(this.renderingCore.HEAPU8.buffer, renderedDataPointer,
+          renderedDataLength);
 
-        this.coreRender(
-          this.lut.table.byteOffset, rawData.byteOffset, renderedData.byteOffset, width, x0, y0, displayX0, displayX1,
-          displayY0, displayY1, viewport.zoom, leftLimit, rightLimit, rescaleSlope, rescaleIntercept,
-        );
+        this.coreRender(this.lut.table.byteOffset, rawData.byteOffset, renderedData.byteOffset, width, x0, y0,
+          displayX0, displayX1, displayY0, displayY1, viewport.zoom, leftLimit, rightLimit, rescaleSlope,
+          rescaleIntercept);
 
         const imageData = createImageData(this.context, renderedData, displayWidth, displayHeight);
         this.context.putImageData(imageData, displayX0, displayY0);
@@ -100,19 +99,26 @@ export class WasmRenderer implements Renderer {
 
   private async loadRenderingCore(): Promise<void> {
     try {
-      this.renderingCore = await new Promise<any>(resolve => {
+      this.renderingCore = await new Promise<RenderingCore>(resolve => {
         loadCoreRenderer().then(module => {
           delete module.then;
           resolve(module);
         });
       });
       this.fillTable = this.renderingCore.cwrap('fillTable', null, ['number', 'number']);
-      this.coreRender = this.renderingCore.cwrap('render', null, [
-        'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number',
-        'number', 'number', 'number', 'number',
-      ]);
+      this.coreRender = this.renderingCore.cwrap('render', null, (new Array(15)).fill('number'));
     } catch (error) {
       throw this.handleEmscriptenErrors(error);
     }
   }
+}
+
+interface RenderingCore {
+  HEAPU8: Uint8Array;
+
+  cwrap(...args: any[]): (...args: any[]) => any;
+
+  _free(pointer: number): void;
+
+  _malloc(size: number): number;
 }

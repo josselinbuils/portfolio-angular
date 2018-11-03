@@ -10,14 +10,11 @@ export class DOMUtils {
    * @returns Element if found, null otherwise
    */
   static closest(element: HTMLElement, selector: string): HTMLElement {
-
     do {
-      if ((<any> element).matches(selector)) {
+      if (element.matches(selector)) {
         return element;
       }
-
       element = element.parentElement;
-
     } while (element instanceof HTMLElement);
 
     return undefined;
