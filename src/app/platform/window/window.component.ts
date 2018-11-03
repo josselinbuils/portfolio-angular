@@ -40,7 +40,6 @@ export class WindowComponent implements AfterContentInit {
   @Input() minHeight = 100;
   @Input() minWidth = 100;
   @Input() resizable = true;
-
   @Input() titleBackground: string;
   @Input() titleColor: string;
 
@@ -99,27 +98,6 @@ export class WindowComponent implements AfterContentInit {
           .finished(() => this.visible = false);
       }
     }
-  }
-
-  maximize(animationDelay: number = ANIMATION_DURATION): void {
-
-    if (!this.resizable) {
-      return;
-    }
-
-    this.startAnimation(animationDelay)
-      .ready(() => {
-        if (this.maximized) {
-          const { left, top, width, height } = this.lastDisplayProperties.maximize;
-          this.setSize(width, height);
-          this.setPosition(left, top);
-        } else {
-          this.lastDisplayProperties.maximize = this.window.getBoundingClientRect();
-          this.setMaxSize();
-          this.setPosition(LEFT_OFFSET, 0);
-        }
-      })
-      .finished(() => this.maximized = !this.maximized);
   }
 
   minimize(): void {
@@ -210,16 +188,21 @@ export class WindowComponent implements AfterContentInit {
     }
 
     const windowBoundingRect = this.window.getBoundingClientRect();
-    const dx = windowBoundingRect.left - downEvent.clientX;
     const dy = windowBoundingRect.top - downEvent.clientY;
+    let dx = windowBoundingRect.left - downEvent.clientX;
     let maximized = this.maximized;
 
     this.setSelectable(false);
 
     const cancelMouseMove = this.renderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
+      if (moveEvent.clientX === downEvent.clientX && moveEvent.clientY === downEvent.clientY) {
+        return;
+      }
       if (maximized) {
+        // Keeps the same position on the title bar in proportion to its width
+        dx += downEvent.offsetX * (1 - 1 / windowBoundingRect.width * this.lastDisplayProperties.maximize.width);
         maximized = false;
-        this.maximize(50);
+        this.toggleMaximize(50);
       }
       this.setPosition(moveEvent.clientX + dx, moveEvent.clientY + dy);
     });
@@ -260,6 +243,25 @@ export class WindowComponent implements AfterContentInit {
       cancelMouseMove();
       cancelMouseUp();
     });
+  }
+
+  toggleMaximize(animationDelay: number = ANIMATION_DURATION): void {
+    if (!this.resizable) {
+      return;
+    }
+    this.startAnimation(animationDelay)
+      .ready(() => {
+        if (this.maximized) {
+          const { left, top, width, height } = this.lastDisplayProperties.maximize;
+          this.setSize(width, height);
+          this.setPosition(left, top);
+        } else {
+          this.lastDisplayProperties.maximize = this.window.getBoundingClientRect();
+          this.setMaxSize();
+          this.setPosition(LEFT_OFFSET, 0);
+        }
+      })
+      .finished(() => this.maximized = !this.maximized);
   }
 
   private getContentSize(): { width: number; height: number } {
