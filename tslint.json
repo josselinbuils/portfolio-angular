@@ -156,7 +156,6 @@
     ],
     "prefer-template": true,
     "promise-function-async": true,
-    "return-undefined": true,
     "quotemark": [
       true,
       "single",
