@@ -2,22 +2,22 @@
             [height]="size.height" background="#111625" titleColor="#efefef" [resizable]="showPlaylist">
 
   <!-- Min template -->
-  <div class="player min" [ngClass]="{seeking: seeking}" *ngIf="!showPlaylist">
+  <div class="player min" [ngClass]="{ seeking: seeking }" *ngIf="!showPlaylist">
     <div class="flex">
       <div class="left">
         <ng-container *ngTemplateOutlet="controls"></ng-container>
       </div>
-      <div class="music-preview" [ngClass]="{'default-preview fa fa-music': !currentMusic.image}"
-           [ngStyle]="{'background-image': 'url(' + currentMusic.image + ')'}"></div>
+      <div class="music-preview" [ngClass]="{'default-preview fa fa-music': !currentMusic || !currentMusic.image}"
+           [ngStyle]="{ 'background-image': currentMusic ? 'url(' + currentMusic.image + ')' : 'none' }"></div>
     </div>
-    <div class="music-info">
+    <div *ngIf="currentMusic" class="music-info">
       {{currentMusic.artist_name}}<span *ngIf="currentMusic.name"> - </span>{{currentMusic.name}}
     </div>
     <ng-container *ngTemplateOutlet="time"></ng-container>
   </div>
 
   <!-- Max template -->
-  <div class="player max" [ngClass]="{seeking: seeking}" *ngIf="showPlaylist">
+  <div class="player max" [ngClass]="{ seeking: seeking }" *ngIf="showPlaylist">
     <div class="body">
 
       <div class="sidebar">
@@ -38,7 +38,7 @@
       <div class="playlist">
         <div class="header">
           <div>
-            <h2 *ngIf="currentItem.name">{{currentItem.name}}</h2>
+            <h2 *ngIf="currentItem">{{currentItem.name}}</h2>
             <div class="select">
               <i class="fa fa-arrow-down" aria-hidden="true"></i>
               <select #select (change)="loadMusicList(currentItem, select.value)">
@@ -62,7 +62,7 @@
         <div class="overflow">
           <table>
             <tbody>
-            <tr *ngFor="let music of musicList" [ngClass]="{active: music.id === currentMusic.id}"
+            <tr *ngFor="let music of musicList" [ngClass]="{active: currentMusic && music.id === currentMusic.id}"
                 (dblclick)="playMusic(music)">
               <td class="col-preview">
                 <div class="inline-music-preview" [ngStyle]="{'background-image': 'url(' + music.image + ')'}">
@@ -83,9 +83,9 @@
     </div>
 
     <div class="navbar">
-      <div class="music-preview" [ngClass]="{'default-preview fa fa-music': !currentMusic.image}"
-           [ngStyle]="{'background-image': 'url(' + currentMusic.image + ')'}"></div>
-      <div class="music-info">
+      <div class="music-preview" [ngClass]="{'default-preview fa fa-music': !currentMusic || !currentMusic.image}"
+           [ngStyle]="{ 'background-image': currentMusic ? 'url(' + currentMusic.image + ')' : 'none' }"></div>
+      <div *ngIf="currentMusic" class="music-info">
         <div class="name">{{currentMusic.name}}</div>
         <div class="artist">{{currentMusic.artist_name}}</div>
       </div>
@@ -99,7 +99,7 @@
 
   <ng-template #controls>
     <div class="controls">
-      <div class="button random-button" [ngClass]="{checked: random}" (click)="random = !random">
+      <div class="button random-button" [ngClass]="{ checked: random }" (click)="random = !random">
         <i class="fa fa-random" aria-hidden="true"></i>
       </div>
       <div class="button prev-button" (click)="prev()">
@@ -111,7 +111,7 @@
       <div class="button next-button" (click)="next()">
         <i class="fa fa-step-forward" aria-hidden="true"></i>
       </div>
-      <div class="button repeat-button" [ngClass]="{checked: repeat}" (click)="repeat = !repeat">
+      <div class="button repeat-button" [ngClass]="{ checked: repeat }" (click)="repeat = !repeat">
         <i class="fa fa-repeat" aria-hidden="true"></i>
       </div>
     </div>
@@ -122,17 +122,17 @@
       <div #currentTime class="current-time">00:00</div>
       <div #progressBar class="progress-bar" (mousedown)="startSeek($event)">
         <div class="bar-container">
-          <div class="bar" [ngStyle]="{width: progress + '%'}"></div>
+          <div class="bar" [ngStyle]="{ width: progress + '%' }"></div>
         </div>
       </div>
-      <div class="duration">{{currentMusic.readableDuration || '00:00'}}</div>
-      <div class="button playlist-button" [ngClass]="{checked: showPlaylist}" (click)="togglePlaylist()">
+      <div class="duration">{{currentMusic ? currentMusic.readableDuration : '00:00'}}</div>
+      <div class="button playlist-button" [ngClass]="{ checked: showPlaylist }" (click)="togglePlaylist()">
         <i class="fa fa-list" aria-hidden="true"></i>
       </div>
     </div>
   </ng-template>
 
   <audio #audio>
-    <source #source *ngIf="currentMusic.audio" [src]="currentMusic.audio" type="audio/mp3">
+    <source #source *ngIf="currentMusic" [src]="currentMusic.audio" type="audio/mp3">
   </audio>
 </app-window>

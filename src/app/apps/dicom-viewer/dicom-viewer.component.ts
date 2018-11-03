@@ -178,7 +178,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     const startX = downEvent.clientX - viewport.deltaX * canvas.clientWidth;
     const startY = downEvent.clientY - viewport.deltaY * canvas.clientHeight;
 
-    const cancelMouseMove = this.viewRenderer.listen('window', 'mousemove', moveEvent => {
+    const cancelMouseMove = this.viewRenderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
 
       viewport.deltaX = (moveEvent.clientX - startX) / canvas.clientWidth;
       viewport.deltaY = (moveEvent.clientY - startY) / canvas.clientHeight;
@@ -216,7 +216,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     const startY = downEvent.clientY;
     const startZoom = viewport.zoom;
 
-    const cancelMouseMove = this.viewRenderer.listen('window', 'mousemove', moveEvent => {
+    const cancelMouseMove = this.viewRenderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
       viewport.zoom = startZoom - (moveEvent.clientY - startY) * ZOOM_SENSIBILITY / this.canvas.clientHeight;
       viewport.zoom = Math.min(Math.max(viewport.zoom, ZOOM_MIN), ZOOM_MAX);
 
@@ -261,7 +261,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     const startWindowWidth = this.viewport.windowWidth;
     const startWindowLevel = this.viewport.windowLevel;
 
-    const cancelMouseMove = this.viewRenderer.listen('window', 'mousemove', moveEvent => {
+    const cancelMouseMove = this.viewRenderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
       this.viewport.windowWidth = startWindowWidth + (moveEvent.clientX - startX) * WINDOW_WIDTH_SENSIBILITY;
       this.viewport.windowLevel = startWindowLevel - (moveEvent.clientY - startY) * WINDOW_LEVEL_SENSIBILITY;
       this.viewport.windowWidth = Math.max(this.viewport.windowWidth, WINDOW_WIDTH_MIN);

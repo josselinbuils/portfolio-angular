@@ -164,7 +164,7 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
   }
 
   async playMusic(music: Music): Promise<void> {
-    if (music.id !== this.currentMusic.id) {
+    if (this.currentMusic === undefined || music.id !== this.currentMusic.id) {
       this.loadMusic(music);
     }
     await this.play();
@@ -209,7 +209,7 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
     this.seeking = true;
     this.setCurrentTime(downEvent.offsetX / progressBarWidth);
 
-    const cancelMouseMove = this.renderer.listen('window', 'mousemove', moveEvent => {
+    const cancelMouseMove = this.renderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
       this.setCurrentTime((moveEvent.clientX as number + dx) / progressBarWidth);
     });
 

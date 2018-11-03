@@ -71,7 +71,7 @@ export class AppComponent implements AfterContentInit {
       height: 0,
     };
 
-    const cancelMouseMove = this.renderer.listen('window', 'mousemove', moveEvent => {
+    const cancelMouseMove = this.renderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
       this.selectionStyle['left.px'] = Math.min(startX, moveEvent.clientX);
       this.selectionStyle['top.px'] = Math.min(startY, moveEvent.clientY);
       this.selectionStyle['width.px'] = Math.abs(moveEvent.clientX - startX);
