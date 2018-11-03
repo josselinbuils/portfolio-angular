@@ -11,6 +11,7 @@ import { DOMUtils } from '../dom-utils';
 import { WindowManagerService } from './window-manager.service';
 
 const ANIMATION_DURATION = 200;
+const BUTTONS_WIDTH = 66;
 const DOM_UPDATE_DELAY = 10;
 const LEFT_OFFSET = 60;
 
@@ -20,6 +21,7 @@ const LEFT_OFFSET = 60;
   styleUrls: ['./window.component.scss'],
 })
 export class WindowComponent implements AfterContentInit {
+  @ViewChild('buttons') buttonsElementRef: ElementRef<HTMLDivElement>;
   @ViewChild('content') contentElementRef: ElementRef<HTMLDivElement>;
   @ViewChild('window') windowElementRef: ElementRef<HTMLDivElement>;
 
@@ -65,6 +67,7 @@ export class WindowComponent implements AfterContentInit {
   visible = true;
   zIndex: number;
 
+  private buttons: HTMLElement;
   private content: HTMLElement;
   private contentInitialized = false;
   private contentRatio: number;
@@ -107,6 +110,7 @@ export class WindowComponent implements AfterContentInit {
   ngAfterContentInit(): void {
     let size: { width: number; height: number };
 
+    this.buttons = this.buttonsElementRef.nativeElement;
     this.content = this.contentElementRef.nativeElement;
     this.window = this.windowElementRef.nativeElement;
 
@@ -199,10 +203,15 @@ export class WindowComponent implements AfterContentInit {
         return;
       }
       if (maximized) {
+        const widthRatio = this.lastDisplayProperties.maximize.width / windowBoundingRect.width;
+
         // Keeps the same position on the title bar in proportion to its width
-        dx += downEvent.offsetX * (1 - 1 / windowBoundingRect.width * this.lastDisplayProperties.maximize.width);
+        dx += (downEvent.offsetX * widthRatio) > BUTTONS_WIDTH
+          ? downEvent.offsetX * (1 - widthRatio)
+          : downEvent.offsetX - BUTTONS_WIDTH;
+
         maximized = false;
-        this.toggleMaximize(50);
+        this.toggleMaximize(true, 50);
       }
       this.setPosition(moveEvent.clientX + dx, moveEvent.clientY + dy);
     });
@@ -245,7 +254,7 @@ export class WindowComponent implements AfterContentInit {
     });
   }
 
-  toggleMaximize(animationDelay: number = ANIMATION_DURATION): void {
+  toggleMaximize(keepPosition: boolean = false, animationDelay: number = ANIMATION_DURATION): void {
     if (!this.resizable) {
       return;
     }
@@ -253,12 +262,19 @@ export class WindowComponent implements AfterContentInit {
       .ready(() => {
         if (this.maximized) {
           const { left, top, width, height } = this.lastDisplayProperties.maximize;
+
+          if (!keepPosition) {
+            this.setPosition(left, top);
+          }
           this.setSize(width, height);
-          this.setPosition(left, top);
+
         } else {
           this.lastDisplayProperties.maximize = this.window.getBoundingClientRect();
+
+          if (!keepPosition) {
+            this.setPosition(LEFT_OFFSET, 0);
+          }
           this.setMaxSize();
-          this.setPosition(LEFT_OFFSET, 0);
         }
       })
       .finished(() => this.maximized = !this.maximized);
@@ -303,11 +319,13 @@ export class WindowComponent implements AfterContentInit {
 
   private setSelectable(selectable: boolean): void {
     if (selectable) {
-      this.renderer.removeStyle(this.window, 'user-select');
+      this.renderer.removeStyle(this.buttons, 'pointer-events');
       this.renderer.removeStyle(this.content, 'pointer-events');
+      this.renderer.removeStyle(this.window, 'user-select');
     } else {
-      this.renderer.setStyle(this.window, 'user-select', 'none');
+      this.renderer.setStyle(this.buttons, 'pointer-events', 'none');
       this.renderer.setStyle(this.content, 'pointer-events', 'none');
+      this.renderer.setStyle(this.window, 'user-select', 'none');
     }
   }
 
