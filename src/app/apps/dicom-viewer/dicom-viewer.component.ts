@@ -53,7 +53,8 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   private renderer: Renderer;
   private statsInterval: number;
 
-  constructor(private readonly http: HttpClient, private readonly viewRenderer: Renderer2) {}
+  constructor(private readonly http: HttpClient,
+              private readonly viewRenderer: Renderer2) {}
 
   back(): void {
 
@@ -116,8 +117,10 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     console.log(this.dicomProperties);
 
     const {
-      height, imageFormat, pixelDataBuffer, rescaleIntercept, rescaleSlope, width, windowLevel, windowWidth,
+      height, imageFormat, rescaleIntercept, rescaleSlope, width, windowLevel, windowWidth,
     } = this.dicomProperties;
+
+    let { pixelData } = this.dicomProperties;
 
     this.canvas = this.viewRenderer.createElement('canvas');
     this.viewRenderer.appendChild(this.viewportElementRef.nativeElement, this.canvas);
@@ -143,15 +146,18 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       this.handleError(new Error(`Unable to instantiate ${this.config.rendererType} renderer: ${error.message}`));
     }
 
-    let pixelData: ArrayBufferView;
+    if (this.config.rendererType !== RendererType.WebGL) {
+      const arrayType: any = {
+        int8: Int8Array,
+        int16: Int16Array,
+        uint8: Uint8Array,
+        uint16: Uint16Array,
+      };
+      pixelData = new arrayType[imageFormat](pixelData.buffer, pixelData.byteOffset);
+    }
 
     if (this.config.rendererType === RendererType.WebAssembly) {
-      pixelData = new Int32Array(pixelDataBuffer);
-    } else if (this.config.rendererType !== RendererType.WebGL) {
-      const arrayType = {
-        int8: Int8Array, int16: Int16Array, uint8: Uint8Array, uint16: Uint16Array,
-      };
-      pixelData = new arrayType[imageFormat](pixelDataBuffer);
+      pixelData = new Int32Array(pixelData as unknown as number[]);
     }
 
     const image = new Image({ height, imageFormat, pixelData, rescaleIntercept, rescaleSlope, width });
@@ -161,7 +167,8 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     const windowNativeElement = this.windowComponent.windowElementRef.nativeElement;
 
     this.onResize({
-      width: windowNativeElement.clientWidth, height: windowNativeElement.clientHeight,
+      width: windowNativeElement.clientWidth,
+      height: windowNativeElement.clientHeight,
     });
 
     this.viewport.zoom = Math.min(this.viewport.height / image.height, 1);
@@ -308,12 +315,11 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       const windowWidth = typeof  dataset.intString('x00281051') === 'number' ? dataset.intString('x00281051') : 400;
       const imageFormat = this.getImageFormat(bitsAllocated, photometricInterpretation, pixelRepresentation);
       const pixelDataElement = dataset.elements.x7fe00010;
-      const pixelDataBuffer = (window as any).dicomParser
-        .sharedCopy(rawDicomData, pixelDataElement.dataOffset, pixelDataElement.length)
-        .buffer;
+      const pixelData = (window as any).dicomParser
+        .sharedCopy(rawDicomData, pixelDataElement.dataOffset, pixelDataElement.length) as Uint8Array;
 
       return {
-        bitsAllocated, height, imageFormat, patientName, photometricInterpretation, pixelDataBuffer,
+        bitsAllocated, height, imageFormat, patientName, photometricInterpretation, pixelData,
         pixelRepresentation, rescaleIntercept, rescaleSlope, width, windowLevel, windowWidth,
       };
 
@@ -328,11 +334,9 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
 
     if (photometricInterpretation === PhotometricInterpretation.RGB) {
       format = 'rgb';
-    } else if ((photometricInterpretation as string).indexOf('MONOCHROME') === 0) {
-      if (pixelRepresentation === PixelRepresentation.Unsigned) {
-        format = 'u';
-      }
-      format += `int${bitsAllocated <= 8 ? '8' : '16'}`;
+    } else if ((photometricInterpretation as string).includes('MONOCHROME')) {
+      const isSigned = pixelRepresentation === PixelRepresentation.Signed;
+      format = `${isSigned ? '' : 'u'}int${bitsAllocated <= 8 ? '8' : '16'}`;
     } else {
       throw new Error('Unsupported photometric interpretation');
     }

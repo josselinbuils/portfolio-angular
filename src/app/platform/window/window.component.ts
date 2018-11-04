@@ -321,11 +321,9 @@ export class WindowComponent implements AfterContentInit {
     if (selectable) {
       this.renderer.removeStyle(this.buttons, 'pointer-events');
       this.renderer.removeStyle(this.content, 'pointer-events');
-      this.renderer.removeStyle(this.window, 'user-select');
     } else {
       this.renderer.setStyle(this.buttons, 'pointer-events', 'none');
       this.renderer.setStyle(this.content, 'pointer-events', 'none');
-      this.renderer.setStyle(this.window, 'user-select', 'none');
     }
   }
 

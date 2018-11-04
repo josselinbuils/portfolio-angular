@@ -6,7 +6,7 @@ export interface DicomProperties {
   imageFormat: ImageFormat;
   patientName: string;
   photometricInterpretation: PhotometricInterpretation;
-  pixelDataBuffer: ArrayBuffer;
+  pixelData: ArrayBufferView;
   pixelRepresentation: PixelRepresentation;
   rescaleIntercept: number;
   rescaleSlope: number;
