@@ -66,12 +66,13 @@ export class WasmRenderer implements Renderer {
       try {
         const rawDataPointer = this.renderingCore._malloc(pixelData.byteLength) as number;
         const rawData = new Uint8Array(this.renderingCore.HEAPU8.buffer, rawDataPointer, pixelData.byteLength);
-        rawData.set(new Uint8Array(pixelData.buffer, pixelData.byteOffset));
+        rawData.set(new Uint8Array(pixelData.buffer, pixelData.byteOffset, pixelData.byteLength));
 
         const renderedDataLength = displayWidth * displayHeight * 4;
         const renderedDataPointer = this.renderingCore._malloc(renderedDataLength);
-        const renderedData = new Uint8ClampedArray(this.renderingCore.HEAPU8.buffer, renderedDataPointer,
-          renderedDataLength);
+        const renderedData = new Uint8ClampedArray(
+          this.renderingCore.HEAPU8.buffer, renderedDataPointer, renderedDataLength,
+        );
 
         this.coreRender(this.lut.table.byteOffset, rawData.byteOffset, renderedData.byteOffset, width, x0, y0,
           displayX0, displayX1, displayY0, displayY1, viewport.zoom, leftLimit, rightLimit, rescaleSlope,
