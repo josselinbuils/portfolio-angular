@@ -17,7 +17,6 @@ module.exports = class DicomController {
   static getList(req, res) {
     if (ENV === ENV_DEV) {
       datasetDescriptors = getDatasetDescriptors();
-      console.log(datasetDescriptors);
     }
     res.json(datasetDescriptors);
   }
@@ -32,11 +31,12 @@ function getDatasetDescriptors() {
   Logger.info(`Loads datasets from ${datasetsPath}`);
 
   return readdirSync(datasetsPath)
-    .map(name => ({
-      files: getFiles(datasetsPath, name),
-      name: name.replace(/\.[a-z]+$/, ''),
-      preview: previews.find(p => p.includes(name))
-    }));
+    .map(fileName => {
+      const files = getFiles(datasetsPath, fileName);
+      const name = fileName.replace(/(\.[a-z]+)+$/, '');
+      const preview = previews.find(p => p.includes(name));
+      return { files, name, preview };
+    });
 }
 
 function getFiles(folderPath, name, deepLevel = 0) {
@@ -46,3 +46,4 @@ function getFiles(folderPath, name, deepLevel = 0) {
     ? readdirSync(path).map(fileName => `${name}/${fileName.replace('.gz', '')}`)
     : [name.replace('.gz', '')];
 }
+
