@@ -1,7 +1,7 @@
 const request = require('request-promise-native');
 
-const {jamendo} = require('../../config.json');
-const {HTTP_INTERNAL_ERROR} = require('../../constants.json');
+const { jamendo } = require('../../config.json');
+const { HTTP_INTERNAL_ERROR } = require('../../constants.json');
 const Logger = require('../../logger');
 
 module.exports = class JamendoController {
@@ -10,7 +10,7 @@ module.exports = class JamendoController {
     const tag = req.params.tag;
     const order = req.params.order;
 
-    const options = {limit: 50};
+    const options = { limit: 50 };
 
     if (tag) {
       options.tags = tag;

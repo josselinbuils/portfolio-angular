@@ -1,7 +1,7 @@
 const snoowrap = require('snoowrap');
 
-const {reddit} = require('../../config.json');
-const {HTTP_INTERNAL_ERROR, USER_AGENT} = require('../../constants.json');
+const { reddit } = require('../../config.json');
+const { HTTP_INTERNAL_ERROR, USER_AGENT } = require('../../constants.json');
 const Logger = require('../../logger');
 
 let redditAPI;
@@ -10,12 +10,12 @@ module.exports = class RedditController {
 
   static getHot(req, res) {
     const subreddit = req.params.subreddit;
-    handle(res, redditAPI.getSubreddit(subreddit).getHot({limit: 50}));
+    handle(res, redditAPI.getSubreddit(subreddit).getHot({ limit: 50 }));
   }
 
   static getTop(req, res) {
     const subreddit = req.params.subreddit;
-    handle(res, redditAPI.getSubreddit(subreddit).getTop({limit: 50}));
+    handle(res, redditAPI.getSubreddit(subreddit).getTop({ limit: 50 }));
   }
 
   static init() {

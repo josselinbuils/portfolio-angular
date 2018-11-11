@@ -1,11 +1,11 @@
 const bodyParser = require('body-parser');
-const compression = require('compression');
 const express = require('express');
-const {join} = require('path');
+const { existsSync } = require('fs');
+const { join } = require('path');
 const serveStatic = require('serve-static');
 
 const {
-  ASSETS_DIR, ENV_DEV, ENV_PROD, HTTP_DEFAULT_PREFIX, HTTP_INTERNAL_ERROR, HTTP_NOT_FOUND, PUBLIC_DIR
+  ASSETS_DIR, ASSETS_DIR_DEV, ENV_DEV, ENV_PROD, HTTP_DEFAULT_PREFIX, HTTP_INTERNAL_ERROR, HTTP_NOT_FOUND, PUBLIC_DIR
 } = require('./constants.json');
 const DependenciesRoutes = require('./api/dependencies/dependencies.routes');
 const DicomRoutes = require('./api/dicom/dicom.routes');
@@ -13,9 +13,9 @@ const JamendoRoutes = require('./api/jamendo/jamendo.routes');
 const Logger = require('./logger');
 const RedditRoutes = require('./api/reddit/reddit.routes');
 
-const ASSETS_PATH = join(process.cwd(), ASSETS_DIR);
-const CLIENT_PATH = join(process.cwd(), PUBLIC_DIR);
 const ENV = process.env.NODE_ENV || ENV_DEV;
+const ASSETS_PATH = join(process.cwd(), ENV === ENV_DEV ? ASSETS_DIR_DEV : ASSETS_DIR);
+const CLIENT_PATH = join(process.cwd(), PUBLIC_DIR);
 const HTTP_PREFIX = process.env.HTTP_PREFIX || HTTP_DEFAULT_PREFIX;
 
 module.exports = class Router {
@@ -28,18 +28,23 @@ module.exports = class Router {
       Logger.info(`<- ${req.method} ${req.url}`);
 
       if (ENV === ENV_DEV) {
-        res.header('Access-Control-Allow-Origin', '*');
-        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+        res.set('Access-Control-Allow-Origin', '*');
+        res.set('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
       }
       next();
     });
 
-    app.use(compression({filter: shouldCompress}));
+    router.use(ASSETS_DIR, (req, res, next) => {
+      const gzPath = join(ASSETS_PATH, `${req.url}.gz`);
 
-    if (ENV === ENV_PROD) {
-      router.use(ASSETS_DIR, serveStatic(ASSETS_PATH));
-    }
+      if (existsSync(gzPath)) {
+        req.url += '.gz';
+        res.set('Content-Encoding', 'gzip');
+      }
+      next();
+    });
 
+    router.use(ASSETS_DIR, serveStatic(ASSETS_PATH));
     router.use(serveStatic(CLIENT_PATH));
     router.use(bodyParser.json());
 
@@ -59,10 +64,3 @@ module.exports = class Router {
     app.use(HTTP_PREFIX, router);
   }
 };
-
-function shouldCompress(req, res) {
-  if (req.url.includes(ASSETS_DIR)) {
-    return true;
-  }
-  return compression.filter(req, res)
-}

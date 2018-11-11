@@ -1,11 +1,11 @@
-const {lstatSync, readdirSync} = require('fs');
-const {join} = require('path');
+const { lstatSync, readdirSync } = require('fs');
+const { join } = require('path');
 
-const {ASSETS_DIR, ASSETS_DIR_DEV, ENV_DEV} = require('../../constants.json');
+const { ASSETS_DIR, ASSETS_DIR_DEV, ENV_DEV } = require('../../constants.json');
 const Logger = require('../../logger');
 
 const ENV = process.env.NODE_ENV || ENV_DEV;
-const dicomPath = join(process.cwd(), ENV === ENV_DEV ? '/src/assets' : ASSETS_DIR, '/dicom');
+const dicomPath = join(process.cwd(), ENV === ENV_DEV ? ASSETS_DIR_DEV : ASSETS_DIR, '/dicom');
 const datasetsPath = join(dicomPath, '/datasets');
 const previewsPath = join(dicomPath, '/previews');
 
@@ -17,6 +17,7 @@ module.exports = class DicomController {
   static getList(req, res) {
     if (ENV === ENV_DEV) {
       datasetDescriptors = getDatasetDescriptors();
+      console.log(datasetDescriptors);
     }
     res.json(datasetDescriptors);
   }
@@ -42,6 +43,6 @@ function getFiles(folderPath, name, deepLevel = 0) {
   const path = join(folderPath, name);
 
   return lstatSync(path).isDirectory()
-    ? readdirSync(path).map(fileName => `${name}/${fileName}`)
-    : [name];
+    ? readdirSync(path).map(fileName => `${name}/${fileName.replace('.gz', '')}`)
+    : [name.replace('.gz', '')];
 }
