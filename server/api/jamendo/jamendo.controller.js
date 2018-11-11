@@ -4,8 +4,6 @@ const {jamendo} = require('../../config.json');
 const {HTTP_INTERNAL_ERROR} = require('../../constants.json');
 const Logger = require('../../logger');
 
-validateConfig();
-
 module.exports = class JamendoController {
 
   static getTracks(req, res) {
@@ -27,6 +25,10 @@ module.exports = class JamendoController {
         Logger.error(error.stack);
         res.status(HTTP_INTERNAL_ERROR).end();
       });
+  }
+
+  static init() {
+    validateConfig();
   }
 };
 

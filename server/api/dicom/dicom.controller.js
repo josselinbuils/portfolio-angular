@@ -7,18 +7,22 @@ const ENV = process.env.NODE_ENV || ENV_DEV;
 const dicomPath = join(process.cwd(), ENV === ENV_DEV ? '/src' : '/dist', '/assets/dicom');
 const datasetsPath = join(dicomPath, '/datasets');
 const previewsPath = join(dicomPath, '/previews');
-const previews = readdirSync(previewsPath);
 
-let datasetDescriptors = getDatasetDescriptors();
-
-console.log(datasetDescriptors);
+let previews;
+let datasetDescriptors;
 
 module.exports = class DicomController {
+
   static getList(req, res) {
     if (ENV === ENV_DEV) {
       datasetDescriptors = getDatasetDescriptors();
     }
     res.json(datasetDescriptors);
+  }
+
+  static init() {
+    previews = readdirSync(previewsPath);
+    datasetDescriptors = getDatasetDescriptors();
   }
 };
 

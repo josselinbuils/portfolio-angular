@@ -4,15 +4,7 @@ const {reddit} = require('../../config.json');
 const {HTTP_INTERNAL_ERROR, USER_AGENT} = require('../../constants.json');
 const Logger = require('../../logger');
 
-validateConfig();
-
-const redditAPI = new snoowrap({
-  userAgent: USER_AGENT,
-  clientId: reddit.clientId,
-  clientSecret: reddit.clientSecret,
-  username: reddit.username,
-  password: reddit.password
-});
+let redditAPI;
 
 module.exports = class RedditController {
 
@@ -24,6 +16,18 @@ module.exports = class RedditController {
   static getTop(req, res) {
     const subreddit = req.params.subreddit;
     handle(res, redditAPI.getSubreddit(subreddit).getTop({limit: 50}));
+  }
+
+  static init() {
+    validateConfig();
+
+    redditAPI = new snoowrap({
+      userAgent: USER_AGENT,
+      clientId: reddit.clientId,
+      clientSecret: reddit.clientSecret,
+      username: reddit.username,
+      password: reddit.password
+    });
   }
 };
 
