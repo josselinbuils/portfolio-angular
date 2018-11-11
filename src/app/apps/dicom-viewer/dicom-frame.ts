@@ -1,6 +1,6 @@
 import { NormalizedImageFormat, PhotometricInterpretation, PixelRepresentation } from './constants';
 
-export interface DicomInstance {
+export interface DicomFrame {
   imageFormat: NormalizedImageFormat;
 
   /**

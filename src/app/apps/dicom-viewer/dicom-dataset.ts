@@ -1,5 +1,5 @@
-import { DicomInstance } from 'app/apps/dicom-viewer/dicom-instance';
+import { DicomFrame } from 'app/apps/dicom-viewer/dicom-frame';
 
 export interface DicomDataset {
-  instances: DicomInstance[];
+  frames: DicomFrame[];
 }

@@ -137,7 +137,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       this.handleError(new Error(`Unable to instantiate ${this.config.rendererType} renderer: ${error.message}`));
     }
 
-    const image = this.dataset.instances[0];
+    const image = this.dataset.frames[0];
     const { windowCenter, windowWidth } = image;
 
     this.viewport = new Viewport({ image, windowCenter, windowWidth });
@@ -159,13 +159,13 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     downEvent.preventDefault();
 
     const startY = downEvent.clientY;
-    const instances = this.dataset.instances;
-    const startIndex = instances.indexOf(this.viewport.image);
+    const frames = this.dataset.frames;
+    const startIndex = frames.indexOf(this.viewport.image);
 
     const cancelMouseMove = this.viewRenderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
-      const deltaInstance = Math.floor((moveEvent.clientY - startY) * instances.length / this.viewport.height);
-      const newIndex = Math.min(Math.max(startIndex + deltaInstance, 0), instances.length - 1);
-      this.viewport.image = this.dataset.instances[newIndex];
+      const deltaInstance = Math.floor((moveEvent.clientY - startY) * frames.length / this.viewport.height);
+      const newIndex = Math.min(Math.max(startIndex + deltaInstance, 0), frames.length - 1);
+      this.viewport.image = frames[newIndex];
     });
 
     const cancelMouseUp = this.viewRenderer.listen('window', 'mouseup', () => {
@@ -202,7 +202,11 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   startTool(downEvent: MouseEvent): void {
     switch (downEvent.button) {
       case MOUSE_BUTTON.LEFT:
-        this.startPaging(downEvent);
+        if (this.dataset.frames.length > 1) {
+          this.startPaging(downEvent);
+        } else {
+          this.startWindowing(downEvent);
+        }
         break;
       case MOUSE_BUTTON.MIDDLE:
         this.startPan(downEvent);

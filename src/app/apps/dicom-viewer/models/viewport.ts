@@ -1,10 +1,10 @@
-import { DicomInstance } from 'app/apps/dicom-viewer/dicom-instance';
+import { DicomFrame } from '../dicom-frame';
 
 export class Viewport {
   deltaX: number;
   deltaY: number;
   height: number;
-  image: DicomInstance;
+  image: DicomFrame;
   width: number;
   windowCenter: number;
   windowWidth: number;

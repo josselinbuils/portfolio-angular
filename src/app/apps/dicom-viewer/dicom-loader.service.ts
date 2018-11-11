@@ -6,7 +6,7 @@ import {
   DATASETS_PATH, DicomImageFormat, NormalizedImageFormat, PhotometricInterpretation, PixelRepresentation,
 } from 'app/apps/dicom-viewer/constants';
 import { DicomDataset } from 'app/apps/dicom-viewer/dicom-dataset';
-import { DicomInstance } from 'app/apps/dicom-viewer/dicom-instance';
+import { DicomFrame } from 'app/apps/dicom-viewer/dicom-frame';
 
 @Injectable()
 export class DicomLoaderService {
@@ -15,15 +15,18 @@ export class DicomLoaderService {
 
   async loadDataset(dataset: DatasetDescriptor): Promise<DicomDataset> {
     const { files } = dataset;
-    let instances: DicomInstance[] = [];
+    let frames: DicomFrame[] = [];
 
-    for (const file of files) {
-      instances.push(await this.loadInstance(file));
+    if (files.length === 1) {
+      frames = await this.loadInstance(files[0]);
+    } else {
+      for (const file of files) {
+        frames.push(...await this.loadInstance(file));
+      }
+      frames = frames.sort((a, b) => a.sopInstanceUID > b.sopInstanceUID ? 1 : -1);
     }
 
-    instances = instances.sort((a, b) => a.sopInstanceUID > b.sopInstanceUID ? 1 : -1);
-
-    return { instances };
+    return { frames };
   }
 
   private async getDicomFile(path: string): Promise<Uint8Array> {
@@ -78,14 +81,14 @@ export class DicomLoaderService {
       const typedPixelData = new arrayType[dicomImageFormat](pixelData.buffer, pixelData.byteOffset);
 
       // Normalizes pixel data
-      pixelData = typedPixelData instanceof Int16Array ? typedPixelData : Int16Array.from(Array.from(typedPixelData));
+      pixelData = typedPixelData instanceof Int16Array ? typedPixelData : new Int16Array(typedPixelData as any);
       imageFormat = NormalizedImageFormat.Int16;
     }
 
     return { imageFormat, pixelData };
   }
 
-  private async loadInstance(path: string): Promise<DicomInstance> {
+  private async loadInstance(path: string): Promise<DicomFrame[]> {
     try {
       const dicomFile = await this.getDicomFile(path);
       const parsedFile = this.parseDicom(dicomFile);
@@ -113,10 +116,48 @@ export class DicomLoaderService {
       const dicomImageFormat = this.getDicomImageFormat(bitsAllocated, photometricInterpretation, pixelRepresentation);
       const { imageFormat, pixelData } = this.getNormalizedPixelData(dicomFile, parsedFile, dicomImageFormat);
 
-      return {
-        bitsAllocated, height, imageFormat, patientName, photometricInterpretation, pixelData,
-        pixelRepresentation, rescaleIntercept, rescaleSlope, sopInstanceUID, width, windowCenter, windowWidth,
+      const frames: DicomFrame[] = [];
+      const instance: DicomFrame = {
+        bitsAllocated, height, imageFormat, patientName, photometricInterpretation, pixelData, pixelRepresentation,
+        rescaleIntercept, rescaleSlope, sopInstanceUID, width, windowCenter, windowWidth,
       };
+
+      const numberOfFrames = typeof parsedFile.intString('x00280008') === 'number'
+        ? parsedFile.intString('x00280008')
+        : 1;
+
+      if (numberOfFrames > 1) {
+        const frameLength = pixelData.length / numberOfFrames;
+
+        if (Number(frameLength) !== frameLength) {
+          throw new Error(`frameLength shall be an integer: ${frameLength}`);
+        }
+
+        for (let i = 0; i < numberOfFrames; i++) {
+          const frame = { ...instance };
+
+          const byteOffset = pixelData.byteOffset + frameLength * pixelData.BYTES_PER_ELEMENT * i;
+          frame.pixelData = new Int16Array(pixelData.buffer, byteOffset, frameLength);
+
+          try {
+            const frameVOILUT = (parsedFile.elements.x52009230 as any).items[0].dataSet
+              .elements.x00289132.items[0].dataSet;
+
+            if (typeof frameVOILUT.intString('x00281050') === 'number') {
+              frame.windowCenter = frameVOILUT.intString('x00281050');
+            }
+            if (typeof  frameVOILUT.intString('x00281051') === 'number') {
+              frame.windowWidth = frameVOILUT.intString('x00281051');
+            }
+          } catch (e) {}
+
+          frames.push(frame);
+        }
+      } else {
+        frames.push(instance);
+      }
+
+      return frames;
 
     } catch (error) {
       throw new Error(`Unable to load DICOM instance: ${error.message || error}`);
@@ -141,6 +182,8 @@ interface ParsedDicomFile {
   fileName: string;
 
   elements: { [tag: string]: { dataOffset: number; length: number } };
+
+  attributeTag(tag: string): string;
 
   floatString(tag: string): number;
 

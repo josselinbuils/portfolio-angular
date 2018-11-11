@@ -1,5 +1,5 @@
 import { NormalizedImageFormat } from '../../constants';
-import { DicomInstance } from '../../dicom-instance';
+import { DicomFrame } from '../../dicom-frame';
 import { Viewport } from '../../models/viewport';
 import { Renderer } from '../renderer';
 
@@ -118,7 +118,7 @@ export class WebGLRenderer implements Renderer {
     return { fragmentShader, vertexShader };
   }
 
-  private createTexture(image: DicomInstance): WebGLTexture {
+  private createTexture(image: DicomFrame): WebGLTexture {
     const gl = this.gl;
     const texture = gl.createTexture();
 
