@@ -1,4 +1,5 @@
 const bodyParser = require('body-parser');
+const compression = require('compression');
 const express = require('express');
 const {join} = require('path');
 const serveStatic = require('serve-static');
@@ -33,6 +34,8 @@ module.exports = class Router {
       next();
     });
 
+    app.use(compression({filter: shouldCompress}));
+
     if (ENV === ENV_PROD) {
       router.use(ASSETS_DIR, serveStatic(ASSETS_PATH));
     }
@@ -56,3 +59,10 @@ module.exports = class Router {
     app.use(HTTP_PREFIX, router);
   }
 };
+
+function shouldCompress(req, res) {
+  if (req.url.includes(ASSETS_DIR)) {
+    return true;
+  }
+  return compression.filter(req, res)
+}
