@@ -64,8 +64,6 @@ export class DicomLoaderService {
       .sharedCopy(dicomFile, pixelDataElement.dataOffset, pixelDataElement.length) as Uint8Array;
     let imageFormat: NormalizedImageFormat;
 
-    console.log(dicomImageFormat);
-
     if (dicomImageFormat === DicomImageFormat.RGB) {
       imageFormat = NormalizedImageFormat.RGB;
     } else {

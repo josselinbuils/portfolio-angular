@@ -1,10 +1,11 @@
 const {lstatSync, readdirSync} = require('fs');
 const {join} = require('path');
 
-const {ENV_DEV} = require('../../constants.json');
+const {ASSETS_DIR, ASSETS_DIR_DEV, ENV_DEV} = require('../../constants.json');
+const Logger = require('../../logger');
 
 const ENV = process.env.NODE_ENV || ENV_DEV;
-const dicomPath = join(process.cwd(), ENV === ENV_DEV ? '/src' : '', '/assets/dicom');
+const dicomPath = join(process.cwd(), ENV === ENV_DEV ? '/src/assets' : ASSETS_DIR, '/dicom');
 const datasetsPath = join(dicomPath, '/datasets');
 const previewsPath = join(dicomPath, '/previews');
 
@@ -27,6 +28,8 @@ module.exports = class DicomController {
 };
 
 function getDatasetDescriptors() {
+  Logger.info(`Loads datasets from ${datasetsPath}`);
+
   return readdirSync(datasetsPath)
     .map(name => ({
       files: getFiles(datasetsPath, name),
