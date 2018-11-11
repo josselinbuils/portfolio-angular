@@ -1,9 +1,10 @@
 const bodyParser = require('body-parser');
 const express = require('express');
+const {join} = require('path');
 const serveStatic = require('serve-static');
 
 const {
-  ENV_DEV, HTTP_DEFAULT_PREFIX, HTTP_INTERNAL_ERROR, HTTP_NOT_FOUND, PUBLIC_DIR
+  ASSETS_DIR, ENV_DEV, ENV_PROD, HTTP_DEFAULT_PREFIX, HTTP_INTERNAL_ERROR, HTTP_NOT_FOUND, PUBLIC_DIR
 } = require('./constants.json');
 const DependenciesRoutes = require('./api/dependencies/dependencies.routes');
 const DicomRoutes = require('./api/dicom/dicom.routes');
@@ -11,7 +12,8 @@ const JamendoRoutes = require('./api/jamendo/jamendo.routes');
 const Logger = require('./logger');
 const RedditRoutes = require('./api/reddit/reddit.routes');
 
-const CLIENT_PATH = process.cwd() + PUBLIC_DIR;
+const ASSETS_PATH = join(process.cwd(), ASSETS_DIR);
+const CLIENT_PATH = join(process.cwd(), PUBLIC_DIR);
 const ENV = process.env.NODE_ENV || ENV_DEV;
 const HTTP_PREFIX = process.env.HTTP_PREFIX || HTTP_DEFAULT_PREFIX;
 
@@ -28,9 +30,12 @@ module.exports = class Router {
         res.header('Access-Control-Allow-Origin', '*');
         res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
       }
-
       next();
     });
+
+    if (ENV === ENV_PROD) {
+      router.use(ASSETS_DIR, serveStatic(ASSETS_PATH));
+    }
 
     router.use(serveStatic(CLIENT_PATH));
     router.use(bodyParser.json());

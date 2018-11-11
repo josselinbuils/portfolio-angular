@@ -4,7 +4,7 @@ const {join} = require('path');
 const {ENV_DEV} = require('../../constants.json');
 
 const ENV = process.env.NODE_ENV || ENV_DEV;
-const dicomPath = join(process.cwd(), ENV === ENV_DEV ? '/src' : '/dist', '/assets/dicom');
+const dicomPath = join(process.cwd(), ENV === ENV_DEV ? '/src' : '', '/assets/dicom');
 const datasetsPath = join(dicomPath, '/datasets');
 const previewsPath = join(dicomPath, '/previews');
 
