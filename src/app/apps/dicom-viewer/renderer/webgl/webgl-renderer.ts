@@ -1,5 +1,5 @@
-import { ImageFormat } from '../../constants';
-import { Image } from '../../models/image';
+import { NormalizedImageFormat } from '../../constants';
+import { DicomInstance } from '../../dicom-instance';
 import { Viewport } from '../../models/viewport';
 import { Renderer } from '../renderer';
 
@@ -49,17 +49,17 @@ export class WebGLRenderer implements Renderer {
     gl.enableVertexAttribArray(positionLocation);
     gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
-    if (imageFormat !== ImageFormat.RGB) {
+    if (imageFormat !== NormalizedImageFormat.RGB) {
       // Look up uniform locations
       const rescaleInterceptLocation = gl.getUniformLocation(this.program, 'rescaleIntercept');
       const rescaleSlopeLocation = gl.getUniformLocation(this.program, 'rescaleSlope');
-      const windowLevelLocation = gl.getUniformLocation(this.program, 'windowLevel');
+      const windowCenterLocation = gl.getUniformLocation(this.program, 'windowCenter');
       const windowWidthLocation = gl.getUniformLocation(this.program, 'windowWidth');
 
       gl.uniform1f(rescaleInterceptLocation, rescaleIntercept);
       gl.uniform1f(rescaleSlopeLocation, rescaleSlope);
       gl.uniform1f(windowWidthLocation, viewport.windowWidth);
-      gl.uniform1f(windowLevelLocation, viewport.windowLevel);
+      gl.uniform1f(windowCenterLocation, viewport.windowCenter);
     }
 
     const matrixLocation = gl.getUniformLocation(this.program, 'u_matrix');
@@ -85,7 +85,7 @@ export class WebGLRenderer implements Renderer {
     }
   }
 
-  private createProgram(imageFormat: ImageFormat): WebGLProgram {
+  private createProgram(imageFormat: NormalizedImageFormat): WebGLProgram {
     const gl = this.gl;
     const program = gl.createProgram();
 
@@ -101,7 +101,9 @@ export class WebGLRenderer implements Renderer {
     return program;
   }
 
-  private createShaders(imageFormat: ImageFormat): { fragmentShader: WebGLShader; vertexShader: WebGLShader } {
+  private createShaders(imageFormat: NormalizedImageFormat): {
+    fragmentShader: WebGLShader; vertexShader: WebGLShader;
+  } {
     const gl = this.gl;
     const fragmentShaderSrc = getFragmentShaderSrc(imageFormat);
 
@@ -116,7 +118,7 @@ export class WebGLRenderer implements Renderer {
     return { fragmentShader, vertexShader };
   }
 
-  private createTexture(image: Image): WebGLTexture {
+  private createTexture(image: DicomInstance): WebGLTexture {
     const gl = this.gl;
     const texture = gl.createTexture();
 
@@ -128,8 +130,9 @@ export class WebGLRenderer implements Renderer {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
-    const { height, imageFormat, pixelData, width } = image;
+    const { height, imageFormat, width } = image;
     const format = getTextureFormat(gl, imageFormat);
+    const pixelData = new Uint8Array(image.pixelData.buffer, image.pixelData.byteOffset);
 
     // Upload the image into the texture.
     gl.texImage2D(gl.TEXTURE_2D, 0, format, width, height, 0, format, gl.UNSIGNED_BYTE, pixelData);

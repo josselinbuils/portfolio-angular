@@ -1,31 +1,40 @@
-const fs = require('fs');
-const path = require('path');
+const {lstatSync, readdirSync} = require('fs');
+const {join} = require('path');
 
 const {ENV_DEV} = require('../../constants.json');
 
 const ENV = process.env.NODE_ENV || ENV_DEV;
-const dicomPath = path.join(process.cwd(), ENV === ENV_DEV ? '/src' : '/dist', '/assets/dicom');
-const previewsPath = path.join(dicomPath, '/previews');
+const dicomPath = join(process.cwd(), ENV === ENV_DEV ? '/src' : '/dist', '/assets/dicom');
+const datasetsPath = join(dicomPath, '/datasets');
+const previewsPath = join(dicomPath, '/previews');
+const previews = readdirSync(previewsPath);
 
-let files = getFiles();
+let datasetDescriptors = getDatasetDescriptors();
+
+console.log(datasetDescriptors);
 
 module.exports = class DicomController {
   static getList(req, res) {
     if (ENV === ENV_DEV) {
-      files = getFiles();
+      datasetDescriptors = getDatasetDescriptors();
     }
-    res.json(files);
+    res.json(datasetDescriptors);
   }
 };
 
-function getFiles() {
-  const previews = fs.readdirSync(previewsPath);
+function getDatasetDescriptors() {
+  return readdirSync(datasetsPath)
+    .map(name => ({
+      files: getFiles(datasetsPath, name),
+      name: name.replace(/\.[a-z]+$/, ''),
+      preview: previews.find(p => p.includes(name))
+    }));
+}
 
-  return fs.readdirSync(dicomPath)
-    .filter(fileName => fileName !== 'previews')
-    .map(fileName => {
-      const name = fileName.replace(/\.[a-z]+$/, '');
-      const preview = previews.find(p => p.includes(name));
-      return {fileName, name, preview};
-    });
+function getFiles(folderPath, name, deepLevel = 0) {
+  const path = join(folderPath, name);
+
+  return lstatSync(path).isDirectory()
+    ? readdirSync(path).map(fileName => `${name}/${fileName}`)
+    : [name];
 }

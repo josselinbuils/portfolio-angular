@@ -8,7 +8,7 @@ void fillTable(uint8_t *table, int windowWidth) {
 }
 
 void render(
-  uint8_t *table, int32_t *rawImageData, uint32_t *renderedImageData, double sliceWidth, double x0, double y0,
+  uint8_t *table, int16_t *rawImageData, uint32_t *renderedImageData, double sliceWidth, double x0, double y0,
   int displayX0, int displayX1, int displayY0, int displayY1, double zoom, int leftLimit, int rightLimit,
   double rescaleSlope, int rescaleIntercept
 ) {

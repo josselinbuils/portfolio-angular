@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 
+import { DicomLoaderService } from 'app/apps/dicom-viewer/dicom-loader.service';
 import { WindowModule } from 'app/platform/window/window.module';
 
 import { ConfigComponent } from './config/config.component';
@@ -23,6 +24,9 @@ import { DicomViewerComponent } from './dicom-viewer.component';
   ],
   exports: [
     DicomViewerComponent,
+  ],
+  providers: [
+    DicomLoaderService,
   ],
 })
 export class DicomViewerModule {}

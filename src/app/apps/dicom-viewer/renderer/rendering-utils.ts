@@ -18,8 +18,8 @@ export function createImageData(context: CanvasRenderingContext2D, data: Uint8Cl
 
 export function getRenderingProperties(viewport: Viewport): RenderingProperties {
 
-  const leftLimit = Math.floor(viewport.windowLevel - viewport.windowWidth / 2);
-  const rightLimit = Math.floor(viewport.windowLevel + viewport.windowWidth / 2);
+  const leftLimit = Math.floor(viewport.windowCenter - viewport.windowWidth / 2);
+  const rightLimit = Math.floor(viewport.windowCenter + viewport.windowWidth / 2);
 
   const imageWidth = Math.round(viewport.image.width * viewport.zoom);
   const imageHeight = Math.round(viewport.image.height * viewport.zoom);

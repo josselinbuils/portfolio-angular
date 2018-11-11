@@ -1,13 +1,12 @@
-import { Image } from './image';
+import { DicomInstance } from 'app/apps/dicom-viewer/dicom-instance';
 
 export class Viewport {
-
   deltaX: number;
   deltaY: number;
   height: number;
-  image: Image;
+  image: DicomInstance;
   width: number;
-  windowLevel: number;
+  windowCenter: number;
   windowWidth: number;
   zoom: number;
 
@@ -17,7 +16,7 @@ export class Viewport {
     this.height = config.height;
     this.image = config.image;
     this.width = config.width;
-    this.windowLevel = config.windowLevel;
+    this.windowCenter = config.windowCenter;
     this.windowWidth = config.windowWidth;
     this.zoom = config.zoom;
   }

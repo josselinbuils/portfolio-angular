@@ -1,5 +1,5 @@
 export interface DatasetDescriptor {
-  fileName: string;
+  files: string[];
   name: string;
   preview: string;
 }

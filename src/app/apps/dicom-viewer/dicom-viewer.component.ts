@@ -1,14 +1,12 @@
-import { HttpClient } from '@angular/common/http';
 import { Component, ElementRef, OnDestroy, Renderer2, ViewChild } from '@angular/core';
-
+import { DicomDataset } from 'app/apps/dicom-viewer/dicom-dataset';
+import { DicomLoaderService } from 'app/apps/dicom-viewer/dicom-loader.service';
 import { MOUSE_BUTTON } from 'app/constants';
 import { WindowInstance } from 'app/platform/window/window-instance';
 import { WindowComponent } from 'app/platform/window/window.component';
 
 import { Config } from './config/config';
-import { ImageFormat, PhotometricInterpretation, PixelRepresentation, RendererType } from './constants';
-import { DicomProperties } from './dicom-properties';
-import { Image } from './models/image';
+import { RendererType } from './constants';
 import { Viewport } from './models/viewport';
 import { JsRenderer } from './renderer/js/js-renderer';
 import { Renderer } from './renderer/renderer';
@@ -38,7 +36,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
 
   canvas: HTMLCanvasElement;
   config?: Config;
-  dicomProperties: DicomProperties;
+  dataset: DicomDataset;
   errorMessage: string;
   fps = 0;
   loading = false;
@@ -53,8 +51,8 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   private renderer: Renderer;
   private statsInterval: number;
 
-  constructor(private readonly http: HttpClient,
-              private readonly viewRenderer: Renderer2) {}
+  constructor(private readonly viewRenderer: Renderer2,
+              private readonly loader: DicomLoaderService) {}
 
   back(): void {
 
@@ -64,8 +62,8 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
 
     this.ngOnDestroy();
 
+    delete this.dataset;
     delete this.errorMessage;
-    delete this.dicomProperties;
     delete this.viewport;
     delete this.config;
 
@@ -109,18 +107,11 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     this.loading = true;
 
     try {
-      this.dicomProperties = this.getDicomProperties(await this.getDicomData(this.config.dataset.fileName));
+      this.dataset = (await this.loader.loadDataset(this.config.dataset));
+      console.log(this.dataset);
     } catch (error) {
       this.handleError(error);
     }
-
-    console.log(this.dicomProperties);
-
-    const {
-      height, imageFormat, rescaleIntercept, rescaleSlope, width, windowLevel, windowWidth,
-    } = this.dicomProperties;
-
-    let { pixelData } = this.dicomProperties;
 
     this.canvas = this.viewRenderer.createElement('canvas');
     this.viewRenderer.appendChild(this.viewportElementRef.nativeElement, this.canvas);
@@ -146,23 +137,10 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       this.handleError(new Error(`Unable to instantiate ${this.config.rendererType} renderer: ${error.message}`));
     }
 
-    if (this.config.rendererType !== RendererType.WebGL) {
-      const arrayType: any = {
-        int8: Int8Array,
-        int16: Int16Array,
-        uint8: Uint8Array,
-        uint16: Uint16Array,
-      };
-      pixelData = new arrayType[imageFormat](pixelData.buffer, pixelData.byteOffset);
-    }
+    const image = this.dataset.instances[0];
+    const { windowCenter, windowWidth } = image;
 
-    if (this.config.rendererType === RendererType.WebAssembly) {
-      pixelData = new Int32Array(pixelData as unknown as number[]);
-    }
-
-    const image = new Image({ height, imageFormat, pixelData, rescaleIntercept, rescaleSlope, width });
-
-    this.viewport = new Viewport({ image, windowLevel, windowWidth });
+    this.viewport = new Viewport({ image, windowCenter, windowWidth });
 
     const windowNativeElement = this.windowComponent.windowElementRef.nativeElement;
 
@@ -175,6 +153,25 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
 
     this.loading = false;
     this.startRender();
+  }
+
+  startPaging(downEvent: MouseEvent): void {
+    downEvent.preventDefault();
+
+    const startY = downEvent.clientY;
+    const instances = this.dataset.instances;
+    const startIndex = instances.indexOf(this.viewport.image);
+
+    const cancelMouseMove = this.viewRenderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
+      const deltaInstance = Math.floor((moveEvent.clientY - startY) * instances.length / this.viewport.height);
+      const newIndex = Math.min(Math.max(startIndex + deltaInstance, 0), instances.length - 1);
+      this.viewport.image = this.dataset.instances[newIndex];
+    });
+
+    const cancelMouseUp = this.viewRenderer.listen('window', 'mouseup', () => {
+      cancelMouseMove();
+      cancelMouseUp();
+    });
   }
 
   startPan(downEvent: MouseEvent): void {
@@ -205,7 +202,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   startTool(downEvent: MouseEvent): void {
     switch (downEvent.button) {
       case MOUSE_BUTTON.LEFT:
-        this.startWindowing(downEvent);
+        this.startPaging(downEvent);
         break;
       case MOUSE_BUTTON.MIDDLE:
         this.startPan(downEvent);
@@ -266,11 +263,11 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     const startY = downEvent.clientY;
 
     const startWindowWidth = this.viewport.windowWidth;
-    const startWindowLevel = this.viewport.windowLevel;
+    const startWindowLevel = this.viewport.windowCenter;
 
     const cancelMouseMove = this.viewRenderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
       this.viewport.windowWidth = startWindowWidth + (moveEvent.clientX - startX) * WINDOW_WIDTH_SENSIBILITY;
-      this.viewport.windowLevel = startWindowLevel - (moveEvent.clientY - startY) * WINDOW_LEVEL_SENSIBILITY;
+      this.viewport.windowCenter = startWindowLevel - (moveEvent.clientY - startY) * WINDOW_LEVEL_SENSIBILITY;
       this.viewport.windowWidth = Math.max(this.viewport.windowWidth, WINDOW_WIDTH_MIN);
     });
 
@@ -278,70 +275,6 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       cancelMouseMove();
       cancelMouseUp();
     });
-  }
-
-  private async getDicomData(dataset: string): Promise<Uint8Array> {
-    try {
-      const dicomData = await this.http
-        .get(`/assets/dicom/${dataset}`, { responseType: 'arraybuffer' })
-        .toPromise();
-
-      return new Uint8Array(dicomData);
-
-    } catch (error) {
-      throw new Error(`Unable to retrieve DICOM file: ${error.message}`);
-    }
-  }
-
-  private getDicomProperties(rawDicomData: Uint8Array): DicomProperties {
-    let dataset: Dataset;
-
-    try {
-      dataset = (window as any).dicomParser.parseDicom(rawDicomData);
-    } catch (error) {
-      throw new Error(`Unable to parse dicom: ${error.message || error}`);
-    }
-
-    try {
-      const bitsAllocated = dataset.uint16('x00280100');
-      const height = dataset.uint16('x00280010');
-      const patientName = dataset.string('x00100010');
-      const photometricInterpretation = dataset.string('x00280004') as PhotometricInterpretation;
-      const pixelRepresentation = dataset.uint16('x00280103');
-      const rescaleIntercept = typeof dataset.intString('x00281052') === 'number' ? dataset.intString('x00281052') : 0;
-      const rescaleSlope = typeof dataset.floatString('x00281053') === 'number' ? dataset.floatString('x00281053') : 1;
-      const width = dataset.uint16('x00280011');
-      const windowLevel = typeof dataset.intString('x00281050') === 'number' ? dataset.intString('x00281050') : 30;
-      const windowWidth = typeof  dataset.intString('x00281051') === 'number' ? dataset.intString('x00281051') : 400;
-      const imageFormat = this.getImageFormat(bitsAllocated, photometricInterpretation, pixelRepresentation);
-      const pixelDataElement = dataset.elements.x7fe00010;
-      const pixelData = (window as any).dicomParser
-        .sharedCopy(rawDicomData, pixelDataElement.dataOffset, pixelDataElement.length) as Uint8Array;
-
-      return {
-        bitsAllocated, height, imageFormat, patientName, photometricInterpretation, pixelData,
-        pixelRepresentation, rescaleIntercept, rescaleSlope, width, windowLevel, windowWidth,
-      };
-
-    } catch (error) {
-      throw new Error(`Unable to parse dicom: ${error.message || error}`);
-    }
-  }
-
-  private getImageFormat(bitsAllocated: number, photometricInterpretation: PhotometricInterpretation,
-                         pixelRepresentation: PixelRepresentation): ImageFormat {
-    let format: string;
-
-    if (photometricInterpretation === PhotometricInterpretation.RGB) {
-      format = 'rgb';
-    } else if ((photometricInterpretation as string).includes('MONOCHROME')) {
-      const isSigned = pixelRepresentation === PixelRepresentation.Signed;
-      format = `${isSigned ? '' : 'u'}int${bitsAllocated <= 8 ? '8' : '16'}`;
-    } else {
-      throw new Error('Unsupported photometric interpretation');
-    }
-
-    return format as ImageFormat;
   }
 
   private handleError(error: Error): Error {
@@ -402,18 +335,4 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
 
     render();
   }
-}
-
-interface Dataset {
-  fileName: string;
-
-  elements: { [tag: string]: { dataOffset: number; length: number } };
-
-  floatString(tag: string): number;
-
-  intString(tag: string): number;
-
-  string(tag: string): string;
-
-  uint16(tag: string): number;
 }
