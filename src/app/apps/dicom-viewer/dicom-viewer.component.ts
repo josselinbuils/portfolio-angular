@@ -6,7 +6,7 @@ import { WindowInstance } from 'app/platform/window/window-instance';
 import { WindowComponent } from 'app/platform/window/window.component';
 
 import { Config } from './config/config';
-import { RendererType } from './constants';
+import { MouseTool, RendererType } from './constants';
 import { Viewport } from './models/viewport';
 import { JsRenderer } from './renderer/js/js-renderer';
 import { Renderer } from './renderer/renderer';
@@ -34,9 +34,11 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   @ViewChild('viewportElement') viewportElementRef: ElementRef<HTMLDivElement>;
   @ViewChild(WindowComponent) windowComponent: WindowComponent;
 
+  activeTool: MouseTool;
   canvas: HTMLCanvasElement;
   config?: Config;
   dataset: DicomDataset;
+  errorMessage: string;
   errorMessage: string;
   fps = 0;
   loading = false;
@@ -44,6 +46,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   showConfig = true;
   title = DicomViewerComponent.appName;
   viewport: Viewport;
+  MouseTool = MouseTool;
 
   private frameDurations: number[];
   private lastTime = performance.now();
@@ -101,6 +104,10 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     }
   }
 
+  selectActiveTool(tool: MouseTool): void {
+    this.activeTool = tool;
+  }
+
   async start(config: Config): Promise<void> {
     this.config = config;
     this.showConfig = false;
@@ -108,6 +115,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
 
     try {
       this.dataset = (await this.loader.loadDataset(this.config.dataset));
+      this.activeTool = this.dataset.frames.length > 1 ? MouseTool.Paging : MouseTool.Windowing;
       console.log(this.dataset);
     } catch (error) {
       this.handleError(error);
@@ -163,7 +171,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     const startIndex = frames.indexOf(this.viewport.image);
 
     const cancelMouseMove = this.viewRenderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
-      const deltaInstance = Math.floor((moveEvent.clientY - startY) * frames.length / this.viewport.height);
+      const deltaInstance = Math.floor((moveEvent.clientY - startY) * frames.length / this.viewport.height * 1.2);
       const newIndex = Math.min(Math.max(startIndex + deltaInstance, 0), frames.length - 1);
       this.viewport.image = frames[newIndex];
     });
@@ -202,10 +210,18 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   startTool(downEvent: MouseEvent): void {
     switch (downEvent.button) {
       case MOUSE_BUTTON.LEFT:
-        if (this.dataset.frames.length > 1) {
-          this.startPaging(downEvent);
-        } else {
-          this.startWindowing(downEvent);
+        switch (this.activeTool) {
+          case MouseTool.Paging:
+            this.startPaging(downEvent);
+            break;
+          case MouseTool.Pan:
+            this.startPan(downEvent);
+            break;
+          case MouseTool.Windowing:
+            this.startWindowing(downEvent);
+            break;
+          case MouseTool.Zoom:
+            this.startZoom(downEvent);
         }
         break;
       case MOUSE_BUTTON.MIDDLE:
@@ -243,19 +259,21 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       }
     });
 
-    const cancelContextMenu = this.viewRenderer.listen('window', 'contextmenu', () => {
-      if (!isMacOS) {
-        cancelMouseMove();
-      }
-      cancelContextMenu();
-
-      return false;
-    });
-
-    if (isMacOS) {
+    if (downEvent.button === MOUSE_BUTTON.LEFT || isMacOS) {
       const cancelMouseUp = this.viewRenderer.listen('window', 'mouseup', () => {
         cancelMouseMove();
         cancelMouseUp();
+      });
+    }
+
+    if (downEvent.button === MOUSE_BUTTON.RIGHT) {
+      const cancelContextMenu = this.viewRenderer.listen('window', 'contextmenu', () => {
+        if (!isMacOS) {
+          cancelMouseMove();
+        }
+        cancelContextMenu();
+
+        return false;
       });
     }
   }

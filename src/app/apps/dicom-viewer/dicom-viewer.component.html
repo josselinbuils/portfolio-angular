@@ -4,6 +4,22 @@
     <app-config [hidden]="!showConfig" (config)="start($event)"></app-config>
     <div #viewportElement class="viewport" [hidden]="showConfig">
       <button (click)="back()">Back</button>
+      <div class="toolbar" *ngIf="dataset">
+        <button *ngIf="dataset.frames.length > 1" [ngClass]="{active: activeTool === MouseTool.Paging}"
+                (click)="selectActiveTool(MouseTool.Paging)">
+          <i class="fa fa-arrows-v" aria-hidden="true"></i>
+        </button>
+        <button [ngClass]="{active: activeTool === MouseTool.Windowing}"
+                (click)="selectActiveTool(MouseTool.Windowing)">
+          <i class="fa fa-adjust" aria-hidden="true"></i>
+        </button>
+        <button [ngClass]="{active: activeTool === MouseTool.Pan}" (click)="selectActiveTool(MouseTool.Pan)">
+          <i class="fa fa-arrows" aria-hidden="true"></i>
+        </button>
+        <button [ngClass]="{active: activeTool === MouseTool.Zoom}" (click)="selectActiveTool(MouseTool.Zoom)">
+          <i class="fa fa-search" aria-hidden="true"></i>
+        </button>
+      </div>
       <div *ngIf="!!viewport" class="overlay">
         <div class="overlay-top-left">
           <p>{{config.dataset.name}}</p>

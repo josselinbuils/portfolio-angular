@@ -7,6 +7,7 @@ import {
 } from 'app/apps/dicom-viewer/constants';
 import { DicomDataset } from 'app/apps/dicom-viewer/dicom-dataset';
 import { DicomFrame } from 'app/apps/dicom-viewer/dicom-frame';
+import { DEV_SERVER_URL } from 'app/constants';
 
 @Injectable()
 export class DicomLoaderService {
@@ -31,8 +32,12 @@ export class DicomLoaderService {
 
   private async getDicomFile(path: string): Promise<Uint8Array> {
     try {
+      const url = location.hostname === 'localhost'
+        ? `${DEV_SERVER_URL}${DATASETS_PATH}${path}`
+        : `${DATASETS_PATH}${path}`;
+
       const dicomFile = await this.http
-        .get(`${DATASETS_PATH}${path}`, { responseType: 'arraybuffer' })
+        .get(url, { responseType: 'arraybuffer' })
         .toPromise();
 
       return new Uint8Array(dicomFile);

@@ -23,7 +23,7 @@
             "polyfills": "src/polyfills.ts",
             "tsConfig": "src/tsconfig.app.json",
             "assets": [
-              "src/assets",
+              {"glob": "**/*", "input": "src/assets/", "ignore": ["src/assets/dicom/**/*"], "output": "/assets/"},
               "src/humans.txt",
               "src/robots.txt",
               "src/sitemap.xml"

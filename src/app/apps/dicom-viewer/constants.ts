@@ -8,6 +8,13 @@ export enum DicomImageFormat {
   UInt16 = 'uint16',
 }
 
+export enum MouseTool {
+  Paging,
+  Pan,
+  Windowing,
+  Zoom,
+}
+
 export enum NormalizedImageFormat {
   Int16 = 'int16',
   RGB = 'rgb',
