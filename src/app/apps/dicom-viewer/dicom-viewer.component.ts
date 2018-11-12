@@ -39,7 +39,6 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   config?: Config;
   dataset: DicomDataset;
   errorMessage: string;
-  errorMessage: string;
   fps = 0;
   loading = false;
   meanRenderDuration: number;
