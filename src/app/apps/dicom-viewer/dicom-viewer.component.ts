@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnDestroy, Renderer2, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { DicomDataset } from 'app/apps/dicom-viewer/dicom-dataset';
 import { DicomLoaderService } from 'app/apps/dicom-viewer/dicom-loader.service';
 import { MOUSE_BUTTON } from 'app/constants';
@@ -27,14 +27,15 @@ const WINDOW_WIDTH_MIN = 1;
   templateUrl: './dicom-viewer.component.html',
   styleUrls: ['./dicom-viewer.component.scss'],
 })
-export class DicomViewerComponent implements OnDestroy, WindowInstance {
+export class DicomViewerComponent implements OnInit, OnDestroy, WindowInstance {
   static appName = 'DICOM Viewer';
   static iconClass = 'fa-heartbeat';
 
   @ViewChild('viewportElement') viewportElementRef: ElementRef<HTMLDivElement>;
   @ViewChild(WindowComponent) windowComponent: WindowComponent;
 
-  activeTool: MouseTool;
+  activeLeftTool: MouseTool;
+  activeRightTool: MouseTool = MouseTool.Zoom;
   canvas: HTMLCanvasElement;
   config?: Config;
   dataset: DicomDataset;
@@ -47,6 +48,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   viewport: Viewport;
   MouseTool = MouseTool;
 
+  private cancelMouseDownListener: () => void;
   private frameDurations: number[];
   private lastTime = performance.now();
   private renderDurations: number[];
@@ -72,15 +74,18 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     this.showConfig = true;
   }
 
-  ngOnDestroy(): void {
+  ngOnInit(): void {
+    this.cancelMouseDownListener = this.disableContextMenu(this.viewportElementRef.nativeElement);
+  }
 
+  ngOnDestroy(): void {
     if (this.renderer !== undefined) {
       if (typeof this.renderer.destroy === 'function') {
         this.renderer.destroy();
       }
       delete this.renderer;
     }
-
+    this.cancelMouseDownListener();
     clearInterval(this.statsInterval);
   }
 
@@ -103,8 +108,12 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     }
   }
 
-  selectActiveTool(tool: MouseTool): void {
-    this.activeTool = tool;
+  selectActiveLeftTool(tool: MouseTool): void {
+    this.activeLeftTool = tool;
+  }
+
+  selectActiveRightTool(tool: MouseTool): void {
+    this.activeRightTool = tool;
   }
 
   async start(config: Config): Promise<void> {
@@ -114,7 +123,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
 
     try {
       this.dataset = (await this.loader.loadDataset(this.config.dataset));
-      this.activeTool = this.dataset.frames.length > 1 ? MouseTool.Paging : MouseTool.Windowing;
+      this.activeLeftTool = this.dataset.frames.length > 1 ? MouseTool.Paging : MouseTool.Windowing;
       console.log(this.dataset);
     } catch (error) {
       this.handleError(error);
@@ -162,35 +171,25 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     this.startRender();
   }
 
-  startPaging(downEvent: MouseEvent): void {
-    downEvent.preventDefault();
-
+  startPaging(downEvent: MouseEvent): () => void {
     const startY = downEvent.clientY;
     const frames = this.dataset.frames;
     const startIndex = frames.indexOf(this.viewport.image);
 
-    const cancelMouseMove = this.viewRenderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
+    return this.viewRenderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
       const deltaInstance = Math.floor((moveEvent.clientY - startY) * frames.length / this.viewport.height * 1.2);
       const newIndex = Math.min(Math.max(startIndex + deltaInstance, 0), frames.length - 1);
       this.viewport.image = frames[newIndex];
     });
-
-    const cancelMouseUp = this.viewRenderer.listen('window', 'mouseup', () => {
-      cancelMouseMove();
-      cancelMouseUp();
-    });
   }
 
-  startPan(downEvent: MouseEvent): void {
-    downEvent.preventDefault();
-
+  startPan(downEvent: MouseEvent): () => void {
     const canvas = this.canvas;
     const viewport = this.viewport;
     const startX = downEvent.clientX - viewport.deltaX * canvas.clientWidth;
     const startY = downEvent.clientY - viewport.deltaY * canvas.clientHeight;
 
-    const cancelMouseMove = this.viewRenderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
-
+    return this.viewRenderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
       viewport.deltaX = (moveEvent.clientX - startX) / canvas.clientWidth;
       viewport.deltaY = (moveEvent.clientY - startY) / canvas.clientHeight;
 
@@ -199,47 +198,58 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
         viewport.deltaX = viewport.deltaY = 0;
       }
     });
-
-    const cancelMouseUp = this.viewRenderer.listen('window', 'mouseup', () => {
-      cancelMouseMove();
-      cancelMouseUp();
-    });
   }
 
   startTool(downEvent: MouseEvent): void {
+    downEvent.preventDefault();
+
     switch (downEvent.button) {
       case MOUSE_BUTTON.LEFT:
-        switch (this.activeTool) {
+      case MOUSE_BUTTON.RIGHT:
+        const isMacOS = navigator.platform.indexOf('Mac') !== -1;
+        const activeTool = downEvent.button === MOUSE_BUTTON.LEFT ? this.activeLeftTool : this.activeRightTool;
+        let cancelMouseMove: () => void;
+
+        switch (activeTool) {
           case MouseTool.Paging:
-            this.startPaging(downEvent);
+            cancelMouseMove = this.startPaging(downEvent);
             break;
           case MouseTool.Pan:
-            this.startPan(downEvent);
+            cancelMouseMove = this.startPan(downEvent);
             break;
           case MouseTool.Windowing:
-            this.startWindowing(downEvent);
+            cancelMouseMove = this.startWindowing(downEvent);
             break;
           case MouseTool.Zoom:
-            this.startZoom(downEvent);
+            cancelMouseMove = this.startZoom(downEvent);
+        }
+
+        if (downEvent.button === MOUSE_BUTTON.LEFT || isMacOS) {
+          const cancelMouseUp = this.viewRenderer.listen('window', 'mouseup', () => {
+            cancelMouseMove();
+            cancelMouseUp();
+          });
+        }
+
+        if (downEvent.button === MOUSE_BUTTON.RIGHT && !isMacOS) {
+          const cancelContextMenu = this.viewRenderer.listen('window', 'contextmenu', () => {
+            cancelMouseMove();
+            cancelContextMenu();
+            return false;
+          });
         }
         break;
       case MOUSE_BUTTON.MIDDLE:
         this.startPan(downEvent);
-        break;
-      case MOUSE_BUTTON.RIGHT:
-        this.startZoom(downEvent);
     }
   }
 
-  startZoom(downEvent: MouseEvent): void {
-    downEvent.preventDefault();
-
-    const isMacOS = navigator.platform.indexOf('Mac') !== -1;
+  startZoom(downEvent: MouseEvent): () => void {
     const viewport = this.viewport;
     const startY = downEvent.clientY;
     const startZoom = viewport.zoom;
 
-    const cancelMouseMove = this.viewRenderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
+    return this.viewRenderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
       viewport.zoom = startZoom - (moveEvent.clientY - startY) * ZOOM_SENSIBILITY / this.canvas.clientHeight;
       viewport.zoom = Math.min(Math.max(viewport.zoom, ZOOM_MIN), ZOOM_MAX);
 
@@ -257,44 +267,30 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
         }
       }
     });
-
-    if (downEvent.button === MOUSE_BUTTON.LEFT || isMacOS) {
-      const cancelMouseUp = this.viewRenderer.listen('window', 'mouseup', () => {
-        cancelMouseMove();
-        cancelMouseUp();
-      });
-    }
-
-    if (downEvent.button === MOUSE_BUTTON.RIGHT) {
-      const cancelContextMenu = this.viewRenderer.listen('window', 'contextmenu', () => {
-        if (!isMacOS) {
-          cancelMouseMove();
-        }
-        cancelContextMenu();
-
-        return false;
-      });
-    }
   }
 
-  startWindowing(downEvent: MouseEvent): void {
-    downEvent.preventDefault();
-
+  startWindowing(downEvent: MouseEvent): () => void {
     const startX = downEvent.clientX;
     const startY = downEvent.clientY;
 
     const startWindowWidth = this.viewport.windowWidth;
     const startWindowLevel = this.viewport.windowCenter;
 
-    const cancelMouseMove = this.viewRenderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
+    return this.viewRenderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
       this.viewport.windowWidth = startWindowWidth + (moveEvent.clientX - startX) * WINDOW_WIDTH_SENSIBILITY;
       this.viewport.windowCenter = startWindowLevel - (moveEvent.clientY - startY) * WINDOW_LEVEL_SENSIBILITY;
       this.viewport.windowWidth = Math.max(this.viewport.windowWidth, WINDOW_WIDTH_MIN);
     });
+  }
 
-    const cancelMouseUp = this.viewRenderer.listen('window', 'mouseup', () => {
-      cancelMouseMove();
-      cancelMouseUp();
+  private disableContextMenu(element: HTMLElement): () => void {
+    return this.viewRenderer.listen(element, 'mousedown', (event: MouseEvent) => {
+      if (event.button === MOUSE_BUTTON.RIGHT) {
+        const cancelContextMenu = this.viewRenderer.listen('window', 'contextmenu', () => {
+          cancelContextMenu();
+          return false;
+        });
+      }
     });
   }
 

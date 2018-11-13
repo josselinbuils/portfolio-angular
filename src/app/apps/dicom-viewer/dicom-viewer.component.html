@@ -5,18 +5,24 @@
     <div #viewportElement class="viewport" [hidden]="showConfig">
       <button (click)="back()">Back</button>
       <div class="toolbar" *ngIf="dataset">
-        <button *ngIf="dataset.frames.length > 1" [ngClass]="{active: activeTool === MouseTool.Paging}"
-                (click)="selectActiveTool(MouseTool.Paging)">
+        <button *ngIf="dataset.frames.length > 1"
+                [ngClass]="{'active-left': activeLeftTool === MouseTool.Paging, 'active-right': activeRightTool === MouseTool.Paging}"
+                (click)="selectActiveLeftTool(MouseTool.Paging)" (contextmenu)="selectActiveRightTool(MouseTool.Paging)">
           <i class="fa fa-arrows-v" aria-hidden="true"></i>
         </button>
-        <button [ngClass]="{active: activeTool === MouseTool.Windowing}"
-                (click)="selectActiveTool(MouseTool.Windowing)">
+        <button
+          [ngClass]="{'active-left': activeLeftTool === MouseTool.Windowing, 'active-right': activeRightTool === MouseTool.Windowing}"
+          (click)="selectActiveLeftTool(MouseTool.Windowing)" (contextmenu)="selectActiveRightTool(MouseTool.Windowing)">
           <i class="fa fa-adjust" aria-hidden="true"></i>
         </button>
-        <button [ngClass]="{active: activeTool === MouseTool.Pan}" (click)="selectActiveTool(MouseTool.Pan)">
+        <button
+          [ngClass]="{'active-left': activeLeftTool === MouseTool.Pan, 'active-right': activeRightTool === MouseTool.Pan}"
+          (click)="selectActiveLeftTool(MouseTool.Pan)" (contextmenu)="selectActiveRightTool(MouseTool.Pan)">
           <i class="fa fa-arrows" aria-hidden="true"></i>
         </button>
-        <button [ngClass]="{active: activeTool === MouseTool.Zoom}" (click)="selectActiveTool(MouseTool.Zoom)">
+        <button
+          [ngClass]="{'active-left': activeLeftTool === MouseTool.Zoom, 'active-right': activeRightTool === MouseTool.Zoom}"
+          (click)="selectActiveLeftTool(MouseTool.Zoom)" (contextmenu)="selectActiveRightTool(MouseTool.Zoom)">
           <i class="fa fa-search" aria-hidden="true"></i>
         </button>
       </div>
