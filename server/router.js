@@ -40,6 +40,7 @@ module.exports = class Router {
       if (existsSync(gzPath)) {
         req.url += '.gz';
         res.set('Content-Encoding', 'gzip');
+        res.set('Content-Type', 'application/octet-stream');
       }
       next();
     });
