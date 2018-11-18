@@ -33,7 +33,7 @@ export class WebGLRenderer implements Renderer {
 
   render(viewport: Viewport): void {
     const gl = this.gl;
-    const { height, id, imageFormat, rescaleIntercept, rescaleSlope, width } = viewport.image;
+    const { columns, id, imageFormat, rescaleIntercept, rescaleSlope, rows } = viewport.image;
 
     if (this.program === undefined) {
       this.program = this.createProgram(imageFormat);
@@ -75,8 +75,8 @@ export class WebGLRenderer implements Renderer {
     const matrixLocation = gl.getUniformLocation(this.program, 'u_matrix');
 
     // Convert dst pixel coordinates to clip space coordinates
-    const displayWidth = Math.round(width * viewport.zoom);
-    const displayHeight = Math.round(height * viewport.zoom);
+    const displayWidth = Math.round(columns * viewport.zoom);
+    const displayHeight = Math.round(rows * viewport.zoom);
     const clipX = (0.5 - displayWidth / viewport.width / 2 + viewport.deltaX) * 2 - 1;
     const clipY = (0.5 - displayHeight / viewport.height / 2 + viewport.deltaY) * -2 + 1;
     const clipWidth = displayWidth / viewport.width * 2;
@@ -140,12 +140,12 @@ export class WebGLRenderer implements Renderer {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
-    const { height, imageFormat, width } = image;
+    const { columns, imageFormat, rows } = image;
     const format = getTextureFormat(gl, imageFormat);
     const pixelData = new Uint8Array(image.pixelData.buffer, image.pixelData.byteOffset);
 
     // Upload the image into the texture.
-    gl.texImage2D(gl.TEXTURE_2D, 0, format, width, height, 0, format, gl.UNSIGNED_BYTE, pixelData);
+    gl.texImage2D(gl.TEXTURE_2D, 0, format, columns, rows, 0, format, gl.UNSIGNED_BYTE, pixelData);
 
     return texture;
   }

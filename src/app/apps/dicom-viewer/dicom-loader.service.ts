@@ -98,33 +98,55 @@ export class DicomLoaderService {
       const dicomFile = await this.getDicomFile(path);
       const parsedFile = this.parseDicom(dicomFile);
 
+      /**
+       * DICOM fields
+       */
       const bitsAllocated = parsedFile.uint16('x00280100');
-      const id = parsedFile.string('x00080018'); // SOPInstanceUID
-      const height = parsedFile.uint16('x00280010');
+      const columns = parsedFile.uint16('x00280011');
+      const imagePosition = parsedFile.elements.x00200032 !== undefined
+        ? this.floatStringsToArray(parsedFile, 'x00200032')
+        : undefined;
+      const imageOrientation = parsedFile.elements.x00200037 !== undefined
+        ? [
+          this.floatStringsToArray(parsedFile, 'x00200037').slice(0, 3),
+          this.floatStringsToArray(parsedFile, 'x00200037').slice(3),
+        ]
+        : undefined;
       const patientName = parsedFile.string('x00100010');
       const photometricInterpretation = parsedFile.string('x00280004') as PhotometricInterpretation;
       const pixelRepresentation = parsedFile.uint16('x00280103');
-      const rescaleIntercept = typeof parsedFile.intString('x00281052') === 'number'
+      const pixelSpacing = parsedFile.elements.x00280030 !== undefined
+        ? this.floatStringsToArray(parsedFile, 'x00280030')
+        : undefined;
+      const rescaleIntercept = parsedFile.elements.x00281052 !== undefined
         ? parsedFile.intString('x00281052')
         : 0;
-      const rescaleSlope = typeof parsedFile.floatString('x00281053') === 'number'
+      const rescaleSlope = parsedFile.elements.x00281053 !== undefined
         ? parsedFile.floatString('x00281053')
         : 1;
-      const width = parsedFile.uint16('x00280011');
-      const windowCenter = typeof parsedFile.intString('x00281050') === 'number'
+      const rows = parsedFile.uint16('x00280010');
+      const sliceLocation = parsedFile.elements.x00201041 !== undefined
+        ? parsedFile.floatString('x00201041')
+        : undefined;
+      const windowCenter = parsedFile.elements.x00281050 !== undefined
         ? parsedFile.intString('x00281050')
         : 30;
-      const windowWidth = typeof  parsedFile.intString('x00281051') === 'number'
+      const windowWidth = parsedFile.elements.x00281051 !== undefined
         ? parsedFile.intString('x00281051')
         : 400;
 
+      /**
+       * App fields
+       */
+      const id = parsedFile.string('x00080018'); // SOPInstanceUID
       const dicomImageFormat = this.getDicomImageFormat(bitsAllocated, photometricInterpretation, pixelRepresentation);
       const { imageFormat, pixelData } = this.getNormalizedPixelData(dicomFile, parsedFile, dicomImageFormat);
 
       const frames: DicomFrame[] = [];
       const instance: DicomFrame = {
-        bitsAllocated, height, id, imageFormat, patientName, photometricInterpretation, pixelData, pixelRepresentation,
-        rescaleIntercept, rescaleSlope, width, windowCenter, windowWidth,
+        bitsAllocated, columns, id, imageFormat, imagePosition, imageOrientation, patientName,
+        photometricInterpretation, pixelData, pixelRepresentation, pixelSpacing, rescaleIntercept, rescaleSlope, rows,
+        sliceLocation, windowCenter, windowWidth,
       };
 
       const numberOfFrames = typeof parsedFile.intString('x00280008') === 'number'
@@ -180,6 +202,16 @@ export class DicomLoaderService {
       throw new Error(`Unable to parse DICOM: ${error.message || error}`);
     }
   }
+
+  private floatStringsToArray(parsedFile: ParsedDicomFile, tag: string): number[] | undefined {
+    const nbValues = parsedFile.numStringValues(tag);
+    const res = [];
+
+    for (let i = 0; i < nbValues; i++) {
+      res.push(parsedFile.floatString(tag, i));
+    }
+    return res;
+  }
 }
 
 interface NormalizedPixelData {
@@ -194,9 +226,11 @@ interface ParsedDicomFile {
 
   attributeTag(tag: string): string;
 
-  floatString(tag: string): number;
+  floatString(tag: string, index?: number): number;
 
-  intString(tag: string): number;
+  intString(tag: string, index?: number): number;
+
+  numStringValues(tag: string): number;
 
   string(tag: string): string;
 

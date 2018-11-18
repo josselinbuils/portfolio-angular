@@ -51,7 +51,7 @@ export class JsRenderer implements Renderer {
   }
 
   private renderCanvasPixels(viewport: Viewport): void {
-    const { pixelData, rescaleIntercept, rescaleSlope, width } = viewport.image;
+    const { columns, pixelData, rescaleIntercept, rescaleSlope } = viewport.image;
     const {
       displayHeight, displayWidth, displayX0, displayX1, displayY0, displayY1, leftLimit, rightLimit, x0, y0,
     } = getRenderingProperties(viewport);
@@ -65,7 +65,7 @@ export class JsRenderer implements Renderer {
 
       for (let y = displayY0; y <= displayY1; y++) {
         for (let x = displayX0; x <= displayX1; x++) {
-          const pixelDataIndex = ((y - y0) / viewport.zoom | 0) * width + ((x - x0) / viewport.zoom | 0);
+          const pixelDataIndex = ((y - y0) / viewport.zoom | 0) * columns + ((x - x0) / viewport.zoom | 0);
           const rawValue = pixelData[pixelDataIndex] * rescaleSlope + rescaleIntercept;
           let intensity = 255;
 
@@ -86,16 +86,16 @@ export class JsRenderer implements Renderer {
   }
 
   private renderImagePixels(viewport: Viewport): void {
-    const { height, pixelData, rescaleIntercept, rescaleSlope, width } = viewport.image;
+    const { columns, pixelData, rescaleIntercept, rescaleSlope, rows } = viewport.image;
     const {
       displayHeight, displayWidth, displayX0, displayY0, leftLimit, rightLimit, x0, x1, y0, y1,
     } = getRenderingProperties(viewport);
 
     const imageY0 = y0 < 0 ? Math.round(-y0 / viewport.zoom) : 0;
-    const imageY1 = y1 > viewport.height ? height - Math.round((y1 - viewport.height) / viewport.zoom) : height;
+    const imageY1 = y1 > viewport.height ? rows - Math.round((y1 - viewport.height) / viewport.zoom) : rows;
 
     const imageX0 = x0 < 0 ? Math.round(-x0 / viewport.zoom) : 0;
-    const imageX1 = x1 > viewport.width ? width - Math.round((x1 - viewport.width) / viewport.zoom) : width;
+    const imageX1 = x1 > viewport.width ? columns - Math.round((x1 - viewport.width) / viewport.zoom) : columns;
 
     const croppedImageWidth = imageX1 - imageX0;
     const croppedImageHeight = imageY1 - imageY0;
@@ -109,7 +109,7 @@ export class JsRenderer implements Renderer {
 
       for (let y = imageY0; y <= imageY1; y++) {
         for (let x = imageX0; x < imageX1; x++) {
-          const rawValue = pixelData[y * width + x] * rescaleSlope + rescaleIntercept;
+          const rawValue = pixelData[y * columns + x] * rescaleSlope + rescaleIntercept;
           let intensity = 0;
 
           if (rawValue >= rightLimit) {
@@ -134,14 +134,14 @@ export class JsRenderer implements Renderer {
   }
 
   private renderRGB(viewport: Viewport): void {
-    const { height, pixelData, width } = viewport.image;
+    const { columns, pixelData, rows } = viewport.image;
     const { imageHeight, imageWidth, x0, y0 } = getRenderingProperties(viewport);
 
-    this.renderingContext.canvas.width = width;
-    this.renderingContext.canvas.height = height;
+    this.renderingContext.canvas.width = columns;
+    this.renderingContext.canvas.height = rows;
 
     const pixelDataLength = pixelData.length;
-    const imageData32 = new Uint32Array(width * height);
+    const imageData32 = new Uint32Array(columns * rows);
     let dataIndex = 0;
 
     for (let i = 0; i < pixelDataLength; i += 3) {
@@ -149,7 +149,7 @@ export class JsRenderer implements Renderer {
     }
 
     const imageData = new Uint8ClampedArray(imageData32.buffer);
-    const imageDataInstance = new ImageData(imageData, width, height);
+    const imageDataInstance = new ImageData(imageData, columns, rows);
 
     this.renderingContext.putImageData(imageDataInstance, 0, 0);
     this.context.drawImage(this.renderingContext.canvas, x0, y0, imageWidth, imageHeight);

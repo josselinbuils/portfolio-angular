@@ -12,7 +12,8 @@ export class Viewport extends Renderable {
   zoom = 1;
 
   constructor(config: ViewportConfig) {
-    super(config);
+    super();
+    super.fillProperties(config);
     super.decorateProperties();
   }
 }

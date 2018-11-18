@@ -7,8 +7,8 @@ export function getRenderingProperties(viewport: Viewport): RenderingProperties 
   const leftLimit = Math.floor(viewport.windowCenter - viewport.windowWidth / 2);
   const rightLimit = Math.floor(viewport.windowCenter + viewport.windowWidth / 2);
 
-  const imageWidth = Math.round(viewport.image.width * viewport.zoom);
-  const imageHeight = Math.round(viewport.image.height * viewport.zoom);
+  const imageWidth = Math.round(viewport.image.columns * viewport.zoom);
+  const imageHeight = Math.round(viewport.image.rows * viewport.zoom);
 
   const x0 = Math.round(((viewport.width - imageWidth) / 2 + viewport.deltaX * viewport.width));
   const x1 = x0 + imageWidth - 1;

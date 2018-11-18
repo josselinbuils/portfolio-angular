@@ -160,6 +160,8 @@ export class DicomViewerComponent implements OnInit, OnDestroy, WindowInstance {
     const image = this.dataset.frames[0];
     const { windowCenter, windowWidth } = image;
 
+    console.log(windowCenter, windowWidth);
+
     this.viewport = new Viewport({ image, windowCenter, windowWidth });
 
     const windowNativeElement = this.windowComponent.windowElementRef.nativeElement;
@@ -169,7 +171,7 @@ export class DicomViewerComponent implements OnInit, OnDestroy, WindowInstance {
       height: windowNativeElement.clientHeight,
     });
 
-    this.viewport.zoom = Math.min(this.viewport.height / image.height, 1);
+    this.viewport.zoom = Math.min(this.viewport.height / image.rows, 1);
 
     this.loading = false;
     this.startRender();
@@ -268,7 +270,7 @@ export class DicomViewerComponent implements OnInit, OnDestroy, WindowInstance {
 
       // Helps to fit the viewport of image is centered
       if (viewport.deltaX === 0 && viewport.deltaY === 0) {
-        const fitViewportZoom = viewport.height / viewport.image.height;
+        const fitViewportZoom = viewport.height / viewport.image.rows;
 
         if (Math.abs(viewport.zoom - fitViewportZoom) < ZOOM_LIMIT) {
           viewport.zoom = fitViewportZoom;

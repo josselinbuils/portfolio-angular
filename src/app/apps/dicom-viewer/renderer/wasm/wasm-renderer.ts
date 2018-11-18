@@ -34,7 +34,7 @@ export class WasmRenderer implements Renderer {
     this.context.fillStyle = 'black';
     this.context.fillRect(0, 0, viewport.width, viewport.height);
 
-    const { pixelData, rescaleIntercept, rescaleSlope, width } = viewport.image;
+    const { columns, pixelData, rescaleIntercept, rescaleSlope } = viewport.image;
 
     if (this.lut === undefined || this.lut.windowWidth !== viewport.windowWidth) {
 
@@ -74,7 +74,7 @@ export class WasmRenderer implements Renderer {
           this.renderingCore.HEAPU8.buffer, renderedDataPointer, renderedDataLength,
         );
 
-        this.coreRender(this.lut.table.byteOffset, rawData.byteOffset, renderedData.byteOffset, width, x0, y0,
+        this.coreRender(this.lut.table.byteOffset, rawData.byteOffset, renderedData.byteOffset, columns, x0, y0,
           displayX0, displayX1, displayY0, displayY1, viewport.zoom, leftLimit, rightLimit, rescaleSlope,
           rescaleIntercept);
 
