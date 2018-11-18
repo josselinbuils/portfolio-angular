@@ -1,8 +1,11 @@
 import { Subject } from 'rxjs';
 
-export class Renderable {
+export class Renderable extends Subject<void> {
   dirty: boolean;
-  onUpdate: Subject<void>;
+
+  constructor() {
+    super();
+  }
 
   decorateProperties(): void {
     for (const [key, startValue] of Object.entries(this)) {
@@ -15,16 +18,15 @@ export class Renderable {
         set(newValue: any): void {
           value = newValue;
 
-          if (value !== undefined && value !== null && value.onUpdate instanceof Subject) {
-            value.onUpdate.subscribe(() => this.dirty = true);
+          if (value !== undefined && value !== null && typeof value.subscribe === 'function') {
+            value.subscribe(() => this.dirty = true);
           }
 
           this.dirty = true;
-          this.onUpdate.next();
+          this.next();
         },
       });
     }
     this.dirty = true;
-    this.onUpdate = new Subject();
   }
 }
