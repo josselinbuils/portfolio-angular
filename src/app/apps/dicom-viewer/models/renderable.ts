@@ -1,10 +1,14 @@
 import { Subject } from 'rxjs';
 
-export class Renderable extends Subject<void> {
-  dirty: boolean;
+export class Renderable {
+  onUpdate: Subject<void>;
 
-  constructor() {
-    super();
+  private dirty: boolean;
+
+  constructor(config: any) {
+    for (const [key, value] of Object.entries(config)) {
+      this[key] = value;
+    }
   }
 
   decorateProperties(): void {
@@ -18,15 +22,39 @@ export class Renderable extends Subject<void> {
         set(newValue: any): void {
           value = newValue;
 
-          if (value !== undefined && value !== null && typeof value.subscribe === 'function') {
-            value.subscribe(() => this.dirty = true);
+          if (value !== undefined && value.onUpdate instanceof Subject) {
+            value.onUpdate.subscribe(() => this.makeDirty());
           }
-
-          this.dirty = true;
-          this.next();
+          this.makeDirty();
         },
       });
     }
     this.dirty = true;
+    this.onUpdate = new Subject();
+  }
+
+  fillProperties(config: any): void {
+    for (const [key, value] of Object.entries(config)) {
+      this[key] = value;
+    }
+  }
+
+  isDirty(): boolean {
+    return this.dirty;
+  }
+
+  makeClean(): void {
+    this.dirty = false;
+
+    for (const propertyValue of Object.values(this)) {
+      if (propertyValue !== undefined && typeof propertyValue.makeClean === 'function') {
+        propertyValue.makeClean();
+      }
+    }
+  }
+
+  private makeDirty(): void {
+    this.dirty = true;
+    this.onUpdate = new Subject();
   }
 }

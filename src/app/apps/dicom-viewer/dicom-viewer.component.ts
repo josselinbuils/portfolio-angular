@@ -13,7 +13,7 @@ import { Renderer } from './renderer/renderer';
 import { WasmRenderer } from './renderer/wasm/wasm-renderer';
 import { WebGLRenderer } from './renderer/webgl/webgl-renderer';
 
-const ANNOTATIONS_REFRESH_DELAY = 200;
+const ANNOTATIONS_REFRESH_DELAY = 500;
 const DELTA_LIMIT = 0.02;
 const ZOOM_LIMIT = 0.07;
 const ZOOM_MAX = 5;
@@ -308,8 +308,7 @@ export class DicomViewerComponent implements OnInit, OnDestroy, WindowInstance {
     if (this.loading) {
       this.loading = false;
     }
-
-    return error;
+    throw error;
   }
 
   private startRender(): void {
@@ -319,21 +318,18 @@ export class DicomViewerComponent implements OnInit, OnDestroy, WindowInstance {
         return;
       }
 
-      if (this.windowComponent.active && this.viewport.dirty) {
+      if (this.windowComponent.active && this.viewport.isDirty()) {
         const t = performance.now();
 
         try {
           this.renderer.render(this.viewport);
-          this.viewport.dirty = false;
+          this.viewport.makeClean();
+          this.renderDurations.push(performance.now() - t);
+          this.frameDurations.push(t - this.lastTime);
+          this.lastTime = t;
         } catch (error) {
-          console.error(error);
           this.handleError(new Error(`Unable to render viewport: ${error.message}`));
-          return;
         }
-
-        this.renderDurations.push(performance.now() - t);
-        this.frameDurations.push(t - this.lastTime);
-        this.lastTime = t;
       }
 
       window.requestAnimationFrame(render);

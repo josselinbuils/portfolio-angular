@@ -2,27 +2,28 @@ import { DicomFrame } from './dicom-frame';
 import { Renderable } from './renderable';
 
 export class Viewport extends Renderable {
-  deltaX: number;
-  deltaY: number;
-  height: number;
+  deltaX = 0;
+  deltaY = 0;
+  height = 0;
   image: DicomFrame;
-  width: number;
-  windowCenter: number;
-  windowWidth: number;
-  zoom: number;
+  width = 0;
+  windowCenter = 30;
+  windowWidth = 400;
+  zoom = 1;
 
-  constructor(config: any) {
-    super();
-
-    this.deltaX = typeof config.deltaX === 'number' ? config.deltaX : 0;
-    this.deltaY = typeof config.deltaY === 'number' ? config.deltaY : 0;
-    this.height = config.height;
-    this.image = config.image;
-    this.width = config.width;
-    this.windowCenter = config.windowCenter;
-    this.windowWidth = config.windowWidth;
-    this.zoom = config.zoom;
-
+  constructor(config: ViewportConfig) {
+    super(config);
     super.decorateProperties();
   }
+}
+
+export interface ViewportConfig {
+  deltaX?: number;
+  deltaY?: number;
+  height?: number;
+  image: DicomFrame;
+  width?: number;
+  windowCenter?: number;
+  windowWidth?: number;
+  zoom?: number;
 }
