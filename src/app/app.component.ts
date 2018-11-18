@@ -3,7 +3,7 @@ import {
 } from '@angular/core';
 
 import { TerminalComponent } from './apps/terminal/terminal.component';
-import { MOUSE_BUTTON } from './constants';
+import { MouseButton } from './constants';
 import { DeviceManagerService } from './platform/device-manager.service';
 import { WindowManagerService } from './platform/window/window-manager.service';
 
@@ -56,7 +56,7 @@ export class AppComponent implements AfterContentInit {
 
   private startSelect(downEvent: MouseEvent): void {
 
-    if (downEvent.button !== MOUSE_BUTTON.LEFT) {
+    if (downEvent.button !== MouseButton.Left) {
       return;
     }
 

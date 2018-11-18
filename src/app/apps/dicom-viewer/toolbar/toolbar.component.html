@@ -1,0 +1,14 @@
+<button *ngIf="dataset.frames.length > 1" [ngClass]="getCssClass(paging)" (click)="selectLeftTool(paging)"
+        (contextmenu)="selectRightTool(paging)">
+  <i class="fa fa-arrows-v" aria-hidden="true"></i>
+</button>
+<button
+  [ngClass]="getCssClass(windowing)" (click)="selectLeftTool(windowing)" (contextmenu)="selectRightTool(windowing)">
+  <i class="fa fa-adjust" aria-hidden="true"></i>
+</button>
+<button [ngClass]="getCssClass(pan)" (click)="selectLeftTool(pan)" (contextmenu)="selectRightTool(pan)">
+  <i class="fa fa-arrows" aria-hidden="true"></i>
+</button>
+<button [ngClass]="getCssClass(zoom)" (click)="selectLeftTool(zoom)" (contextmenu)="selectRightTool(zoom)">
+  <i class="fa fa-search" aria-hidden="true"></i>
+</button>

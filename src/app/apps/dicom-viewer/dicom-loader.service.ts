@@ -24,7 +24,7 @@ export class DicomLoaderService {
       for (const file of files) {
         frames.push(...await this.loadInstance(file));
       }
-      frames = frames.sort((a, b) => a.sopInstanceUID > b.sopInstanceUID ? 1 : -1);
+      frames = frames.sort((a, b) => a.id > b.id ? 1 : -1);
     }
 
     return { frames };
@@ -99,6 +99,7 @@ export class DicomLoaderService {
       const parsedFile = this.parseDicom(dicomFile);
 
       const bitsAllocated = parsedFile.uint16('x00280100');
+      const id = parsedFile.string('x00080018'); // SOPInstanceUID
       const height = parsedFile.uint16('x00280010');
       const patientName = parsedFile.string('x00100010');
       const photometricInterpretation = parsedFile.string('x00280004') as PhotometricInterpretation;
@@ -109,7 +110,6 @@ export class DicomLoaderService {
       const rescaleSlope = typeof parsedFile.floatString('x00281053') === 'number'
         ? parsedFile.floatString('x00281053')
         : 1;
-      const sopInstanceUID = parsedFile.string('x00080018');
       const width = parsedFile.uint16('x00280011');
       const windowCenter = typeof parsedFile.intString('x00281050') === 'number'
         ? parsedFile.intString('x00281050')
@@ -123,8 +123,8 @@ export class DicomLoaderService {
 
       const frames: DicomFrame[] = [];
       const instance: DicomFrame = {
-        bitsAllocated, height, imageFormat, patientName, photometricInterpretation, pixelData, pixelRepresentation,
-        rescaleIntercept, rescaleSlope, sopInstanceUID, width, windowCenter, windowWidth,
+        bitsAllocated, height, id, imageFormat, patientName, photometricInterpretation, pixelData, pixelRepresentation,
+        rescaleIntercept, rescaleSlope, width, windowCenter, windowWidth,
       };
 
       const numberOfFrames = typeof parsedFile.intString('x00280008') === 'number'
@@ -141,6 +141,8 @@ export class DicomLoaderService {
         for (let i = 0; i < numberOfFrames; i++) {
           const frame = { ...instance };
           const byteOffset = pixelData.byteOffset + frameLength * pixelData.BYTES_PER_ELEMENT * i;
+
+          frame.id = `${id}.${i}`;
 
           frame.pixelData = pixelData instanceof Int16Array
             ? new Int16Array(pixelData.buffer, byteOffset, frameLength)

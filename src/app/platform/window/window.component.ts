@@ -3,7 +3,7 @@ import {
   ViewChild,
 } from '@angular/core';
 
-import { MOUSE_BUTTON } from 'app/constants';
+import { MouseButton } from 'app/constants';
 
 import { DeviceManagerService } from '../device-manager.service';
 import { DOMUtils } from '../dom-utils';
@@ -181,7 +181,7 @@ export class WindowComponent implements AfterContentInit {
 
   startMove(downEvent: MouseEvent): void {
 
-    if (downEvent.button !== MOUSE_BUTTON.LEFT) {
+    if (downEvent.button !== MouseButton.Left) {
       return;
     }
 
@@ -225,7 +225,7 @@ export class WindowComponent implements AfterContentInit {
 
   startResize(downEvent: MouseEvent): void {
 
-    if (downEvent.button !== MOUSE_BUTTON.LEFT) {
+    if (downEvent.button !== MouseButton.Left) {
       return;
     }
 

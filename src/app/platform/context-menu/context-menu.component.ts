@@ -1,6 +1,6 @@
 import { Component, Renderer2 } from '@angular/core';
 
-import { MOUSE_BUTTON } from 'app/constants';
+import { MouseButton } from 'app/constants';
 
 import { DOMUtils } from '../dom-utils';
 
@@ -59,7 +59,7 @@ export class ContextMenuComponent {
 
   private mouseDownListener(event: MouseEvent): void {
 
-    if ([MOUSE_BUTTON.LEFT, MOUSE_BUTTON.RIGHT].indexOf(event.button) === -1) {
+    if ([MouseButton.Left, MouseButton.Right].indexOf(event.button) === -1) {
       return;
     }
 

@@ -14,7 +14,7 @@ enum Step {
 }
 
 @Component({
-  selector: 'app-config',
+  selector: 'app-dicom-viewer-config',
   templateUrl: './config.component.html',
   styleUrls: ['./config.component.scss'],
 })

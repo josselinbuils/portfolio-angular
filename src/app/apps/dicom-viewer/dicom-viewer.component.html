@@ -1,31 +1,11 @@
 <app-window [windowTitle]="title" background="black" titleColor="white" [minWidth]="800" [minHeight]="554"
             (resize)="onResize($event)">
   <div class="container">
-    <app-config [hidden]="!showConfig" (config)="start($event)"></app-config>
+    <app-dicom-viewer-config [hidden]="!showConfig" (config)="start($event)"></app-dicom-viewer-config>
+    <app-dicom-viewer-toolbar *ngIf="dataset" [activeLeftTool]="activeLeftTool" [activeRightTool]="activeRightTool"
+                              [dataset]="dataset" (toolSelected)="selectActiveTool($event)"></app-dicom-viewer-toolbar>
     <div #viewportElement class="viewport" [hidden]="showConfig">
       <button (click)="back()">Back</button>
-      <div class="toolbar" *ngIf="dataset">
-        <button *ngIf="dataset.frames.length > 1"
-                [ngClass]="{'active-left': activeLeftTool === MouseTool.Paging, 'active-right': activeRightTool === MouseTool.Paging}"
-                (click)="selectActiveLeftTool(MouseTool.Paging)" (contextmenu)="selectActiveRightTool(MouseTool.Paging)">
-          <i class="fa fa-arrows-v" aria-hidden="true"></i>
-        </button>
-        <button
-          [ngClass]="{'active-left': activeLeftTool === MouseTool.Windowing, 'active-right': activeRightTool === MouseTool.Windowing}"
-          (click)="selectActiveLeftTool(MouseTool.Windowing)" (contextmenu)="selectActiveRightTool(MouseTool.Windowing)">
-          <i class="fa fa-adjust" aria-hidden="true"></i>
-        </button>
-        <button
-          [ngClass]="{'active-left': activeLeftTool === MouseTool.Pan, 'active-right': activeRightTool === MouseTool.Pan}"
-          (click)="selectActiveLeftTool(MouseTool.Pan)" (contextmenu)="selectActiveRightTool(MouseTool.Pan)">
-          <i class="fa fa-arrows" aria-hidden="true"></i>
-        </button>
-        <button
-          [ngClass]="{'active-left': activeLeftTool === MouseTool.Zoom, 'active-right': activeRightTool === MouseTool.Zoom}"
-          (click)="selectActiveLeftTool(MouseTool.Zoom)" (contextmenu)="selectActiveRightTool(MouseTool.Zoom)">
-          <i class="fa fa-search" aria-hidden="true"></i>
-        </button>
-      </div>
       <div *ngIf="!!viewport" class="overlay">
         <div class="overlay-top-left">
           <p>{{config.dataset.name}}</p>

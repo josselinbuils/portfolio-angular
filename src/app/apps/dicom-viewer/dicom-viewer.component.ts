@@ -1,7 +1,7 @@
 import { Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { DicomDataset } from 'app/apps/dicom-viewer/dicom-dataset';
 import { DicomLoaderService } from 'app/apps/dicom-viewer/dicom-loader.service';
-import { MOUSE_BUTTON } from 'app/constants';
+import { MouseButton } from 'app/constants';
 import { WindowInstance } from 'app/platform/window/window-instance';
 import { WindowComponent } from 'app/platform/window/window.component';
 
@@ -46,7 +46,6 @@ export class DicomViewerComponent implements OnInit, OnDestroy, WindowInstance {
   showConfig = true;
   title = DicomViewerComponent.appName;
   viewport: Viewport;
-  MouseTool = MouseTool;
 
   private cancelMouseDownListener: () => void;
   private frameDurations: number[];
@@ -108,12 +107,16 @@ export class DicomViewerComponent implements OnInit, OnDestroy, WindowInstance {
     }
   }
 
-  selectActiveLeftTool(tool: MouseTool): void {
-    this.activeLeftTool = tool;
-  }
+  selectActiveTool(event: { button: MouseButton; tool: MouseTool }): void {
+    const { button, tool } = event;
 
-  selectActiveRightTool(tool: MouseTool): void {
-    this.activeRightTool = tool;
+    switch (button) {
+      case MouseButton.Left:
+        this.activeLeftTool = tool;
+        break;
+      case MouseButton.Right:
+        this.activeRightTool = tool;
+    }
   }
 
   async start(config: Config): Promise<void> {
@@ -204,10 +207,10 @@ export class DicomViewerComponent implements OnInit, OnDestroy, WindowInstance {
     downEvent.preventDefault();
 
     switch (downEvent.button) {
-      case MOUSE_BUTTON.LEFT:
-      case MOUSE_BUTTON.RIGHT:
+      case MouseButton.Left:
+      case MouseButton.Right:
         const isMacOS = navigator.platform.indexOf('Mac') !== -1;
-        const activeTool = downEvent.button === MOUSE_BUTTON.LEFT ? this.activeLeftTool : this.activeRightTool;
+        const activeTool = downEvent.button === MouseButton.Left ? this.activeLeftTool : this.activeRightTool;
         let cancelMouseMove: () => void;
 
         switch (activeTool) {
@@ -224,14 +227,14 @@ export class DicomViewerComponent implements OnInit, OnDestroy, WindowInstance {
             cancelMouseMove = this.startZoom(downEvent);
         }
 
-        if (downEvent.button === MOUSE_BUTTON.LEFT || isMacOS) {
+        if (downEvent.button === MouseButton.Left || isMacOS) {
           const cancelMouseUp = this.viewRenderer.listen('window', 'mouseup', () => {
             cancelMouseMove();
             cancelMouseUp();
           });
         }
 
-        if (downEvent.button === MOUSE_BUTTON.RIGHT && !isMacOS) {
+        if (downEvent.button === MouseButton.Right && !isMacOS) {
           const cancelContextMenu = this.viewRenderer.listen('window', 'contextmenu', () => {
             cancelMouseMove();
             cancelContextMenu();
@@ -239,7 +242,7 @@ export class DicomViewerComponent implements OnInit, OnDestroy, WindowInstance {
           });
         }
         break;
-      case MOUSE_BUTTON.MIDDLE:
+      case MouseButton.Middle:
         this.startPan(downEvent);
     }
   }
@@ -285,7 +288,7 @@ export class DicomViewerComponent implements OnInit, OnDestroy, WindowInstance {
 
   private disableContextMenu(element: HTMLElement): () => void {
     return this.viewRenderer.listen(element, 'mousedown', (event: MouseEvent) => {
-      if (event.button === MOUSE_BUTTON.RIGHT) {
+      if (event.button === MouseButton.Right) {
         const cancelContextMenu = this.viewRenderer.listen('window', 'contextmenu', () => {
           cancelContextMenu();
           return false;

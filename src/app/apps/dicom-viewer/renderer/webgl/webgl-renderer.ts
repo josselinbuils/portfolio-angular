@@ -10,7 +10,7 @@ export class WebGLRenderer implements Renderer {
 
   private readonly gl: WebGLRenderingContext;
   private program: WebGLProgram;
-  private texture: WebGLTexture;
+  private texture: { id: string; instance: WebGLTexture };
 
   constructor(canvas: HTMLCanvasElement) {
     if (canvas.getContext('webgl') instanceof WebGLRenderingContext) {
@@ -24,20 +24,31 @@ export class WebGLRenderer implements Renderer {
 
   destroy(): void {
     const gl = this.gl;
-    gl.deleteTexture(this.texture);
+
+    gl.deleteTexture(this.texture.instance);
     gl.deleteProgram(this.program);
+
+    delete this.program;
+    delete this.texture;
   }
 
   render(viewport: Viewport): void {
     const gl = this.gl;
-    const { height, imageFormat, rescaleIntercept, rescaleSlope, width } = viewport.image;
+    const { height, id, imageFormat, rescaleIntercept, rescaleSlope, width } = viewport.image;
 
     if (this.program === undefined) {
       this.program = this.createProgram(imageFormat);
     }
 
-    gl.deleteTexture(this.texture);
-    this.texture = this.createTexture(viewport.image);
+    const textureChanged = this.texture !== undefined && this.texture.id !== id;
+
+    if (this.texture === undefined || textureChanged) {
+      if (textureChanged) {
+        gl.deleteTexture(this.texture.instance);
+      }
+      const instance = this.createTexture(viewport.image);
+      this.texture = { id, instance };
+    }
 
     // Look up where the vertex data needs to go.
     const positionLocation = gl.getAttribLocation(this.program, 'a_position');

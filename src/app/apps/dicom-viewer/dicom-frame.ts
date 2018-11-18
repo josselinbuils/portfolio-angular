@@ -1,6 +1,7 @@
 import { NormalizedImageFormat, PhotometricInterpretation, PixelRepresentation } from './constants';
 
 export interface DicomFrame {
+  id: string;
   imageFormat: NormalizedImageFormat;
 
   /**
@@ -8,7 +9,6 @@ export interface DicomFrame {
    */
   bitsAllocated: number;
   height: number;
-  sopInstanceUID: string;
   patientName: string;
   photometricInterpretation: PhotometricInterpretation;
   pixelData: Int16Array | Uint8Array;

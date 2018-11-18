@@ -1,0 +1,24 @@
+$color: white;
+$background-color: black;
+$radius: 4px;
+
+.element {
+  background: $background-color;
+  color: $color;
+  border-radius: $radius;
+  outline: none;
+  border: 1px solid $color;
+}
+
+button {
+  @extend .element;
+  padding: 3px 5px;
+
+  &:active:hover {
+    background: lighten($background-color, 25%);
+  }
+
+  &:hover {
+    background: lighten($background-color, 15%);
+  }
+}

@@ -1,17 +1,7 @@
-$color: white;
-$background-color: black;
-$radius: 4px;
+@import './common';
 
 * {
   user-select: none;
-}
-
-.element {
-  background: $background-color;
-  color: $color;
-  border-radius: $radius;
-  outline: none;
-  border: 1px solid $color;
 }
 
 .container {
@@ -43,19 +33,6 @@ $radius: 4px;
       position: absolute;
       top: 10px;
       left: 10px;
-    }
-
-    button {
-      @extend .element;
-      padding: 3px 5px;
-
-      &:active:hover:not(.active-left) {
-        background: lighten($background-color, 25%);
-      }
-
-      &:hover:not(.active-left) {
-        background: lighten($background-color, 15%);
-      }
     }
 
     canvas {
@@ -104,82 +81,6 @@ $radius: 4px;
 
         & + p {
           margin-top: 5px;
-        }
-      }
-    }
-
-    .toolbar {
-      @extend .element;
-      position: absolute;
-      top: 50%;
-      left: 10px;
-      transform: translateY(-50%);
-
-      button {
-        width: 32px;
-        height: 32px;
-        font-size: 20px;
-        border: none;
-        border-radius: 0;
-        display: block;
-        position: relative;
-
-        &:first-child {
-          border-top-left-radius: $radius;
-          border-top-right-radius: $radius;
-
-          &.active-left:before {
-            border-top-left-radius: $radius;
-          }
-
-          &.active-right:before {
-            border-top-right-radius: $radius;
-          }
-        }
-
-        &:last-child {
-          border-bottom-left-radius: $radius;
-          border-bottom-right-radius: $radius;
-
-          &.active-left:before {
-            border-bottom-left-radius: $radius;
-          }
-
-          &.active-right:before {
-            border-bottom-right-radius: $radius;
-          }
-        }
-
-        &.active-left:before {
-          left: 0;
-        }
-
-        &.active-left.active-right:before {
-          width: 32px;
-        }
-
-        &.active-left, &.active-right {
-          &:before {
-            position: absolute;
-            top: 0;
-            width: 16px;
-            height: 32px;
-            background: $color;
-            content: "";
-          }
-
-          i:before {
-            color: $color;
-            mix-blend-mode: difference;
-          }
-        }
-
-        &.active-right:before {
-          right: 0;
-        }
-
-        & + button {
-          border-top: 1px solid $color;
         }
       }
     }
