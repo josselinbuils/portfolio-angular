@@ -1,6 +1,6 @@
 import loadCoreRenderer from '../../../../../assets/wasm-renderer';
 
-import { Viewport } from '../../models/viewport';
+import { Viewport } from '../../models';
 import { Renderer } from '../renderer';
 import { getRenderingProperties } from '../rendering-utils';
 

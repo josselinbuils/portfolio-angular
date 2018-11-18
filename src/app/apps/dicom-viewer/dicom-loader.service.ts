@@ -1,13 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
-import { DatasetDescriptor } from 'app/apps/dicom-viewer/config/dataset-descriptor';
+import { DEV_SERVER_URL } from 'app/constants';
+
+import { DatasetDescriptor } from './config/dataset-descriptor';
 import {
   DATASETS_PATH, DicomImageFormat, NormalizedImageFormat, PhotometricInterpretation, PixelRepresentation,
-} from 'app/apps/dicom-viewer/constants';
-import { DicomDataset } from 'app/apps/dicom-viewer/dicom-dataset';
-import { DicomFrame } from 'app/apps/dicom-viewer/dicom-frame';
-import { DEV_SERVER_URL } from 'app/constants';
+} from './constants';
+import { DicomDataset, DicomFrame } from './models';
 
 @Injectable()
 export class DicomLoaderService {

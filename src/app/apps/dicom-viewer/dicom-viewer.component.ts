@@ -1,18 +1,19 @@
 import { Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
-import { DicomDataset } from 'app/apps/dicom-viewer/dicom-dataset';
-import { DicomLoaderService } from 'app/apps/dicom-viewer/dicom-loader.service';
+
 import { MouseButton } from 'app/constants';
 import { WindowInstance } from 'app/platform/window/window-instance';
 import { WindowComponent } from 'app/platform/window/window.component';
 
 import { Config } from './config/config';
 import { MouseTool, RendererType } from './constants';
-import { Viewport } from './models/viewport';
+import { DicomLoaderService } from './dicom-loader.service';
+import { DicomDataset, Viewport } from './models';
 import { JsRenderer } from './renderer/js/js-renderer';
 import { Renderer } from './renderer/renderer';
 import { WasmRenderer } from './renderer/wasm/wasm-renderer';
 import { WebGLRenderer } from './renderer/webgl/webgl-renderer';
 
+const ANNOTATIONS_REFRESH_DELAY = 200;
 const DELTA_LIMIT = 0.02;
 const ZOOM_LIMIT = 0.07;
 const ZOOM_MAX = 5;
@@ -206,44 +207,48 @@ export class DicomViewerComponent implements OnInit, OnDestroy, WindowInstance {
   startTool(downEvent: MouseEvent): void {
     downEvent.preventDefault();
 
+    const isMacOS = navigator.platform.indexOf('Mac') !== -1;
+    let tool: MouseTool;
+    let cancelMouseMove: () => void;
+
     switch (downEvent.button) {
       case MouseButton.Left:
-      case MouseButton.Right:
-        const isMacOS = navigator.platform.indexOf('Mac') !== -1;
-        const activeTool = downEvent.button === MouseButton.Left ? this.activeLeftTool : this.activeRightTool;
-        let cancelMouseMove: () => void;
-
-        switch (activeTool) {
-          case MouseTool.Paging:
-            cancelMouseMove = this.startPaging(downEvent);
-            break;
-          case MouseTool.Pan:
-            cancelMouseMove = this.startPan(downEvent);
-            break;
-          case MouseTool.Windowing:
-            cancelMouseMove = this.startWindowing(downEvent);
-            break;
-          case MouseTool.Zoom:
-            cancelMouseMove = this.startZoom(downEvent);
-        }
-
-        if (downEvent.button === MouseButton.Left || isMacOS) {
-          const cancelMouseUp = this.viewRenderer.listen('window', 'mouseup', () => {
-            cancelMouseMove();
-            cancelMouseUp();
-          });
-        }
-
-        if (downEvent.button === MouseButton.Right && !isMacOS) {
-          const cancelContextMenu = this.viewRenderer.listen('window', 'contextmenu', () => {
-            cancelMouseMove();
-            cancelContextMenu();
-            return false;
-          });
-        }
+        tool = this.activeLeftTool;
         break;
       case MouseButton.Middle:
-        this.startPan(downEvent);
+        tool = MouseTool.Pan;
+        break;
+      case MouseButton.Right:
+        tool = this.activeRightTool;
+    }
+
+    switch (tool) {
+      case MouseTool.Paging:
+        cancelMouseMove = this.startPaging(downEvent);
+        break;
+      case MouseTool.Pan:
+        cancelMouseMove = this.startPan(downEvent);
+        break;
+      case MouseTool.Windowing:
+        cancelMouseMove = this.startWindowing(downEvent);
+        break;
+      case MouseTool.Zoom:
+        cancelMouseMove = this.startZoom(downEvent);
+    }
+
+    if ([MouseButton.Left, MouseButton.Middle].includes(downEvent.button) || isMacOS) {
+      const cancelMouseUp = this.viewRenderer.listen('window', 'mouseup', () => {
+        cancelMouseMove();
+        cancelMouseUp();
+      });
+    }
+
+    if (downEvent.button === MouseButton.Right && !isMacOS) {
+      const cancelContextMenu = this.viewRenderer.listen('window', 'contextmenu', () => {
+        cancelMouseMove();
+        cancelContextMenu();
+        return false;
+      });
     }
   }
 
@@ -314,11 +319,12 @@ export class DicomViewerComponent implements OnInit, OnDestroy, WindowInstance {
         return;
       }
 
-      if (this.windowComponent.active) {
+      if (this.windowComponent.active && this.viewport.dirty) {
         const t = performance.now();
 
         try {
           this.renderer.render(this.viewport);
+          this.viewport.dirty = false;
         } catch (error) {
           console.error(error);
           this.handleError(new Error(`Unable to render viewport: ${error.message}`));
@@ -351,7 +357,7 @@ export class DicomViewerComponent implements OnInit, OnDestroy, WindowInstance {
       } else {
         this.meanRenderDuration = 0;
       }
-    }, 500);
+    }, ANNOTATIONS_REFRESH_DELAY);
 
     render();
   }

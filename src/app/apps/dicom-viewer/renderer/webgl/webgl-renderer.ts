@@ -1,6 +1,5 @@
 import { NormalizedImageFormat } from '../../constants';
-import { DicomFrame } from '../../dicom-frame';
-import { Viewport } from '../../models/viewport';
+import { DicomFrame, Viewport } from '../../models';
 import { Renderer } from '../renderer';
 
 import { getFragmentShaderSrc, getTextureFormat } from './fragment-shader';

@@ -1,4 +1,4 @@
-import { NormalizedImageFormat, PhotometricInterpretation, PixelRepresentation } from './constants';
+import { NormalizedImageFormat, PhotometricInterpretation, PixelRepresentation } from '../constants';
 
 export interface DicomFrame {
   id: string;

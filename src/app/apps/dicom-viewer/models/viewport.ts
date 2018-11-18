@@ -1,6 +1,7 @@
-import { DicomFrame } from '../dicom-frame';
+import { DicomFrame } from './dicom-frame';
+import { Renderable } from './renderable';
 
-export class Viewport {
+export class Viewport extends Renderable {
   deltaX: number;
   deltaY: number;
   height: number;
@@ -11,6 +12,8 @@ export class Viewport {
   zoom: number;
 
   constructor(config: any) {
+    super();
+
     this.deltaX = typeof config.deltaX === 'number' ? config.deltaX : 0;
     this.deltaY = typeof config.deltaY === 'number' ? config.deltaY : 0;
     this.height = config.height;
@@ -19,5 +22,7 @@ export class Viewport {
     this.windowCenter = config.windowCenter;
     this.windowWidth = config.windowWidth;
     this.zoom = config.zoom;
+
+    super.decorateProperties();
   }
 }

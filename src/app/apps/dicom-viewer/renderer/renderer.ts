@@ -1,4 +1,4 @@
-import { Viewport } from '../models/viewport';
+import { Viewport } from '../models';
 
 export interface Renderer {
   destroy?(): void;

@@ -1,6 +1,5 @@
-import { NormalizedImageFormat } from 'app/apps/dicom-viewer/constants';
-
-import { Viewport } from '../../models/viewport';
+import { NormalizedImageFormat } from '../../constants';
+import { Viewport } from '../../models';
 import { Renderer } from '../renderer';
 import { getRenderingProperties } from '../rendering-utils';
 

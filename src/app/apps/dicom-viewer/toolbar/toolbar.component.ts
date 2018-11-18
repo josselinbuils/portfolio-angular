@@ -1,7 +1,9 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { MouseTool } from 'app/apps/dicom-viewer/constants';
-import { DicomDataset } from 'app/apps/dicom-viewer/dicom-dataset';
+
 import { MouseButton } from 'app/constants';
+
+import { MouseTool } from '../constants';
+import { DicomDataset } from '../models';
 
 @Component({
   selector: 'app-dicom-viewer-toolbar',

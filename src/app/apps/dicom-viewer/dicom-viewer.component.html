@@ -13,7 +13,7 @@
         <div class="overlay-top-right">
           <p>renderer: {{config.rendererType}}</p>
           <p>framerate: {{fps ? fps + 'fps' : '-'}}</p>
-          <p>rendering: {{meanRenderDuration | number: '1.2-2'}}ms</p>
+          <p>rendering: {{meanRenderDuration > 0 ? (meanRenderDuration | number: '1.2-2') + 'ms' : '-'}}</p>
         </div>
         <div class="overlay-bottom-right">
           <p>zoom: {{viewport.zoom | number: '1.2-2'}}</p>
