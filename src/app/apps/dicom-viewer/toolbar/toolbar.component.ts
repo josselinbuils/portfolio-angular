@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { DatasetDescriptor } from 'app/apps/dicom-viewer/config/dataset-descriptor';
 import { MouseTool } from 'app/apps/dicom-viewer/constants';
+import { DicomDataset } from 'app/apps/dicom-viewer/dicom-dataset';
 import { MouseButton } from 'app/constants';
 
 @Component({
@@ -11,7 +11,7 @@ import { MouseButton } from 'app/constants';
 export class ToolbarComponent {
   @Input() activeLeftTool: MouseTool;
   @Input() activeRightTool: MouseTool;
-  @Input() dataset: DatasetDescriptor;
+  @Input() dataset: DicomDataset;
 
   @Output() toolSelected = new EventEmitter<{ button: MouseButton; tool: MouseTool }>();
 
