@@ -1,6 +1,8 @@
+import { NormalizedImageFormat } from 'app/apps/dicom-viewer/constants';
+
 import { Viewport } from '../../models/viewport';
 import { Renderer } from '../renderer';
-import { createImageData, getRenderingProperties } from '../rendering-utils';
+import { getRenderingProperties } from '../rendering-utils';
 
 export class JsRenderer implements Renderer {
 
@@ -27,14 +29,25 @@ export class JsRenderer implements Renderer {
     this.context.fillStyle = 'black';
     this.context.fillRect(0, 0, viewport.width, viewport.height);
 
-    if (this.lut === undefined || this.lut.windowWidth !== viewport.windowWidth) {
-      this.lut = this.getVOILut(viewport);
-    }
+    switch (viewport.image.imageFormat) {
+      case NormalizedImageFormat.Int16:
+        if (this.lut === undefined || this.lut.windowWidth !== viewport.windowWidth) {
+          this.lut = this.getVOILut(viewport);
+        }
 
-    if (viewport.zoom < 1) {
-      this.renderCanvasPixels(viewport);
-    } else {
-      this.renderImagePixels(viewport);
+        if (viewport.zoom < 1) {
+          this.renderCanvasPixels(viewport);
+        } else {
+          this.renderImagePixels(viewport);
+        }
+        break;
+
+      case NormalizedImageFormat.RGB:
+        this.renderRGB(viewport);
+        break;
+
+      default:
+        throw new Error('Unsupported image format');
     }
   }
 
@@ -68,7 +81,7 @@ export class JsRenderer implements Renderer {
       }
 
       const imageData = new Uint8ClampedArray(imageData32.buffer);
-      const imageDataInstance = createImageData(this.context, imageData, displayWidth, displayHeight);
+      const imageDataInstance = new ImageData(imageData, displayWidth, displayHeight);
       this.context.putImageData(imageDataInstance, displayX0, displayY0);
     }
   }
@@ -114,11 +127,32 @@ export class JsRenderer implements Renderer {
       this.renderingContext.canvas.height = croppedImageHeight;
 
       const imageData = new Uint8ClampedArray(imageData32.buffer);
-      const imageDataInstance = createImageData(this.renderingContext, imageData, croppedImageWidth,
-        croppedImageHeight);
+      const imageDataInstance = new ImageData(imageData, croppedImageWidth, croppedImageHeight);
 
       this.renderingContext.putImageData(imageDataInstance, 0, 0);
       this.context.drawImage(this.renderingContext.canvas, displayX0, displayY0, displayWidth, displayHeight);
     }
+  }
+
+  private renderRGB(viewport: Viewport): void {
+    const { height, pixelData, width } = viewport.image;
+    const { imageHeight, imageWidth, x0, y0 } = getRenderingProperties(viewport);
+
+    this.renderingContext.canvas.width = width;
+    this.renderingContext.canvas.height = height;
+
+    const pixelDataLength = pixelData.length;
+    const imageData32 = new Uint32Array(width * height);
+    let dataIndex = 0;
+
+    for (let i = 0; i < pixelDataLength; i += 3) {
+      imageData32[dataIndex++] = pixelData[i] | pixelData[i + 1] << 8 | pixelData[i + 2] << 16 | 255 << 24;
+    }
+
+    const imageData = new Uint8ClampedArray(imageData32.buffer);
+    const imageDataInstance = new ImageData(imageData, width, height);
+
+    this.renderingContext.putImageData(imageDataInstance, 0, 0);
+    this.context.drawImage(this.renderingContext.canvas, x0, y0, imageWidth, imageHeight);
   }
 }

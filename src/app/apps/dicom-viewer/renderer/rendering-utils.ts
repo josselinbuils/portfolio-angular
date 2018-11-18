@@ -2,20 +2,6 @@ import { Viewport } from '../models/viewport';
 
 import { RenderingProperties } from './rendering-properties';
 
-export function createImageData(context: CanvasRenderingContext2D, data: Uint8ClampedArray, width: number,
-                                height: number): ImageData {
-  let imageData: ImageData;
-
-  try {
-    imageData = new ImageData(data, width, height);
-  } catch (error) {
-    imageData = context.createImageData(width, height);
-    imageData.data.set(data);
-  }
-
-  return imageData;
-}
-
 export function getRenderingProperties(viewport: Viewport): RenderingProperties {
 
   const leftLimit = Math.floor(viewport.windowCenter - viewport.windowWidth / 2);

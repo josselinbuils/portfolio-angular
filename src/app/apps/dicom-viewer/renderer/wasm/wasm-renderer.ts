@@ -2,7 +2,7 @@ import loadCoreRenderer from '../../../../../assets/wasm-renderer';
 
 import { Viewport } from '../../models/viewport';
 import { Renderer } from '../renderer';
-import { createImageData, getRenderingProperties } from '../rendering-utils';
+import { getRenderingProperties } from '../rendering-utils';
 
 export class WasmRenderer implements Renderer {
 
@@ -78,7 +78,7 @@ export class WasmRenderer implements Renderer {
           displayX0, displayX1, displayY0, displayY1, viewport.zoom, leftLimit, rightLimit, rescaleSlope,
           rescaleIntercept);
 
-        const imageData = createImageData(this.context, renderedData, displayWidth, displayHeight);
+        const imageData = new ImageData(renderedData, displayWidth, displayHeight);
         this.context.putImageData(imageData, displayX0, displayY0);
 
         this.renderingCore._free(rawData.byteOffset);

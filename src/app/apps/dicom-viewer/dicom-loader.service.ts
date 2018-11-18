@@ -140,9 +140,11 @@ export class DicomLoaderService {
 
         for (let i = 0; i < numberOfFrames; i++) {
           const frame = { ...instance };
-
           const byteOffset = pixelData.byteOffset + frameLength * pixelData.BYTES_PER_ELEMENT * i;
-          frame.pixelData = new Int16Array(pixelData.buffer, byteOffset, frameLength);
+
+          frame.pixelData = pixelData instanceof Int16Array
+            ? new Int16Array(pixelData.buffer, byteOffset, frameLength)
+            : new Uint8Array(pixelData.buffer, byteOffset, frameLength);
 
           try {
             const frameVOILUT = (parsedFile.elements.x52009230 as any).items[0].dataSet
