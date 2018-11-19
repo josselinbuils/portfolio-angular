@@ -1,33 +1,33 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { cloneDeep } from 'lodash';
 
 import { DEV_SERVER_URL } from 'app/constants';
 
 import { DatasetDescriptor } from './config/dataset-descriptor';
-import {
-  DATASETS_PATH, DicomImageFormat, NormalizedImageFormat, PhotometricInterpretation, PixelRepresentation,
-} from './constants';
-import { DicomDataset, DicomFrame } from './models';
+import { DATASETS_PATH, PhotometricInterpretation } from './constants';
+import { DicomFrame } from './models';
 
 @Injectable()
 export class DicomLoaderService {
 
   constructor(private readonly http: HttpClient) {}
 
-  async loadDataset(dataset: DatasetDescriptor): Promise<DicomDataset> {
+  async loadFrames(dataset: DatasetDescriptor): Promise<DicomFrame[]> {
     const { files } = dataset;
-    let frames: DicomFrame[] = [];
+    let frames: DicomFrame[];
 
     if (files.length === 1) {
       frames = await this.loadInstance(files[0]);
     } else {
+      frames = [];
       for (const file of files) {
         frames.push(...await this.loadInstance(file));
       }
-      frames = frames.sort((a, b) => a.id > b.id ? 1 : -1);
+      frames = frames.sort((a, b) => a.sopInstanceUID > b.sopInstanceUID ? 1 : -1);
     }
 
-    return { frames };
+    return frames;
   }
 
   private async getDicomFile(path: string): Promise<Uint8Array> {
@@ -47,52 +47,6 @@ export class DicomLoaderService {
     }
   }
 
-  private getDicomImageFormat(bitsAllocated: number, photometricInterpretation: PhotometricInterpretation,
-                              pixelRepresentation: PixelRepresentation): DicomImageFormat {
-    let format: string;
-
-    if (photometricInterpretation === PhotometricInterpretation.RGB) {
-      format = 'rgb';
-    } else if ((photometricInterpretation as string).includes('MONOCHROME')) {
-      const isSigned = pixelRepresentation === PixelRepresentation.Signed;
-      format = `${isSigned ? '' : 'u'}int${bitsAllocated <= 8 ? '8' : '16'}`;
-    } else {
-      throw new Error('Unsupported photometric interpretation');
-    }
-
-    return format as DicomImageFormat;
-  }
-
-  private getNormalizedPixelData(dicomFile: Uint8Array, parsedFile: ParsedDicomFile,
-                                 dicomImageFormat: DicomImageFormat): NormalizedPixelData {
-
-    const pixelDataElement = parsedFile.elements.x7fe00010;
-
-    let pixelData: Uint8Array | Int16Array = (window as any).dicomParser
-      .sharedCopy(dicomFile, pixelDataElement.dataOffset, pixelDataElement.length) as Uint8Array;
-    let imageFormat: NormalizedImageFormat;
-
-    if (dicomImageFormat === DicomImageFormat.RGB) {
-      imageFormat = NormalizedImageFormat.RGB;
-    } else {
-      const arrayType: any = {
-        int8: Int8Array,
-        int16: Int16Array,
-        uint8: Uint8Array,
-        uint16: Uint16Array,
-      };
-
-      // Casts pixel data to the right type
-      const typedPixelData = new arrayType[dicomImageFormat](pixelData.buffer, pixelData.byteOffset);
-
-      // Normalizes pixel data
-      pixelData = typedPixelData instanceof Int16Array ? typedPixelData : new Int16Array(typedPixelData as any);
-      imageFormat = NormalizedImageFormat.Int16;
-    }
-
-    return { imageFormat, pixelData };
-  }
-
   private async loadInstance(path: string): Promise<DicomFrame[]> {
     try {
       const dicomFile = await this.getDicomFile(path);
@@ -103,72 +57,43 @@ export class DicomLoaderService {
        */
       const bitsAllocated = parsedFile.uint16('x00280100');
       const columns = parsedFile.uint16('x00280011');
-      const imagePosition = parsedFile.elements.x00200032 !== undefined
-        ? this.floatStringsToArray(parsedFile, 'x00200032')
-        : undefined;
-      const imageOrientation = parsedFile.elements.x00200037 !== undefined
-        ? [
-          this.floatStringsToArray(parsedFile, 'x00200037').slice(0, 3),
-          this.floatStringsToArray(parsedFile, 'x00200037').slice(3),
-        ]
-        : undefined;
+      const imagePosition = this.floatStringsToArray(parsedFile, 'x00200032');
+      const imageOrientation = this.floatStringsToArray(parsedFile, 'x00200037', 3);
+      const numberOfFrames = parsedFile.intString('x00280008');
       const patientName = parsedFile.string('x00100010');
       const photometricInterpretation = parsedFile.string('x00280004') as PhotometricInterpretation;
+      const pixelDataElement = parsedFile.elements.x7fe00010;
+      const pixelData: Uint8Array = (window as any).dicomParser
+        .sharedCopy(dicomFile, pixelDataElement.dataOffset, pixelDataElement.length);
       const pixelRepresentation = parsedFile.uint16('x00280103');
-      const pixelSpacing = parsedFile.elements.x00280030 !== undefined
-        ? this.floatStringsToArray(parsedFile, 'x00280030')
-        : undefined;
-      const rescaleIntercept = parsedFile.elements.x00281052 !== undefined
-        ? parsedFile.intString('x00281052')
-        : 0;
-      const rescaleSlope = parsedFile.elements.x00281053 !== undefined
-        ? parsedFile.floatString('x00281053')
-        : 1;
+      const pixelSpacing = this.floatStringsToArray(parsedFile, 'x00280030');
+      const rescaleIntercept = parsedFile.intString('x00281052');
+      const rescaleSlope = parsedFile.floatString('x00281053');
       const rows = parsedFile.uint16('x00280010');
-      const sliceLocation = parsedFile.elements.x00201041 !== undefined
-        ? parsedFile.floatString('x00201041')
-        : undefined;
-      const windowCenter = parsedFile.elements.x00281050 !== undefined
-        ? parsedFile.intString('x00281050')
-        : 30;
-      const windowWidth = parsedFile.elements.x00281051 !== undefined
-        ? parsedFile.intString('x00281051')
-        : 400;
-
-      /**
-       * App fields
-       */
-      const id = parsedFile.string('x00080018'); // SOPInstanceUID
-      const dicomImageFormat = this.getDicomImageFormat(bitsAllocated, photometricInterpretation, pixelRepresentation);
-      const { imageFormat, pixelData } = this.getNormalizedPixelData(dicomFile, parsedFile, dicomImageFormat);
+      const sliceLocation = parsedFile.floatString('x00201041');
+      const sopInstanceUID = parsedFile.string('x00080018');
+      const windowCenter = parsedFile.intString('x00281050');
+      const windowWidth = parsedFile.intString('x00281051');
 
       const frames: DicomFrame[] = [];
-      const instance: DicomFrame = {
-        bitsAllocated, columns, id, imageFormat, imagePosition, imageOrientation, patientName,
-        photometricInterpretation, pixelData, pixelRepresentation, pixelSpacing, rescaleIntercept, rescaleSlope, rows,
-        sliceLocation, windowCenter, windowWidth,
+      const instance: any = {
+        bitsAllocated, columns, imagePosition, imageOrientation, numberOfFrames, patientName, photometricInterpretation,
+        pixelRepresentation, pixelSpacing, rescaleIntercept, rescaleSlope, rows, sliceLocation, sopInstanceUID,
+        windowCenter, windowWidth,
       };
 
-      const numberOfFrames = typeof parsedFile.intString('x00280008') === 'number'
-        ? parsedFile.intString('x00280008')
-        : 1;
-
-      if (numberOfFrames > 1) {
+      if (Number.isInteger(numberOfFrames)) {
         const frameLength = pixelData.length / numberOfFrames;
 
-        if (Number(frameLength) !== frameLength) {
+        if (!Number.isInteger(frameLength)) {
           throw new Error(`frameLength shall be an integer: ${frameLength}`);
         }
 
         for (let i = 0; i < numberOfFrames; i++) {
-          const frame = { ...instance };
+          const frame = cloneDeep(instance);
           const byteOffset = pixelData.byteOffset + frameLength * pixelData.BYTES_PER_ELEMENT * i;
 
-          frame.id = `${id}.${i}`;
-
-          frame.pixelData = pixelData instanceof Int16Array
-            ? new Int16Array(pixelData.buffer, byteOffset, frameLength)
-            : new Uint8Array(pixelData.buffer, byteOffset, frameLength);
+          frame.pixelData = new Uint8Array(pixelData.buffer, byteOffset, frameLength);
 
           try {
             const frameVOILUT = (parsedFile.elements.x52009230 as any).items[0].dataSet
@@ -182,10 +107,11 @@ export class DicomLoaderService {
             }
           } catch (e) {}
 
-          frames.push(frame);
+          frames.push(new DicomFrame(frame));
         }
       } else {
-        frames.push(instance);
+        instance.pixelData = pixelData;
+        frames.push(new DicomFrame(instance));
       }
 
       return frames;
@@ -203,20 +129,30 @@ export class DicomLoaderService {
     }
   }
 
-  private floatStringsToArray(parsedFile: ParsedDicomFile, tag: string): number[] | undefined {
+  private floatStringsToArray(parsedFile: ParsedDicomFile, tag: string, slice?: number): number[] | undefined {
     const nbValues = parsedFile.numStringValues(tag);
-    const res = [];
 
-    for (let i = 0; i < nbValues; i++) {
-      res.push(parsedFile.floatString(tag, i));
+    if (nbValues > 0) {
+      const array = [];
+
+      for (let i = 0; i < nbValues; i++) {
+        array.push(parsedFile.floatString(tag, i));
+      }
+
+      if (slice !== undefined) {
+        const slicedArray = [];
+
+        for (let j = 0; j < array.length; j += slice) {
+          slicedArray.push(array.slice(j, j + slice));
+        }
+        return slicedArray;
+      }
+
+      return array;
     }
-    return res;
-  }
-}
 
-interface NormalizedPixelData {
-  imageFormat: NormalizedImageFormat;
-  pixelData: Int16Array | Uint8Array;
+    return undefined;
+  }
 }
 
 interface ParsedDicomFile {

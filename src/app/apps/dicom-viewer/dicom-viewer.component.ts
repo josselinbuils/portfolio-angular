@@ -1,13 +1,13 @@
 import { Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
-
 import { MouseButton } from 'app/constants';
 import { WindowInstance } from 'app/platform/window/window-instance';
 import { WindowComponent } from 'app/platform/window/window.component';
 
 import { Config } from './config/config';
 import { MouseTool, RendererType } from './constants';
+import { DicomComputerService } from './dicom-computer.service';
 import { DicomLoaderService } from './dicom-loader.service';
-import { DicomDataset, Viewport } from './models';
+import { Camera, DicomDataset, Viewport } from './models';
 import { JsRenderer } from './renderer/js/js-renderer';
 import { Renderer } from './renderer/renderer';
 import { WasmRenderer } from './renderer/wasm/wasm-renderer';
@@ -56,7 +56,8 @@ export class DicomViewerComponent implements OnInit, OnDestroy, WindowInstance {
   private statsInterval: number;
 
   constructor(private readonly viewRenderer: Renderer2,
-              private readonly loader: DicomLoaderService) {}
+              private readonly loader: DicomLoaderService,
+              private readonly computer: DicomComputerService) {}
 
   back(): void {
 
@@ -126,9 +127,10 @@ export class DicomViewerComponent implements OnInit, OnDestroy, WindowInstance {
     this.loading = true;
 
     try {
-      this.dataset = (await this.loader.loadDataset(this.config.dataset));
-      this.activeLeftTool = this.dataset.frames.length > 1 ? MouseTool.Paging : MouseTool.Windowing;
-      console.log(this.dataset);
+      const dicomFrames = await this.loader.loadFrames(this.config.dataset);
+      const frames = this.computer.computeFrames(dicomFrames);
+      this.dataset = { frames };
+      console.log(this.dataset.frames);
     } catch (error) {
       this.handleError(error);
     }
@@ -159,10 +161,9 @@ export class DicomViewerComponent implements OnInit, OnDestroy, WindowInstance {
 
     const image = this.dataset.frames[0];
     const { windowCenter, windowWidth } = image;
-
-    console.log(windowCenter, windowWidth);
-
-    this.viewport = new Viewport({ image, windowCenter, windowWidth });
+    const camera = Camera.fromFrame(image);
+    this.viewport = new Viewport({ camera, image, windowCenter, windowWidth });
+    console.log(this.viewport);
 
     const windowNativeElement = this.windowComponent.windowElementRef.nativeElement;
 
@@ -173,6 +174,7 @@ export class DicomViewerComponent implements OnInit, OnDestroy, WindowInstance {
 
     this.viewport.zoom = Math.min(this.viewport.height / image.rows, 1);
 
+    this.activeLeftTool = this.dataset.frames.length > 1 ? MouseTool.Paging : MouseTool.Windowing;
     this.loading = false;
     this.startRender();
   }

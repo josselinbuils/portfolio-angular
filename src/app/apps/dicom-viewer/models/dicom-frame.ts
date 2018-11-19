@@ -1,25 +1,26 @@
-import { NormalizedImageFormat, PhotometricInterpretation, PixelRepresentation } from '../constants';
+import { PhotometricInterpretation, PixelRepresentation } from '../constants';
+import { fillProperties } from '../helpers/model-helpers';
 
-export interface DicomFrame {
-  id: string;
-  imageFormat: NormalizedImageFormat;
-
-  /**
-   * DICOM
-   */
+export class DicomFrame {
   bitsAllocated: number;
-  rows: number;
-  imageOrientation: number[][] | undefined;
-  imagePosition: number[] | undefined;
+  columns: number;
+  imageOrientation?: number[][];
+  imagePosition?: number[];
+  numberOfFrames?: number;
   patientName: string;
   photometricInterpretation: PhotometricInterpretation;
-  pixelData: Int16Array | Uint8Array;
+  pixelData: Uint8Array;
   pixelRepresentation: PixelRepresentation;
-  pixelSpacing: number[] | undefined;
-  rescaleIntercept: number;
-  rescaleSlope: number;
-  sliceLocation: number | undefined;
-  columns: number;
-  windowCenter: number;
-  windowWidth: number;
+  pixelSpacing?: number[];
+  rescaleIntercept?: number;
+  rescaleSlope?: number;
+  rows: number;
+  sliceLocation?: number;
+  sopInstanceUID: string;
+  windowCenter?: number;
+  windowWidth?: number;
+
+  constructor(config: object) {
+    fillProperties(this, config);
+  }
 }

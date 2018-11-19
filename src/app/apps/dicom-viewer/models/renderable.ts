@@ -27,13 +27,6 @@ export class Renderable {
     this.onUpdate = new Subject();
   }
 
-  // Cannot be done in the constructor as default values will not be overridden
-  fillProperties(config: any): void {
-    for (const [key, value] of Object.entries(config)) {
-      this[key] = value;
-    }
-  }
-
   isDirty(): boolean {
     return this.dirty;
   }

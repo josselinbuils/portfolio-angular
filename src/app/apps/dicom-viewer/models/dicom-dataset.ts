@@ -1,5 +1,5 @@
-import { DicomFrame } from './dicom-frame';
+import { Frame } from './frame';
 
 export interface DicomDataset {
-  frames: DicomFrame[];
+  frames: Frame[];
 }

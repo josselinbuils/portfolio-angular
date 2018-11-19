@@ -1,30 +1,23 @@
-import { DicomFrame } from './dicom-frame';
+import { fillProperties } from '../helpers/model-helpers';
+
+import { Camera } from './camera';
+import { Frame } from './frame';
 import { Renderable } from './renderable';
 
 export class Viewport extends Renderable {
+  camera: Camera;
   deltaX = 0;
   deltaY = 0;
   height = 0;
-  image: DicomFrame;
+  image: Frame;
   width = 0;
   windowCenter = 30;
   windowWidth = 400;
   zoom = 1;
 
-  constructor(config: ViewportConfig) {
+  constructor(config: object) {
     super();
-    super.fillProperties(config);
+    fillProperties(this, config);
     super.decorateProperties();
   }
-}
-
-export interface ViewportConfig {
-  deltaX?: number;
-  deltaY?: number;
-  height?: number;
-  image: DicomFrame;
-  width?: number;
-  windowCenter?: number;
-  windowWidth?: number;
-  zoom?: number;
 }
