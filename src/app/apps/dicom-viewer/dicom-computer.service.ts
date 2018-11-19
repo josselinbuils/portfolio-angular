@@ -95,16 +95,16 @@ export class DicomComputerService {
       // Casts pixel data to the right type
       switch (dicomImageFormat) {
         case DicomImageFormat.Int8:
-          typedPixelData = new Int8Array(rawPixelData.buffer, rawPixelData.byteOffset);
+          typedPixelData = new Int8Array(rawPixelData.buffer, rawPixelData.byteOffset, rawPixelData.length);
           break;
         case DicomImageFormat.Int16:
-          typedPixelData = new Int16Array(rawPixelData.buffer, rawPixelData.byteOffset);
+          typedPixelData = new Int16Array(rawPixelData.buffer, rawPixelData.byteOffset, rawPixelData.length / 2);
           break;
         case DicomImageFormat.UInt8:
           typedPixelData = rawPixelData;
           break;
         case DicomImageFormat.UInt16:
-          typedPixelData = new Uint16Array(rawPixelData.buffer, rawPixelData.byteOffset);
+          typedPixelData = new Uint16Array(rawPixelData.buffer, rawPixelData.byteOffset, rawPixelData.length / 2);
       }
 
       // Normalizes pixel data
