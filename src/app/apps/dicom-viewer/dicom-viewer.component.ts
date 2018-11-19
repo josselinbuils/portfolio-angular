@@ -7,6 +7,7 @@ import { Config } from './config/config';
 import { MouseTool, RendererType } from './constants';
 import { DicomComputerService } from './dicom-computer.service';
 import { DicomLoaderService } from './dicom-loader.service';
+import { findFrame } from './helpers/camera-helpers';
 import { Camera, DicomDataset, Viewport } from './models';
 import { JsRenderer } from './renderer/js/js-renderer';
 import { Renderer } from './renderer/renderer';
@@ -160,13 +161,14 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
           this.renderer = new WebGLRenderer(this.canvas);
       }
     } catch (error) {
-      this.handleError(new Error(`Unable to instantiate ${this.config.rendererType} renderer: ${error.message}`));
+      error.message = `Unable to instantiate ${this.config.rendererType} renderer: ${error.message}`;
+      this.handleError(error);
     }
 
-    const image = this.dataset.frames[0];
-    const { windowCenter, windowWidth } = image;
-    const camera = Camera.fromFrame(image);
-    this.viewport = new Viewport({ camera, image, windowCenter, windowWidth });
+    const frame = this.dataset.frames[0];
+    const { windowCenter, windowWidth } = frame;
+    const camera = Camera.fromFrame(frame);
+    this.viewport = new Viewport({ camera, windowCenter, windowWidth });
     console.log(this.viewport);
 
     const windowNativeElement = this.windowComponent.windowElementRef.nativeElement;
@@ -176,7 +178,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       height: windowNativeElement.clientHeight,
     });
 
-    this.viewport.zoom = Math.min(this.viewport.height / image.rows, 1);
+    this.viewport.zoom = Math.min(this.viewport.height / frame.rows, 1);
 
     this.activeLeftTool = this.dataset.frames.length > 1 ? MouseTool.Paging : MouseTool.Windowing;
     this.cancelMouseDownListener = this.disableContextMenu(this.viewportElementRef.nativeElement);
@@ -188,12 +190,12 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   startPaging(downEvent: MouseEvent): () => void {
     const startY = downEvent.clientY;
     const frames = this.dataset.frames;
-    const startIndex = frames.indexOf(this.viewport.image);
+    const startIndex = frames.indexOf(findFrame(this.dataset, this.viewport.camera));
 
     return this.viewRenderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
       const deltaInstance = Math.floor((moveEvent.clientY - startY) * frames.length / this.viewport.height * 1.2);
       const newIndex = Math.min(Math.max(startIndex + deltaInstance, 0), frames.length - 1);
-      this.viewport.image = frames[newIndex];
+      this.viewport.camera = Camera.fromFrame(frames[newIndex]);
     });
   }
 
@@ -266,6 +268,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     const viewport = this.viewport;
     const startY = downEvent.clientY;
     const startZoom = viewport.zoom;
+    const frame = findFrame(this.dataset, this.viewport.camera);
 
     return this.viewRenderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
       viewport.zoom = startZoom - (moveEvent.clientY - startY) * ZOOM_SENSIBILITY / this.canvas.clientHeight;
@@ -278,7 +281,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
 
       // Helps to fit the viewport of image is centered
       if (viewport.deltaX === 0 && viewport.deltaY === 0) {
-        const fitViewportZoom = viewport.height / viewport.image.rows;
+        const fitViewportZoom = viewport.height / frame.rows;
 
         if (Math.abs(viewport.zoom - fitViewportZoom) < ZOOM_LIMIT) {
           viewport.zoom = fitViewportZoom;
@@ -332,14 +335,16 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
         const t = performance.now();
 
         try {
-          const { deltaX, deltaY, image, windowCenter, windowWidth, zoom } = this.viewport;
-          this.renderer.render({ deltaX, deltaY, frame: image, windowCenter, windowWidth, zoom });
+          const { camera, deltaX, deltaY, windowCenter, windowWidth, zoom } = this.viewport;
+          const frame = findFrame(this.dataset, camera);
+          this.renderer.render({ deltaX, deltaY, frame, windowCenter, windowWidth, zoom });
           this.viewport.makeClean();
           this.renderDurations.push(performance.now() - t);
           this.frameDurations.push(t - this.lastTime);
           this.lastTime = t;
         } catch (error) {
-          this.handleError(new Error(`Unable to render viewport: ${error.message}`));
+          error.message = `Unable to render viewport: ${error.message}`;
+          this.handleError(error);
         }
       }
 

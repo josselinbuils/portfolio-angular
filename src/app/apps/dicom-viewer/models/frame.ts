@@ -31,6 +31,7 @@ export class Frame {
   rows: number;
   sliceLocation: number;
   sopInstanceUID: string;
+  spacingBetweenSlices: number;
   windowCenter: number = 30;
   windowWidth: number = 400;
 

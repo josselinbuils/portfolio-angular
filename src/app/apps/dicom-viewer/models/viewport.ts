@@ -1,7 +1,6 @@
 import { fillProperties } from '../helpers/model-helpers';
 
 import { Camera } from './camera';
-import { Frame } from './frame';
 import { Renderable } from './renderable';
 
 export class Viewport extends Renderable {
@@ -9,7 +8,6 @@ export class Viewport extends Renderable {
   deltaX = 0;
   deltaY = 0;
   height = 0;
-  image: Frame;
   width = 0;
   windowCenter = 30;
   windowWidth = 400;

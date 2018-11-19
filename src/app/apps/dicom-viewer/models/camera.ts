@@ -27,4 +27,8 @@ export class Camera extends Renderable {
     fillProperties(this, config);
     super.decorateProperties();
   }
+
+  getDirection(): number[] {
+    return math.subtract(this.lookPoint, this.eyePoint) as number[];
+  }
 }

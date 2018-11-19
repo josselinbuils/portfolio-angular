@@ -17,6 +17,7 @@ export class DicomFrame {
   rows: number;
   sliceLocation?: number;
   sopInstanceUID: string;
+  spacingBetweenSlices: number;
   windowCenter?: number;
   windowWidth?: number;
 

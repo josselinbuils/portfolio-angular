@@ -72,6 +72,7 @@ export class DicomLoaderService {
       const rows = parsedFile.uint16('x00280010');
       const sliceLocation = parsedFile.floatString('x00201041');
       const sopInstanceUID = parsedFile.string('x00080018');
+      const spacingBetweenSlices = parsedFile.floatString('x00180088');
       const windowCenter = parsedFile.intString('x00281050');
       const windowWidth = parsedFile.intString('x00281051');
 
@@ -79,7 +80,7 @@ export class DicomLoaderService {
       const instance: any = {
         bitsAllocated, columns, imagePosition, imageOrientation, numberOfFrames, patientName, photometricInterpretation,
         pixelRepresentation, pixelSpacing, rescaleIntercept, rescaleSlope, rows, sliceLocation, sopInstanceUID,
-        windowCenter, windowWidth,
+        spacingBetweenSlices, windowCenter, windowWidth,
       };
 
       if (Number.isInteger(numberOfFrames)) {
