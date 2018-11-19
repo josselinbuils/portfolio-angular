@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, Renderer2, ViewChild } from '@angular/core';
 import { MouseButton } from 'app/constants';
 import { WindowInstance } from 'app/platform/window/window-instance';
 import { WindowComponent } from 'app/platform/window/window.component';
@@ -28,7 +28,7 @@ const WINDOW_WIDTH_MIN = 1;
   templateUrl: './dicom-viewer.component.html',
   styleUrls: ['./dicom-viewer.component.scss'],
 })
-export class DicomViewerComponent implements OnInit, OnDestroy, WindowInstance {
+export class DicomViewerComponent implements OnDestroy, WindowInstance {
   static appName = 'DICOM Viewer';
   static iconClass = 'fa-heartbeat';
 
@@ -39,8 +39,8 @@ export class DicomViewerComponent implements OnInit, OnDestroy, WindowInstance {
   activeRightTool: MouseTool = MouseTool.Zoom;
   canvas: HTMLCanvasElement;
   config?: Config;
-  dataset: DicomDataset;
-  errorMessage: string;
+  dataset?: DicomDataset;
+  errorMessage?: string;
   fps = 0;
   loading = false;
   meanRenderDuration: number;
@@ -60,34 +60,40 @@ export class DicomViewerComponent implements OnInit, OnDestroy, WindowInstance {
               private readonly computer: DicomComputerService) {}
 
   back(): void {
-
     if (this.canvas instanceof HTMLCanvasElement) {
       this.viewRenderer.removeChild(this.viewportElementRef.nativeElement, this.canvas);
     }
 
     this.ngOnDestroy();
 
+    delete this.cancelMouseDownListener;
+    delete this.canvas;
+    delete this.config;
     delete this.dataset;
     delete this.errorMessage;
+    delete this.renderer;
+    delete this.statsInterval;
     delete this.viewport;
-    delete this.config;
 
+    this.loading = false;
     this.showConfig = true;
   }
 
-  ngOnInit(): void {
-    this.cancelMouseDownListener = this.disableContextMenu(this.viewportElementRef.nativeElement);
-  }
-
   ngOnDestroy(): void {
+    if (typeof this.cancelMouseDownListener === 'function') {
+      this.cancelMouseDownListener();
+    }
+    if (this.dataset !== undefined) {
+      this.dataset.destroy();
+    }
     if (this.renderer !== undefined) {
       if (typeof this.renderer.destroy === 'function') {
         this.renderer.destroy();
       }
-      delete this.renderer;
     }
-    this.cancelMouseDownListener();
-    clearInterval(this.statsInterval);
+    if (this.statsInterval !== undefined) {
+      clearInterval(this.statsInterval);
+    }
   }
 
   onResize(size: { width: number; height: number }): void {
@@ -128,9 +134,16 @@ export class DicomViewerComponent implements OnInit, OnDestroy, WindowInstance {
 
     try {
       const dicomFrames = await this.loader.loadFrames(this.config.dataset);
+
+      // Back button has been clicked
+      if (this.config === undefined) {
+        return;
+      }
+
       const frames = this.computer.computeFrames(dicomFrames);
-      this.dataset = { frames };
+      this.dataset = new DicomDataset({ frames });
       console.log(this.dataset.frames);
+
     } catch (error) {
       this.handleError(error);
     }
@@ -175,6 +188,8 @@ export class DicomViewerComponent implements OnInit, OnDestroy, WindowInstance {
     this.viewport.zoom = Math.min(this.viewport.height / image.rows, 1);
 
     this.activeLeftTool = this.dataset.frames.length > 1 ? MouseTool.Paging : MouseTool.Windowing;
+    this.cancelMouseDownListener = this.disableContextMenu(this.viewportElementRef.nativeElement);
+
     this.loading = false;
     this.startRender();
   }
