@@ -22,7 +22,7 @@ export class DicomComputerService {
       delete frame.pixelData;
 
       return new Frame({
-        ...cloneDeep(frame), dicom, dimensionsMm, imageCenter, imageFormat, imageNormal, imageOrientation,
+        ...cloneDeep(frame), dicom, dimensionsMm, id, imageCenter, imageFormat, imageNormal, imageOrientation,
         imagePosition, pixelData, pixelSpacing, sliceLocation,
       });
     });
