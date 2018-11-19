@@ -1,6 +1,6 @@
 import { NormalizedImageFormat } from '../../constants';
-import { Viewport } from '../../models';
 import { Renderer } from '../renderer';
+import { RenderingParameters } from '../rendering-parameters';
 import { getRenderingProperties } from '../rendering-utils';
 
 export class JsRenderer implements Renderer {
@@ -9,13 +9,42 @@ export class JsRenderer implements Renderer {
   private lut?: { table: number[]; windowWidth: number };
   private readonly renderingContext = (document.createElement('canvas') as HTMLCanvasElement).getContext('2d');
 
-  constructor(canvas: HTMLCanvasElement) {
+  constructor(private readonly canvas: HTMLCanvasElement) {
     this.context = canvas.getContext('2d');
   }
 
-  getVOILut(viewport: Viewport): { table: number[]; windowWidth: number } {
+  render(renderingParameters: RenderingParameters): void {
+    this.context.fillStyle = 'black';
+    this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+    const { frame, zoom } = renderingParameters;
+
+    switch (frame.imageFormat) {
+      case NormalizedImageFormat.Int16:
+        const { windowWidth } = renderingParameters;
+
+        if (this.lut === undefined || this.lut.windowWidth !== windowWidth) {
+          this.lut = this.getVOILut(windowWidth);
+        }
+
+        if (zoom < 1) {
+          this.renderCanvasPixels(renderingParameters);
+        } else {
+          this.renderImagePixels(renderingParameters);
+        }
+        break;
+
+      case NormalizedImageFormat.RGB:
+        this.renderRGB(renderingParameters);
+        break;
+
+      default:
+        throw new Error('Unsupported image format');
+    }
+  }
+
+  private getVOILut(windowWidth: number): { table: number[]; windowWidth: number } {
     const table: number[] = [];
-    const windowWidth = viewport.windowWidth;
 
     for (let i = 0; i < windowWidth; i++) {
       table[i] = Math.floor(i / windowWidth * 256);
@@ -24,37 +53,13 @@ export class JsRenderer implements Renderer {
     return { table, windowWidth };
   }
 
-  render(viewport: Viewport): void {
-    this.context.fillStyle = 'black';
-    this.context.fillRect(0, 0, viewport.width, viewport.height);
-
-    switch (viewport.image.imageFormat) {
-      case NormalizedImageFormat.Int16:
-        if (this.lut === undefined || this.lut.windowWidth !== viewport.windowWidth) {
-          this.lut = this.getVOILut(viewport);
-        }
-
-        if (viewport.zoom < 1) {
-          this.renderCanvasPixels(viewport);
-        } else {
-          this.renderImagePixels(viewport);
-        }
-        break;
-
-      case NormalizedImageFormat.RGB:
-        this.renderRGB(viewport);
-        break;
-
-      default:
-        throw new Error('Unsupported image format');
-    }
-  }
-
-  private renderCanvasPixels(viewport: Viewport): void {
-    const { columns, pixelData, rescaleIntercept, rescaleSlope } = viewport.image;
+  private renderCanvasPixels(renderingParameters: RenderingParameters): void {
+    const { frame, zoom } = renderingParameters;
+    const { columns, pixelData, rescaleIntercept, rescaleSlope } = frame;
+    const { width, height } = this.canvas;
     const {
       displayHeight, displayWidth, displayX0, displayX1, displayY0, displayY1, leftLimit, rightLimit, x0, y0,
-    } = getRenderingProperties(viewport);
+    } = getRenderingProperties(renderingParameters, width, height);
 
     const length = displayWidth * displayHeight;
 
@@ -65,7 +70,7 @@ export class JsRenderer implements Renderer {
 
       for (let y = displayY0; y <= displayY1; y++) {
         for (let x = displayX0; x <= displayX1; x++) {
-          const pixelDataIndex = ((y - y0) / viewport.zoom | 0) * columns + ((x - x0) / viewport.zoom | 0);
+          const pixelDataIndex = ((y - y0) / zoom | 0) * columns + ((x - x0) / zoom | 0);
           const rawValue = pixelData[pixelDataIndex] * rescaleSlope + rescaleIntercept;
           let intensity = 255;
 
@@ -85,17 +90,19 @@ export class JsRenderer implements Renderer {
     }
   }
 
-  private renderImagePixels(viewport: Viewport): void {
-    const { columns, pixelData, rescaleIntercept, rescaleSlope, rows } = viewport.image;
+  private renderImagePixels(renderingParameters: RenderingParameters): void {
+    const { frame, zoom } = renderingParameters;
+    const { columns, pixelData, rescaleIntercept, rescaleSlope, rows } = frame;
+    const { width, height } = this.canvas;
     const {
       displayHeight, displayWidth, displayX0, displayY0, leftLimit, rightLimit, x0, x1, y0, y1,
-    } = getRenderingProperties(viewport);
+    } = getRenderingProperties(renderingParameters, width, height);
 
-    const imageY0 = y0 < 0 ? Math.round(-y0 / viewport.zoom) : 0;
-    const imageY1 = y1 > viewport.height ? rows - Math.round((y1 - viewport.height) / viewport.zoom) : rows;
+    const imageY0 = y0 < 0 ? Math.round(-y0 / zoom) : 0;
+    const imageY1 = y1 > height ? rows - Math.round((y1 - height) / zoom) : rows;
 
-    const imageX0 = x0 < 0 ? Math.round(-x0 / viewport.zoom) : 0;
-    const imageX1 = x1 > viewport.width ? columns - Math.round((x1 - viewport.width) / viewport.zoom) : columns;
+    const imageX0 = x0 < 0 ? Math.round(-x0 / zoom) : 0;
+    const imageX1 = x1 > width ? columns - Math.round((x1 - width) / zoom) : columns;
 
     const croppedImageWidth = imageX1 - imageX0;
     const croppedImageHeight = imageY1 - imageY0;
@@ -133,9 +140,10 @@ export class JsRenderer implements Renderer {
     }
   }
 
-  private renderRGB(viewport: Viewport): void {
-    const { columns, pixelData, rows } = viewport.image;
-    const { imageHeight, imageWidth, x0, y0 } = getRenderingProperties(viewport);
+  private renderRGB(renderingParameters: RenderingParameters): void {
+    const { columns, pixelData, rows } = renderingParameters.frame;
+    const { width, height } = this.canvas;
+    const { imageHeight, imageWidth, x0, y0 } = getRenderingProperties(renderingParameters, width, height);
 
     this.renderingContext.canvas.width = columns;
     this.renderingContext.canvas.height = rows;

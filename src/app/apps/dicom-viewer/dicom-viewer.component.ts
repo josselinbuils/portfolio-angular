@@ -108,10 +108,6 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
 
       viewport.width = size.width;
       viewport.height = size.height;
-
-      if (this.renderer !== undefined && typeof this.renderer.resize === 'function') {
-        this.renderer.resize(viewport);
-      }
     }
   }
 
@@ -158,16 +154,11 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
           this.renderer = new JsRenderer(this.canvas);
           break;
         case RendererType.WebAssembly:
-          this.renderer = new WasmRenderer(this.canvas);
+          this.renderer = await WasmRenderer.create(this.canvas);
           break;
         case RendererType.WebGL:
           this.renderer = new WebGLRenderer(this.canvas);
       }
-
-      if (typeof this.renderer.init === 'function') {
-        await this.renderer.init();
-      }
-
     } catch (error) {
       this.handleError(new Error(`Unable to instantiate ${this.config.rendererType} renderer: ${error.message}`));
     }
@@ -341,7 +332,8 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
         const t = performance.now();
 
         try {
-          this.renderer.render(this.viewport);
+          const { deltaX, deltaY, image, windowCenter, windowWidth, zoom } = this.viewport;
+          this.renderer.render({ deltaX, deltaY, frame: image, windowCenter, windowWidth, zoom });
           this.viewport.makeClean();
           this.renderDurations.push(performance.now() - t);
           this.frameDurations.push(t - this.lastTime);

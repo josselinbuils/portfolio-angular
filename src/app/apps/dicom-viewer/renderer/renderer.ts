@@ -1,8 +1,6 @@
-import { Viewport } from '../models';
+import { RenderingParameters } from './rendering-parameters';
 
 export interface Renderer {
   destroy?(): void;
-  init?(): Promise<void>;
-  render(viewport: Viewport): void;
-  resize?(viewport: Viewport): void;
+  render(renderingParameters: RenderingParameters): void;
 }

@@ -1,6 +1,7 @@
 import { NormalizedImageFormat } from '../../constants';
-import { Frame, Viewport } from '../../models';
+import { Frame } from '../../models';
 import { Renderer } from '../renderer';
+import { RenderingParameters } from '../rendering-parameters';
 
 import { getFragmentShaderSrc, getTextureFormat } from './fragment-shader';
 import { VERTEX_SHADER_SRC } from './vertex-shader';
@@ -10,8 +11,10 @@ export class WebGLRenderer implements Renderer {
   private readonly gl: WebGLRenderingContext;
   private program: WebGLProgram;
   private texture: { id: string; instance: WebGLTexture };
+  private glViewportWidth: number;
+  private glViewportHeight: number;
 
-  constructor(canvas: HTMLCanvasElement) {
+  constructor(private readonly canvas: HTMLCanvasElement) {
     if (canvas.getContext('webgl') instanceof WebGLRenderingContext) {
       this.gl = canvas.getContext('webgl');
     } else if (canvas.getContext('experimental-webgl') instanceof WebGLRenderingContext) {
@@ -31,9 +34,17 @@ export class WebGLRenderer implements Renderer {
     delete this.texture;
   }
 
-  render(viewport: Viewport): void {
+  render(renderingParameters: RenderingParameters): void {
     const gl = this.gl;
-    const { columns, id, imageFormat, rescaleIntercept, rescaleSlope, rows } = viewport.image;
+    const { deltaX, deltaY, frame, windowCenter, windowWidth, zoom } = renderingParameters;
+    const { columns, id, imageFormat, rescaleIntercept, rescaleSlope, rows } = frame;
+    const { width, height } = this.canvas;
+
+    if (this.glViewportWidth !== width || this.glViewportHeight !== height) {
+      this.gl.viewport(0, 0, width, height);
+      this.glViewportWidth = width;
+      this.glViewportHeight = height;
+    }
 
     if (this.program === undefined) {
       this.program = this.createProgram(imageFormat);
@@ -45,7 +56,7 @@ export class WebGLRenderer implements Renderer {
       if (textureChanged) {
         gl.deleteTexture(this.texture.instance);
       }
-      const instance = this.createTexture(viewport.image);
+      const instance = this.createTexture(frame);
       this.texture = { id, instance };
     }
 
@@ -68,31 +79,25 @@ export class WebGLRenderer implements Renderer {
 
       gl.uniform1f(rescaleInterceptLocation, rescaleIntercept);
       gl.uniform1f(rescaleSlopeLocation, rescaleSlope);
-      gl.uniform1f(windowWidthLocation, viewport.windowWidth);
-      gl.uniform1f(windowCenterLocation, viewport.windowCenter);
+      gl.uniform1f(windowWidthLocation, windowWidth);
+      gl.uniform1f(windowCenterLocation, windowCenter);
     }
 
     const matrixLocation = gl.getUniformLocation(this.program, 'u_matrix');
 
     // Convert dst pixel coordinates to clip space coordinates
-    const displayWidth = Math.round(columns * viewport.zoom);
-    const displayHeight = Math.round(rows * viewport.zoom);
-    const clipX = (0.5 - displayWidth / viewport.width / 2 + viewport.deltaX) * 2 - 1;
-    const clipY = (0.5 - displayHeight / viewport.height / 2 + viewport.deltaY) * -2 + 1;
-    const clipWidth = displayWidth / viewport.width * 2;
-    const clipHeight = displayHeight / viewport.height * -2;
+    const displayWidth = Math.round(columns * zoom);
+    const displayHeight = Math.round(rows * zoom);
+    const clipX = (0.5 - displayWidth / width / 2 + deltaX) * 2 - 1;
+    const clipY = (0.5 - displayHeight / height / 2 + deltaY) * -2 + 1;
+    const clipWidth = displayWidth / width * 2;
+    const clipHeight = displayHeight / height * -2;
 
     // Build a matrix that will stretch our unit quad to our desired size and location
     gl.uniformMatrix3fv(matrixLocation, false, [clipWidth, 0, 0, 0, clipHeight, 0, clipX, clipY, 1]);
 
     // Draw the rectangle.
     gl.drawArrays(gl.TRIANGLES, 0, 6);
-  }
-
-  resize(viewport: Viewport): void {
-    if (this.gl instanceof WebGLRenderingContext) {
-      this.gl.viewport(0, 0, viewport.width, viewport.height);
-    }
   }
 
   private createProgram(imageFormat: NormalizedImageFormat): WebGLProgram {

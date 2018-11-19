@@ -1,26 +1,28 @@
-import { Viewport } from '../models';
-
+import { RenderingParameters } from './rendering-parameters';
 import { RenderingProperties } from './rendering-properties';
 
-export function getRenderingProperties(viewport: Viewport): RenderingProperties {
+export function getRenderingProperties(renderingParameters: RenderingParameters, width: number,
+                                       height: number): RenderingProperties {
 
-  const leftLimit = Math.floor(viewport.windowCenter - viewport.windowWidth / 2);
-  const rightLimit = Math.floor(viewport.windowCenter + viewport.windowWidth / 2);
+  const { deltaX, deltaY, frame: { columns, rows }, windowCenter, windowWidth, zoom } = renderingParameters;
 
-  const imageWidth = Math.round(viewport.image.columns * viewport.zoom);
-  const imageHeight = Math.round(viewport.image.rows * viewport.zoom);
+  const leftLimit = Math.floor(windowCenter - windowWidth / 2);
+  const rightLimit = Math.floor(windowCenter + windowWidth / 2);
 
-  const x0 = Math.round(((viewport.width - imageWidth) / 2 + viewport.deltaX * viewport.width));
+  const imageWidth = Math.round(columns * zoom);
+  const imageHeight = Math.round(rows * zoom);
+
+  const x0 = Math.round(((width - imageWidth) / 2 + deltaX * width));
   const x1 = x0 + imageWidth - 1;
 
-  const y0 = Math.round(((viewport.height - imageHeight) / 2 + viewport.deltaY * viewport.height));
+  const y0 = Math.round(((height - imageHeight) / 2 + deltaY * height));
   const y1 = y0 + imageHeight - 1;
 
   const displayX0 = Math.max(x0, 0);
-  const displayX1 = Math.min(x1, viewport.width - 1);
+  const displayX1 = Math.min(x1, width - 1);
 
   const displayY0 = Math.max(y0, 0);
-  const displayY1 = Math.min(y1, viewport.height - 1);
+  const displayY1 = Math.min(y1, height - 1);
 
   const displayWidth = Math.max(displayX1 - displayX0 + 1, 0);
   const displayHeight = Math.max(displayY1 - displayY0 + 1, 0);

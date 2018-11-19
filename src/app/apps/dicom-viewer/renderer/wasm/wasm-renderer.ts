@@ -1,7 +1,7 @@
 import loadCoreRenderer from '../../../../../assets/wasm-renderer';
 
-import { Viewport } from '../../models';
 import { Renderer } from '../renderer';
+import { RenderingParameters } from '../rendering-parameters';
 import { getRenderingProperties } from '../rendering-utils';
 
 export class WasmRenderer implements Renderer {
@@ -17,48 +17,49 @@ export class WasmRenderer implements Renderer {
   private renderingCore: RenderingCore;
   private lut?: { table: Uint8Array; windowWidth: number };
 
-  constructor(canvas: HTMLCanvasElement) {
+  static async create(canvas: HTMLCanvasElement): Promise<WasmRenderer> {
+    const renderer = new WasmRenderer(canvas);
+    await renderer.loadRenderingCore();
+    return renderer;
+  }
+
+  constructor(private readonly canvas: HTMLCanvasElement) {
     this.context = canvas.getContext('2d');
   }
 
-  async init(): Promise<void> {
-    await this.loadRenderingCore();
-  }
-
-  render(viewport: Viewport): void {
+  render(renderingParameters: RenderingParameters): void {
 
     if (this.renderingCore === undefined) {
       return;
     }
 
+    const { frame, windowWidth, zoom } = renderingParameters;
+    const { columns, pixelData, rescaleIntercept, rescaleSlope } = frame;
+    const { width, height } = this.canvas;
+    const {
+      displayHeight, displayWidth, displayX0, displayX1, displayY0, displayY1, leftLimit, rightLimit, x0, y0,
+    } = getRenderingProperties(renderingParameters, width, height);
+
     this.context.fillStyle = 'black';
-    this.context.fillRect(0, 0, viewport.width, viewport.height);
+    this.context.fillRect(0, 0, width, height);
 
-    const { columns, pixelData, rescaleIntercept, rescaleSlope } = viewport.image;
-
-    if (this.lut === undefined || this.lut.windowWidth !== viewport.windowWidth) {
+    if (this.lut === undefined || this.lut.windowWidth !== windowWidth) {
 
       if (this.lut !== undefined) {
         this.renderingCore._free(this.lut.table.byteOffset);
       }
 
-      const pointer = this.renderingCore._malloc(viewport.windowWidth) as number;
-      const table = new Uint8Array(this.renderingCore.HEAPU8.buffer, pointer, viewport.windowWidth);
+      const pointer = this.renderingCore._malloc(windowWidth) as number;
+      const table = new Uint8Array(this.renderingCore.HEAPU8.buffer, pointer, windowWidth);
 
       try {
-        this.fillTable(table.byteOffset, viewport.windowWidth);
+        this.fillTable(table.byteOffset, windowWidth);
       } catch (error) {
         throw this.handleEmscriptenErrors(error);
       }
 
-      this.lut = {
-        windowWidth: viewport.windowWidth, table,
-      };
+      this.lut = { table, windowWidth };
     }
-
-    const {
-      displayHeight, displayWidth, displayX0, displayX1, displayY0, displayY1, leftLimit, rightLimit, x0, y0,
-    } = getRenderingProperties(viewport);
 
     const length = displayWidth * displayHeight;
 
@@ -75,7 +76,7 @@ export class WasmRenderer implements Renderer {
         );
 
         this.coreRender(this.lut.table.byteOffset, rawData.byteOffset, renderedData.byteOffset, columns, x0, y0,
-          displayX0, displayX1, displayY0, displayY1, viewport.zoom, leftLimit, rightLimit, rescaleSlope,
+          displayX0, displayX1, displayY0, displayY1, zoom, leftLimit, rightLimit, rescaleSlope,
           rescaleIntercept);
 
         const imageData = new ImageData(renderedData, displayWidth, displayHeight);
