@@ -178,7 +178,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       height: windowNativeElement.clientHeight,
     });
 
-    this.viewport.zoom = Math.min(this.viewport.height / frame.rows, 1);
+    this.viewport.zoom = this.viewport.height / frame.rows;
 
     this.activeLeftTool = this.dataset.frames.length > 1 ? MouseTool.Paging : MouseTool.Windowing;
     this.cancelMouseDownListener = this.disableContextMenu(this.viewportElementRef.nativeElement);

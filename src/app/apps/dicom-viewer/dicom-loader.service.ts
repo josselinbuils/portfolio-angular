@@ -30,9 +30,9 @@ export class DicomLoaderService {
     return frames;
   }
 
-  private findWindowingInFunctionalGroup(functionalGroup: any): Windowing | undefined {
+  private findWindowingInFunctionalGroup(functionalGroup: any, index: number = 0): Windowing | undefined {
     if (functionalGroup !== undefined) {
-      const voiLUT = functionalGroup.items[0].dataSet.elements.x00289132;
+      const voiLUT = functionalGroup.items[index].dataSet.elements.x00289132;
 
       if (voiLUT !== undefined) {
         const dataset = voiLUT.items[0].dataSet;
@@ -87,7 +87,8 @@ export class DicomLoaderService {
       return new Uint8Array(dicomFile);
 
     } catch (error) {
-      throw new Error(`Unable to retrieve DICOM file: ${error.message}`);
+      error.message = `Unable to retrieve DICOM file: ${error.message}`;
+      throw error;
     }
   }
 
@@ -148,7 +149,7 @@ export class DicomLoaderService {
           frame.pixelData = new Uint8Array(pixelData.buffer, byteOffset, frameLength);
 
           if (sharedWindowing === undefined) {
-            const frameWindowing = this.findWindowingInFunctionalGroup(parsedFile.elements.x52009230);
+            const frameWindowing = this.findWindowingInFunctionalGroup(parsedFile.elements.x52009230, i);
 
             if (frameWindowing !== undefined) {
               frame.windowCenter = frameWindowing.windowCenter;
@@ -166,7 +167,8 @@ export class DicomLoaderService {
       return frames;
 
     } catch (error) {
-      throw new Error(`Unable to load DICOM instance: ${error.message || error}`);
+      error.message = `Unable to load DICOM instance: ${error.message || error}`;
+      throw error;
     }
   }
 
