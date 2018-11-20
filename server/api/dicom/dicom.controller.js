@@ -36,7 +36,8 @@ function getDatasetDescriptors() {
       const name = fileName.replace(/(\.[a-z]+)+$/, '');
       const preview = previews.find(p => p.includes(name));
       return { files, name, preview };
-    });
+    })
+    .filter((descriptor, index, descriptors) => descriptors.findIndex(d => d.name === descriptor.name) === index);
 }
 
 function getFiles(folderPath, name, deepLevel = 0) {
@@ -46,4 +47,3 @@ function getFiles(folderPath, name, deepLevel = 0) {
     ? readdirSync(path).map(fileName => `${name}/${fileName.replace('.gz', '')}`)
     : [name.replace('.gz', '')];
 }
-

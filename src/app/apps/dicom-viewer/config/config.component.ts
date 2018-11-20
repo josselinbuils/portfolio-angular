@@ -1,9 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-
+import { DEV_SERVER_URL } from 'app/constants';
 import { HTTP_PREFIX } from 'app/env';
 
-import { RendererType } from '../constants';
+import { PREVIEWS_PATH, RendererType } from '../constants';
 
 import { Config } from './config';
 import { DatasetDescriptor } from './dataset-descriptor';
@@ -23,6 +23,9 @@ export class ConfigComponent implements OnInit {
   @Output() config = new EventEmitter<Config>();
 
   datasets: DatasetDescriptor[];
+  previewsPath = location.hostname === 'localhost'
+    ? `${DEV_SERVER_URL}${PREVIEWS_PATH}`
+    : `${PREVIEWS_PATH}`;
   renderers = [
     { type: RendererType.JavaScript, logo: 'javascript.png' },
     { type: RendererType.WebAssembly, logo: 'webassembly.png' },

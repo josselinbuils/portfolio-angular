@@ -1,4 +1,5 @@
 export const DATASETS_PATH = '/assets/dicom/datasets/';
+export const PREVIEWS_PATH = '/assets/dicom/previews/';
 
 export enum MouseTool {
   Paging,

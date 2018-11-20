@@ -30,6 +30,50 @@ export class DicomLoaderService {
     return frames;
   }
 
+  private findWindowingInFunctionalGroup(functionalGroup: any): Windowing | undefined {
+    if (functionalGroup !== undefined) {
+      const voiLUT = functionalGroup.items[0].dataSet.elements.x00289132;
+
+      if (voiLUT !== undefined) {
+        const dataset = voiLUT.items[0].dataSet;
+        const elements = dataset.elements;
+
+        if (elements.x00281050 !== undefined && elements.x00281051 !== undefined) {
+          return {
+            windowCenter: dataset.intString('x00281050'),
+            windowWidth: dataset.intString('x00281051'),
+          };
+        }
+      }
+    }
+    return undefined;
+  }
+
+  private floatStringsToArray(parsedFile: ParsedDicomFile, tag: string, slice?: number): number[] | undefined {
+    const nbValues = parsedFile.numStringValues(tag);
+
+    if (nbValues > 0) {
+      const array = [];
+
+      for (let i = 0; i < nbValues; i++) {
+        array.push(parsedFile.floatString(tag, i));
+      }
+
+      if (slice !== undefined) {
+        const slicedArray = [];
+
+        for (let j = 0; j < array.length; j += slice) {
+          slicedArray.push(array.slice(j, j + slice));
+        }
+        return slicedArray;
+      }
+
+      return array;
+    }
+
+    return undefined;
+  }
+
   private async getDicomFile(path: string): Promise<Uint8Array> {
     try {
       const url = location.hostname === 'localhost'
@@ -90,23 +134,27 @@ export class DicomLoaderService {
           throw new Error(`frameLength shall be an integer: ${frameLength}`);
         }
 
+        const sharedWindowing = this.findWindowingInFunctionalGroup(parsedFile.elements.x52009229);
+
+        if (sharedWindowing !== undefined) {
+          instance.windowCenter = sharedWindowing.windowCenter;
+          instance.windowWidth = sharedWindowing.windowWidth;
+        }
+
         for (let i = 0; i < numberOfFrames; i++) {
           const frame = cloneDeep(instance);
           const byteOffset = pixelData.byteOffset + frameLength * pixelData.BYTES_PER_ELEMENT * i;
 
           frame.pixelData = new Uint8Array(pixelData.buffer, byteOffset, frameLength);
 
-          try {
-            const frameVOILUT = (parsedFile.elements.x52009230 as any).items[0].dataSet
-              .elements.x00289132.items[0].dataSet;
+          if (sharedWindowing === undefined) {
+            const frameWindowing = this.findWindowingInFunctionalGroup(parsedFile.elements.x52009230);
 
-            if (typeof frameVOILUT.intString('x00281050') === 'number') {
-              frame.windowCenter = frameVOILUT.intString('x00281050');
+            if (frameWindowing !== undefined) {
+              frame.windowCenter = frameWindowing.windowCenter;
+              frame.windowWidth = frameWindowing.windowWidth;
             }
-            if (typeof  frameVOILUT.intString('x00281051') === 'number') {
-              frame.windowWidth = frameVOILUT.intString('x00281051');
-            }
-          } catch (e) {}
+          }
 
           frames.push(new DicomFrame(frame));
         }
@@ -129,31 +177,6 @@ export class DicomLoaderService {
       throw new Error(`Unable to parse DICOM: ${error.message || error}`);
     }
   }
-
-  private floatStringsToArray(parsedFile: ParsedDicomFile, tag: string, slice?: number): number[] | undefined {
-    const nbValues = parsedFile.numStringValues(tag);
-
-    if (nbValues > 0) {
-      const array = [];
-
-      for (let i = 0; i < nbValues; i++) {
-        array.push(parsedFile.floatString(tag, i));
-      }
-
-      if (slice !== undefined) {
-        const slicedArray = [];
-
-        for (let j = 0; j < array.length; j += slice) {
-          slicedArray.push(array.slice(j, j + slice));
-        }
-        return slicedArray;
-      }
-
-      return array;
-    }
-
-    return undefined;
-  }
 }
 
 interface ParsedDicomFile {
@@ -172,4 +195,9 @@ interface ParsedDicomFile {
   string(tag: string): string;
 
   uint16(tag: string): number;
+}
+
+interface Windowing {
+  windowCenter: number;
+  windowWidth: number;
 }
