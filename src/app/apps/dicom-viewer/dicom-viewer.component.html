@@ -1,4 +1,4 @@
-<app-window [windowTitle]="title" background="black" titleColor="white" [minWidth]="800" [minHeight]="554"
+<app-window [windowTitle]="title" background="black" titleColor="#efefef" [minWidth]="800" [minHeight]="554"
             (resize)="onResize($event)">
   <div class="container">
     <app-dicom-viewer-config [hidden]="!showConfig" (config)="start($event)"></app-dicom-viewer-config>

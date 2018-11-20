@@ -1,5 +1,4 @@
-$background-color: black;
-$color: white;
+@import '../common';
 
 :host {
   color: $color;
