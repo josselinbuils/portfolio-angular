@@ -178,16 +178,18 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     const startY = downEvent.clientY;
     const frames = this.dataset.frames;
     const startIndex = frames.indexOf(findFrame(this.dataset, this.viewport.camera));
+    let currentIndex = startIndex;
 
     return this.viewRenderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
       const deltaInstance = Math.floor((moveEvent.clientY - startY) * frames.length / this.viewport.height * 1.2);
       const newIndex = Math.min(Math.max(startIndex + deltaInstance, 0), frames.length - 1);
 
-      if (newIndex !== startIndex) {
+      if (newIndex !== currentIndex) {
         const frame = frames[newIndex];
         this.viewport.camera = Camera.fromFrame(frame);
         this.viewport.windowWidth = frame.windowWidth;
         this.viewport.windowCenter = frame.windowCenter;
+        currentIndex = newIndex;
       }
     });
   }

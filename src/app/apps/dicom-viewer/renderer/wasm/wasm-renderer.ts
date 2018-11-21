@@ -33,15 +33,25 @@ export class WasmRenderer implements Renderer {
       return;
     }
 
-    const { frame, windowWidth, zoom } = renderingParameters;
-    const { columns, pixelData, rescaleIntercept, rescaleSlope } = frame;
     const { width, height } = this.canvas;
-    const {
-      displayHeight, displayWidth, displayX0, displayX1, displayY0, displayY1, leftLimit, rightLimit, x0, y0,
-    } = getRenderingProperties(renderingParameters, width, height);
 
     this.context.fillStyle = 'black';
     this.context.fillRect(0, 0, width, height);
+
+    const {
+      boundedViewportSpace, isImageInViewport, leftLimit, rightLimit, viewportSpace,
+    } = getRenderingProperties(renderingParameters, width, height);
+
+    if (!isImageInViewport) {
+      return;
+    }
+
+    const { frame, zoom, windowWidth } = renderingParameters;
+    const { columns, pixelData, rescaleIntercept, rescaleSlope } = frame;
+    const { imageHeight, imageWidth, imageX0, imageX1, imageY0, imageY1 } = boundedViewportSpace;
+
+    const viewportSpaceImageX0 = viewportSpace.imageX0;
+    const viewportSpaceImageY0 = viewportSpace.imageY0;
 
     if (this.lut === undefined || this.lut.windowWidth !== windowWidth) {
 
@@ -61,33 +71,31 @@ export class WasmRenderer implements Renderer {
       this.lut = { table, windowWidth };
     }
 
-    const length = displayWidth * displayHeight;
+    try {
+      const rawDataPointer = this.renderingCore._malloc(pixelData.byteLength) as number;
+      const rawData = new Uint8Array(this.renderingCore.HEAPU8.buffer, rawDataPointer, pixelData.byteLength);
+      rawData.set(new Uint8Array(pixelData.buffer, pixelData.byteOffset, pixelData.byteLength));
 
-    if (length > 0) {
-      try {
-        const rawDataPointer = this.renderingCore._malloc(pixelData.byteLength) as number;
-        const rawData = new Uint8Array(this.renderingCore.HEAPU8.buffer, rawDataPointer, pixelData.byteLength);
-        rawData.set(new Uint8Array(pixelData.buffer, pixelData.byteOffset, pixelData.byteLength));
+      const renderedDataLength = imageWidth * imageHeight * 4;
+      const renderedDataPointer = this.renderingCore._malloc(renderedDataLength);
+      const renderedData = new Uint8ClampedArray(
+        this.renderingCore.HEAPU8.buffer, renderedDataPointer, renderedDataLength,
+      );
 
-        const renderedDataLength = displayWidth * displayHeight * 4;
-        const renderedDataPointer = this.renderingCore._malloc(renderedDataLength);
-        const renderedData = new Uint8ClampedArray(
-          this.renderingCore.HEAPU8.buffer, renderedDataPointer, renderedDataLength,
-        );
+      this.coreRender(
+        this.lut.table.byteOffset, rawData.byteOffset, renderedData.byteOffset, columns, viewportSpaceImageX0,
+        viewportSpaceImageY0, imageX0, imageX1, imageY0, imageY1, zoom, leftLimit, rightLimit, rescaleSlope,
+        rescaleIntercept,
+      );
 
-        this.coreRender(this.lut.table.byteOffset, rawData.byteOffset, renderedData.byteOffset, columns, x0, y0,
-          displayX0, displayX1, displayY0, displayY1, zoom, leftLimit, rightLimit, rescaleSlope,
-          rescaleIntercept);
+      const imageData = new ImageData(renderedData, imageWidth, imageHeight);
+      this.context.putImageData(imageData, imageX0, imageY0);
 
-        const imageData = new ImageData(renderedData, displayWidth, displayHeight);
-        this.context.putImageData(imageData, displayX0, displayY0);
+      this.renderingCore._free(rawData.byteOffset);
+      this.renderingCore._free(renderedData.byteOffset);
 
-        this.renderingCore._free(rawData.byteOffset);
-        this.renderingCore._free(renderedData.byteOffset);
-
-      } catch (error) {
-        throw this.handleEmscriptenErrors(error);
-      }
+    } catch (error) {
+      throw this.handleEmscriptenErrors(error);
     }
   }
 

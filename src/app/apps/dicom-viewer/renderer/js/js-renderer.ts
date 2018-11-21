@@ -1,6 +1,7 @@
 import { NormalizedImageFormat } from '../../constants';
 import { Renderer } from '../renderer';
 import { RenderingParameters } from '../rendering-parameters';
+import { RenderingProperties } from '../rendering-properties';
 import { getRenderingProperties } from '../rendering-utils';
 
 export class JsRenderer implements Renderer {
@@ -14,12 +15,21 @@ export class JsRenderer implements Renderer {
   }
 
   render(renderingParameters: RenderingParameters): void {
+    const { width, height } = this.canvas;
+
     this.context.fillStyle = 'black';
-    this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    this.context.fillRect(0, 0, width, height);
+
+    const renderingProperties = getRenderingProperties(renderingParameters, width, height);
+
+    if (!renderingProperties.isImageInViewport) {
+      return;
+    }
 
     const { frame, zoom } = renderingParameters;
+    const { columns, imageFormat, rows } = frame;
 
-    switch (frame.imageFormat) {
+    switch (imageFormat) {
       case NormalizedImageFormat.Int16:
         const { windowWidth } = renderingParameters;
 
@@ -28,14 +38,14 @@ export class JsRenderer implements Renderer {
         }
 
         if (zoom < 1) {
-          this.renderCanvasPixels(renderingParameters);
+          this.renderViewportPixels(renderingParameters, renderingProperties);
         } else {
-          this.renderImagePixels(renderingParameters);
+          this.renderImagePixels(renderingParameters, renderingProperties);
         }
         break;
 
       case NormalizedImageFormat.RGB:
-        this.renderRGB(renderingParameters);
+        this.renderRGB(renderingParameters, renderingProperties);
         break;
 
       default:
@@ -53,103 +63,51 @@ export class JsRenderer implements Renderer {
     return { table, windowWidth };
   }
 
-  private renderCanvasPixels(renderingParameters: RenderingParameters): void {
-    const { frame, zoom } = renderingParameters;
-    const { columns, pixelData, rescaleIntercept, rescaleSlope } = frame;
+  private renderImagePixels(renderingParameters: RenderingParameters, renderingProperties: RenderingProperties): void {
     const { width, height } = this.canvas;
-    const {
-      displayHeight, displayWidth, displayX0, displayX1, displayY0, displayY1, leftLimit, rightLimit, x0, y0,
-    } = getRenderingProperties(renderingParameters, width, height);
-
-    const length = displayWidth * displayHeight;
-
-    if (length > 0) {
-      const table = this.lut.table;
-      const imageData32 = new Uint32Array(length);
-      let dataIndex = 0;
-
-      for (let y = displayY0; y <= displayY1; y++) {
-        for (let x = displayX0; x <= displayX1; x++) {
-          const pixelDataIndex = ((y - y0) / zoom | 0) * columns + ((x - x0) / zoom | 0);
-          const rawValue = pixelData[pixelDataIndex] * rescaleSlope + rescaleIntercept | 0;
-          let intensity = 255;
-
-          if (rawValue < leftLimit) {
-            intensity = 0;
-          } else if (rawValue < rightLimit) {
-            intensity = table[rawValue - leftLimit];
-          }
-
-          imageData32[dataIndex++] = intensity | intensity << 8 | intensity << 16 | 255 << 24;
-        }
-      }
-
-      const imageData = new Uint8ClampedArray(imageData32.buffer);
-      const imageDataInstance = new ImageData(imageData, displayWidth, displayHeight);
-      this.context.putImageData(imageDataInstance, displayX0, displayY0);
-    }
-  }
-
-  private renderImagePixels(renderingParameters: RenderingParameters): void {
-    const { frame, zoom } = renderingParameters;
+    const { frame, zoom, windowWidth } = renderingParameters;
     const { columns, pixelData, rescaleIntercept, rescaleSlope, rows } = frame;
-    const { width, height } = this.canvas;
-    const {
-      displayHeight, displayWidth, displayX0, displayY0, leftLimit, rightLimit, x0, x1, y0, y1,
-    } = getRenderingProperties(renderingParameters, width, height);
+    const { boundedViewportSpace, leftLimit, rightLimit, imageSpace } = renderingProperties;
+    const { imageX0, imageY0, imageWidth, imageHeight } = boundedViewportSpace;
+    const { displayHeight, displayWidth, displayX0, displayX1, displayY0, displayY1 } = imageSpace;
 
-    const imageY0 = y0 < 0 ? Math.round(-y0 / zoom) : 0;
-    const imageY1 = y1 > height ? rows - Math.round((y1 - height) / zoom) : rows;
+    const table = this.lut.table;
+    const imageData32 = new Uint32Array(displayWidth * displayHeight);
 
-    const imageX0 = x0 < 0 ? Math.round(-x0 / zoom) : 0;
-    const imageX1 = x1 > width ? columns - Math.round((x1 - width) / zoom) : columns;
+    let dataIndex = 0;
 
-    const croppedImageWidth = imageX1 - imageX0;
-    const croppedImageHeight = imageY1 - imageY0;
+    for (let y = displayY0; y <= displayY1; y++) {
+      for (let x = displayX0; x <= displayX1; x++) {
+        const rawValue = pixelData[y * columns + x] * rescaleSlope + rescaleIntercept | 0;
+        let intensity = 0;
 
-    const length = croppedImageWidth * croppedImageHeight;
-
-    if (length > 0) {
-      const table = this.lut.table;
-      const imageData32 = new Uint32Array(length);
-      let dataIndex = 0;
-
-      for (let y = imageY0; y <= imageY1; y++) {
-        for (let x = imageX0; x < imageX1; x++) {
-          const rawValue = pixelData[y * columns + x] * rescaleSlope + rescaleIntercept;
-          let intensity = 0;
-
-          if (rawValue >= rightLimit) {
-            intensity = 255;
-          } else if (rawValue > leftLimit) {
-            intensity = table[rawValue - leftLimit];
-          }
-
-          imageData32[dataIndex++] = intensity | intensity << 8 | intensity << 16 | 255 << 24;
+        if (rawValue >= rightLimit) {
+          intensity = 255;
+        } else if (rawValue > leftLimit) {
+          intensity = table[rawValue - leftLimit];
         }
+
+        imageData32[dataIndex++] = intensity | intensity << 8 | intensity << 16 | 255 << 24;
       }
-
-      this.renderingContext.canvas.width = croppedImageWidth;
-      this.renderingContext.canvas.height = croppedImageHeight;
-
-      const imageData = new Uint8ClampedArray(imageData32.buffer);
-      const imageDataInstance = new ImageData(imageData, croppedImageWidth, croppedImageHeight);
-
-      this.renderingContext.putImageData(imageDataInstance, 0, 0);
-      this.context.drawImage(this.renderingContext.canvas, displayX0, displayY0, displayWidth, displayHeight);
     }
+
+    const imageData = new Uint8ClampedArray(imageData32.buffer);
+    const imageDataInstance = new ImageData(imageData, displayWidth, displayHeight);
+
+    this.renderingContext.canvas.width = displayWidth;
+    this.renderingContext.canvas.height = displayHeight;
+
+    this.renderingContext.putImageData(imageDataInstance, 0, 0);
+    this.context.drawImage(this.renderingContext.canvas, imageX0, imageY0, imageWidth, imageHeight);
   }
 
-  private renderRGB(renderingParameters: RenderingParameters): void {
+  private renderRGB(renderingParameters: RenderingParameters, renderingProperties: RenderingProperties): void {
     const { columns, pixelData, rows } = renderingParameters.frame;
-    const { width, height } = this.canvas;
-    const { imageHeight, imageWidth, x0, y0 } = getRenderingProperties(renderingParameters, width, height);
-
-    this.renderingContext.canvas.width = columns;
-    this.renderingContext.canvas.height = rows;
+    const { imageHeight, imageWidth, imageX0, imageY0 } = renderingProperties.viewportSpace;
 
     const pixelDataLength = pixelData.length;
     const imageData32 = new Uint32Array(columns * rows);
+
     let dataIndex = 0;
 
     for (let i = 0; i < pixelDataLength; i += 3) {
@@ -159,7 +117,47 @@ export class JsRenderer implements Renderer {
     const imageData = new Uint8ClampedArray(imageData32.buffer);
     const imageDataInstance = new ImageData(imageData, columns, rows);
 
+    this.renderingContext.canvas.width = columns;
+    this.renderingContext.canvas.height = rows;
+
     this.renderingContext.putImageData(imageDataInstance, 0, 0);
-    this.context.drawImage(this.renderingContext.canvas, x0, y0, imageWidth, imageHeight);
+    this.context.drawImage(this.renderingContext.canvas, imageX0, imageY0, imageWidth, imageHeight);
+  }
+
+  private renderViewportPixels(renderingParameters: RenderingParameters,
+                               renderingProperties: RenderingProperties): void {
+
+    const { frame, zoom } = renderingParameters;
+    const { columns, pixelData, rescaleIntercept, rescaleSlope } = frame;
+    const { boundedViewportSpace, leftLimit, rightLimit, viewportSpace } = renderingProperties;
+    const { imageHeight, imageWidth, imageX0, imageX1, imageY0, imageY1 } = boundedViewportSpace;
+
+    const viewportSpaceImageX0 = viewportSpace.imageX0;
+    const viewportSpaceImageY0 = viewportSpace.imageY0;
+    const table = this.lut.table;
+    const imageData32 = new Uint32Array(imageWidth * imageHeight);
+
+    let dataIndex = 0;
+
+    for (let y = imageY0; y <= imageY1; y++) {
+      for (let x = imageX0; x <= imageX1; x++) {
+        const pixelDataIndex = ((y - viewportSpaceImageY0) / zoom | 0) * columns +
+          ((x - viewportSpaceImageX0) / zoom | 0);
+        const rawValue = pixelData[pixelDataIndex] * rescaleSlope + rescaleIntercept | 0;
+        let intensity = 255;
+
+        if (rawValue < leftLimit) {
+          intensity = 0;
+        } else if (rawValue < rightLimit) {
+          intensity = table[rawValue - leftLimit];
+        }
+
+        imageData32[dataIndex++] = intensity | intensity << 8 | intensity << 16 | 255 << 24;
+      }
+    }
+
+    const imageData = new Uint8ClampedArray(imageData32.buffer);
+    const imageDataInstance = new ImageData(imageData, imageWidth, imageHeight);
+    this.context.putImageData(imageDataInstance, imageX0, imageY0);
   }
 }
