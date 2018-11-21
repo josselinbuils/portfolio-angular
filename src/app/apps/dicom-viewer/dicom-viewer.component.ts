@@ -8,8 +8,9 @@ import { MouseTool, RendererType } from './constants';
 import { DicomComputerService } from './dicom-computer.service';
 import { DicomLoaderService } from './dicom-loader.service';
 import { findFrame } from './helpers/camera-helpers';
-import { Camera, DicomDataset, Viewport } from './models';
-import { JsRenderer } from './renderer/js/js-renderer';
+import { getSliceDimensions } from './helpers/volume-helpers';
+import { Camera, Dataset, Viewport } from './models';
+import { JsFrameRenderer } from './renderer/js/js-frame-renderer';
 import { Renderer } from './renderer/renderer';
 import { WebGLRenderer } from './renderer/webgl/webgl-renderer';
 
@@ -39,7 +40,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   activeRightTool: MouseTool = MouseTool.Zoom;
   canvas: HTMLCanvasElement;
   config?: Config;
-  dataset?: DicomDataset;
+  dataset?: Dataset;
   errorMessage?: string;
   fps = 0;
   loading = false;
@@ -122,9 +123,10 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       }
 
       const frames = this.computer.computeFrames(dicomFrames);
-      this.dataset = new DicomDataset({ frames });
+      const volume = this.computer.computeVolume(frames);
+      this.dataset = new Dataset({ frames, volume });
       this.destroyers.push(() => this.dataset.destroy());
-      console.log(this.dataset.frames);
+      console.log(this.dataset);
 
     } catch (error) {
       this.handleError(error);
@@ -137,7 +139,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     try {
       switch (this.config.rendererType) {
         case RendererType.JavaScript:
-          this.renderer = new JsRenderer(this.canvas);
+          this.renderer = new JsFrameRenderer(this.canvas);
           break;
         case RendererType.WebGL:
           this.renderer = new WebGLRenderer(this.canvas);
@@ -153,6 +155,10 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     const camera = Camera.fromFrame(frame);
     this.viewport = new Viewport({ camera, windowCenter, windowWidth });
     console.log(this.viewport);
+
+    if (this.dataset.volume !== undefined) {
+      console.log(getSliceDimensions(this.dataset.volume, this.viewport.camera));
+    }
 
     const windowNativeElement = this.windowComponent.windowElementRef.nativeElement;
 
@@ -328,8 +334,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
 
         try {
           const { camera, deltaX, deltaY, windowCenter, windowWidth, zoom } = this.viewport;
-          const frame = findFrame(this.dataset, camera);
-          this.renderer.render({ deltaX, deltaY, frame, windowCenter, windowWidth, zoom });
+          this.renderer.render(this.dataset, { deltaX, deltaY, camera, windowCenter, windowWidth, zoom });
           this.viewport.makeClean();
           this.renderDurations.push(performance.now() - t);
           this.frameDurations.push(t - this.lastTime);

@@ -1,5 +1,6 @@
 import { NormalizedImageFormat } from '../../constants';
-import { Frame } from '../../models';
+import { findFrame } from '../../helpers/camera-helpers';
+import { Dataset, Frame } from '../../models';
 import { Renderer } from '../renderer';
 import { RenderingParameters } from '../rendering-parameters';
 
@@ -34,9 +35,10 @@ export class WebGLRenderer implements Renderer {
     delete this.texture;
   }
 
-  render(renderingParameters: RenderingParameters): void {
+  render(dataset: Dataset, renderingParameters: RenderingParameters): void {
     const gl = this.gl;
-    const { deltaX, deltaY, frame, windowCenter, windowWidth, zoom } = renderingParameters;
+    const { deltaX, deltaY, camera, windowCenter, windowWidth, zoom } = renderingParameters;
+    const frame = findFrame(dataset, camera);
     const { columns, id, imageFormat, rescaleIntercept, rescaleSlope, rows } = frame;
     const { width, height } = this.canvas;
 

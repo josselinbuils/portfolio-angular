@@ -1,10 +1,12 @@
 import { NormalizedImageFormat } from '../../constants';
+import { findFrame } from '../../helpers/camera-helpers';
+import { Dataset, Frame } from '../../models';
 import { Renderer } from '../renderer';
 import { RenderingParameters } from '../rendering-parameters';
 import { RenderingProperties } from '../rendering-properties';
 import { getRenderingProperties } from '../rendering-utils';
 
-export class JsRenderer implements Renderer {
+export class JsFrameRenderer implements Renderer {
 
   private readonly context: CanvasRenderingContext2D;
   private lut?: { table: number[]; windowWidth: number };
@@ -14,20 +16,20 @@ export class JsRenderer implements Renderer {
     this.context = canvas.getContext('2d');
   }
 
-  render(renderingParameters: RenderingParameters): void {
+  render(dataset: Dataset, renderingParameters: RenderingParameters): void {
     const { width, height } = this.canvas;
+    const { camera, zoom } = renderingParameters;
+    const frame = findFrame(dataset, camera);
+    const { columns, imageFormat, rows } = frame;
 
     this.context.fillStyle = 'black';
     this.context.fillRect(0, 0, width, height);
 
-    const renderingProperties = getRenderingProperties(renderingParameters, width, height);
+    const renderingProperties = getRenderingProperties(renderingParameters, columns, rows, width, height);
 
     if (!renderingProperties.isImageInViewport) {
       return;
     }
-
-    const { frame, zoom } = renderingParameters;
-    const { columns, imageFormat, rows } = frame;
 
     switch (imageFormat) {
       case NormalizedImageFormat.Int16:
@@ -38,14 +40,14 @@ export class JsRenderer implements Renderer {
         }
 
         if (zoom < 1) {
-          this.renderViewportPixels(renderingParameters, renderingProperties);
+          this.renderViewportPixels(frame, renderingParameters, renderingProperties);
         } else {
-          this.renderImagePixels(renderingParameters, renderingProperties);
+          this.renderImagePixels(frame, renderingParameters, renderingProperties);
         }
         break;
 
       case NormalizedImageFormat.RGB:
-        this.renderRGB(renderingParameters, renderingProperties);
+        this.renderRGB(frame, renderingParameters, renderingProperties);
         break;
 
       default:
@@ -63,10 +65,12 @@ export class JsRenderer implements Renderer {
     return { table, windowWidth };
   }
 
-  private renderImagePixels(renderingParameters: RenderingParameters, renderingProperties: RenderingProperties): void {
+  private renderImagePixels(frame: Frame, renderingParameters: RenderingParameters,
+                            renderingProperties: RenderingProperties): void {
+
     const { width, height } = this.canvas;
-    const { frame, zoom, windowWidth } = renderingParameters;
     const { columns, pixelData, rescaleIntercept, rescaleSlope, rows } = frame;
+    const { zoom, windowWidth } = renderingParameters;
     const { boundedViewportSpace, leftLimit, rightLimit, imageSpace } = renderingProperties;
     const { imageX0, imageY0, imageWidth, imageHeight } = boundedViewportSpace;
     const { displayHeight, displayWidth, displayX0, displayX1, displayY0, displayY1 } = imageSpace;
@@ -101,8 +105,10 @@ export class JsRenderer implements Renderer {
     this.context.drawImage(this.renderingContext.canvas, imageX0, imageY0, imageWidth, imageHeight);
   }
 
-  private renderRGB(renderingParameters: RenderingParameters, renderingProperties: RenderingProperties): void {
-    const { columns, pixelData, rows } = renderingParameters.frame;
+  private renderRGB(frame: Frame, renderingParameters: RenderingParameters,
+                    renderingProperties: RenderingProperties): void {
+
+    const { columns, pixelData, rows } = frame;
     const { imageHeight, imageWidth, imageX0, imageY0 } = renderingProperties.viewportSpace;
 
     const pixelDataLength = pixelData.length;
@@ -124,11 +130,11 @@ export class JsRenderer implements Renderer {
     this.context.drawImage(this.renderingContext.canvas, imageX0, imageY0, imageWidth, imageHeight);
   }
 
-  private renderViewportPixels(renderingParameters: RenderingParameters,
+  private renderViewportPixels(frame: Frame, renderingParameters: RenderingParameters,
                                renderingProperties: RenderingProperties): void {
 
-    const { frame, zoom } = renderingParameters;
     const { columns, pixelData, rescaleIntercept, rescaleSlope } = frame;
+    const { zoom } = renderingParameters;
     const { boundedViewportSpace, leftLimit, rightLimit, viewportSpace } = renderingProperties;
     const { imageHeight, imageWidth, imageX0, imageX1, imageY0, imageY1 } = boundedViewportSpace;
 

@@ -3,7 +3,8 @@ import { cloneDeep } from 'lodash';
 import * as math from 'mathjs';
 
 import { NormalizedImageFormat, PhotometricInterpretation, PixelRepresentation } from './constants';
-import { DicomFrame, Frame } from './models';
+import { getDistanceBetweenPoints } from './helpers/volume-helpers';
+import { DicomFrame, Frame, Volume } from './models';
 
 @Injectable()
 export class DicomComputerService {
@@ -23,6 +24,61 @@ export class DicomComputerService {
         ...cloneDeep(frame), dicom, dimensionsMm, id, imageCenter, imageFormat, imageNormal, imageOrientation,
         imagePosition, pixelData, pixelSpacing, sliceLocation,
       });
+    });
+  }
+
+  computeVolume(frames: Frame[]): Volume | undefined {
+    const isVolume = frames.every(frame => {
+      return frame.imageFormat === NormalizedImageFormat.Int16 &&
+        frame.dicom.imageOrientation !== undefined &&
+        frame.dicom.imagePosition !== undefined &&
+        frame.dicom.pixelSpacing !== undefined;
+    });
+
+    if (!isVolume) {
+      return undefined;
+    }
+
+    const { columns, imageOrientation, imageNormal, pixelSpacing, rows } = frames[0];
+
+    const dimensionsVoxels = [columns, rows, frames.length];
+    const firstVoxelCenter = frames[0].imagePosition;
+    const orientation = [...imageOrientation, imageNormal];
+
+    const pixelData: Int16Array[] = [];
+
+    frames.forEach(frame => {
+      pixelData.push(frame.pixelData as Int16Array);
+    });
+
+    const sliceDistance = Math.abs(getDistanceBetweenPoints(frames[0].imageCenter, frames[1].imageCenter, imageNormal));
+    const voxelSpacing = [...pixelSpacing, sliceDistance];
+    const dimensionsMm = math.dotMultiply(dimensionsVoxels, voxelSpacing);
+    const orientedDimensionsMm = orientation.map(o => math.dotMultiply(o, dimensionsMm));
+    const orientedDimensionsVoxels = orientation.map(o => math.dotMultiply(o, dimensionsVoxels));
+
+    const getCorner = (x: number, y: number, z: number): number[] => {
+      return math.chain(firstVoxelCenter)
+        .add(math.multiply(orientedDimensionsMm[0], x))
+        .add(math.multiply(orientedDimensionsMm[1], y))
+        .add(math.multiply(orientedDimensionsMm[2], z))
+        .done();
+    };
+
+    const corners = {
+      x0y0z0: getCorner(0, 0, 0),
+      x1y0z0: getCorner(1, 0, 0),
+      x1y1z0: getCorner(1, 1, 0),
+      x0y1z0: getCorner(0, 1, 0),
+      x0y0z1: getCorner(0, 0, 1),
+      x1y0z1: getCorner(1, 0, 1),
+      x1y1z1: getCorner(1, 1, 1),
+      x0y1z1: getCorner(0, 1, 1),
+    };
+
+    return new Volume({
+      dimensionsMm, dimensionsVoxels, corners, firstVoxelCenter, orientation, orientedDimensionsMm,
+      orientedDimensionsVoxels, pixelData, voxelSpacing,
     });
   }
 

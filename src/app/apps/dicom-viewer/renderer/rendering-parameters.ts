@@ -1,9 +1,9 @@
-import { Frame } from '../models';
+import { Camera } from '../models';
 
 export interface RenderingParameters {
+  camera: Camera;
   deltaX: number;
   deltaY: number;
-  frame: Frame;
   windowWidth: number;
   windowCenter: number;
   zoom: number;

@@ -1,10 +1,10 @@
-import * as math from 'mathjs';
+import { Camera, Dataset, Frame } from '../models';
 
-import { Camera, DicomDataset, Frame } from '../models';
+import { getDistanceBetweenPoints } from './volume-helpers';
 
 const DEBUG = false;
 
-export function findFrame(dataset: DicomDataset, camera: Camera): Frame {
+export function findFrame(dataset: Dataset, camera: Camera): Frame {
   try {
     return findFrameBinary(dataset, camera);
   } catch (error) {
@@ -14,7 +14,7 @@ export function findFrame(dataset: DicomDataset, camera: Camera): Frame {
 }
 
 // TODO improve this
-function findFrameBinary(dataset: DicomDataset, camera: Camera): Frame {
+function findFrameBinary(dataset: Dataset, camera: Camera): Frame {
   if (DEBUG) { console.time(); }
 
   const frames = dataset.frames;
@@ -61,7 +61,7 @@ function findFrameBinary(dataset: DicomDataset, camera: Camera): Frame {
   throw new Error('Unable to find frame');
 }
 
-function findFrameLinear(dataset: DicomDataset, camera: Camera): Frame {
+function findFrameLinear(dataset: Dataset, camera: Camera): Frame {
   const direction = camera.getDirection();
 
   for (const frame of dataset.frames) {
@@ -73,8 +73,4 @@ function findFrameLinear(dataset: DicomDataset, camera: Camera): Frame {
     }
   }
   throw new Error('Unable to find frame');
-}
-
-function getDistanceBetweenPoints(pointA: number[], pointB: number[], axe: number[]): number {
-  return math.chain(pointA).subtract(pointB).dot(axe).abs().done();
 }
