@@ -9,10 +9,8 @@ import { DicomFrame, Frame } from './models';
 export class DicomComputerService {
   computeFrames(dicomFrames: DicomFrame[]): Frame[] {
     return dicomFrames.map((frame, frameIndex) => {
-      const { numberOfFrames, sopInstanceUID } = frame;
-
       const dicom = frame;
-      const id = this.getFrameId(frame, frameIndex);
+      const id = `${frame.sopInstanceUID}-${frameIndex}`;
       const { imageFormat, pixelData } = this.normalizePixelData(frame);
       const {
         dimensionsMm, imageCenter, imageNormal, imageOrientation, imagePosition, pixelSpacing, sliceLocation,
@@ -72,11 +70,6 @@ export class DicomComputerService {
     }
 
     return format as DicomImageFormat;
-  }
-
-  private getFrameId(frame: DicomFrame, frameIndex: number): string {
-    const { numberOfFrames, sopInstanceUID } = frame;
-    return numberOfFrames > 0 ? `${sopInstanceUID}.${frameIndex}` : sopInstanceUID;
   }
 
   private normalizePixelData(frame: DicomFrame): NormalizedPixelData {

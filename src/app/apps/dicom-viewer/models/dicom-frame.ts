@@ -6,7 +6,6 @@ export class DicomFrame {
   columns: number;
   imageOrientation?: number[][];
   imagePosition?: number[];
-  numberOfFrames?: number;
   patientName: string;
   photometricInterpretation: PhotometricInterpretation;
   pixelData: Uint8Array;
