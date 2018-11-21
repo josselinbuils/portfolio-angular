@@ -28,7 +28,7 @@ export class DicomComputerService {
   }
 
   computeVolume(frames: Frame[]): Volume | undefined {
-    const isVolume = frames.every(frame => {
+    const isVolume = frames.length > 30 && frames.every(frame => {
       return frame.imageFormat === NormalizedImageFormat.Int16 &&
         frame.dicom.imageOrientation !== undefined &&
         frame.dicom.imagePosition !== undefined &&
