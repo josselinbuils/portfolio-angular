@@ -11,7 +11,6 @@ import { findFrame } from './helpers/camera-helpers';
 import { Camera, DicomDataset, Viewport } from './models';
 import { JsRenderer } from './renderer/js/js-renderer';
 import { Renderer } from './renderer/renderer';
-import { WasmRenderer } from './renderer/wasm/wasm-renderer';
 import { WebGLRenderer } from './renderer/webgl/webgl-renderer';
 
 const ANNOTATIONS_REFRESH_DELAY = 500;
@@ -139,9 +138,6 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       switch (this.config.rendererType) {
         case RendererType.JavaScript:
           this.renderer = new JsRenderer(this.canvas);
-          break;
-        case RendererType.WebAssembly:
-          this.renderer = await WasmRenderer.create(this.canvas);
           break;
         case RendererType.WebGL:
           this.renderer = new WebGLRenderer(this.canvas);

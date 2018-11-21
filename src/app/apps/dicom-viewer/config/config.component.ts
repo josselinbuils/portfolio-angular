@@ -28,7 +28,6 @@ export class ConfigComponent implements OnInit {
     : `${PREVIEWS_PATH}`;
   renderers = [
     { type: RendererType.JavaScript, logo: 'javascript.png' },
-    { type: RendererType.WebAssembly, logo: 'webassembly.png' },
     { type: RendererType.WebGL, logo: 'webgl.png' },
   ];
   rendererType: string;
