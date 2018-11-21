@@ -19,12 +19,18 @@ export class DicomLoaderService {
 
     if (files.length === 1) {
       frames = await this.loadInstance(files[0]);
-    } else {
+    } else if (files.length > 0) {
       frames = [];
+
       for (const file of files) {
         frames.push(...await this.loadInstance(file));
       }
-      frames = frames.sort((a, b) => a.sopInstanceUID > b.sopInstanceUID ? 1 : -1);
+
+      frames = frames.every(frame => frame.sliceLocation !== undefined)
+        ? frames.sort((a, b) => a.sliceLocation > b.sliceLocation ? 1 : -1)
+        : frames.sort((a, b) => a.sopInstanceUID > b.sopInstanceUID ? 1 : -1);
+    } else {
+      throw new Error('No file to load');
     }
 
     return frames;

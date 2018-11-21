@@ -14,12 +14,14 @@ export class Renderable {
           return value;
         },
         set(newValue: any): void {
-          value = newValue;
+          if (newValue !== value) {
+            value = newValue;
 
-          if (value !== undefined && value.onUpdate instanceof Subject) {
-            value.onUpdate.subscribe(() => this.makeDirty());
+            if (value !== undefined && value.onUpdate instanceof Subject) {
+              value.onUpdate.subscribe(() => this.makeDirty());
+            }
+            this.makeDirty();
           }
-          this.makeDirty();
         },
       });
     }

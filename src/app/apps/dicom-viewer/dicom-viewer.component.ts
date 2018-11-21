@@ -49,12 +49,11 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   title = DicomViewerComponent.appName;
   viewport: Viewport;
 
-  private cancelMouseDownListener: () => void;
+  private destroyers: (() => void)[];
   private frameDurations: number[];
   private lastTime = performance.now();
   private renderDurations: number[];
   private renderer: Renderer;
-  private statsInterval: number;
 
   constructor(private readonly viewRenderer: Renderer2,
               private readonly loader: DicomLoaderService,
@@ -67,13 +66,11 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
 
     this.ngOnDestroy();
 
-    delete this.cancelMouseDownListener;
     delete this.canvas;
     delete this.config;
     delete this.dataset;
     delete this.errorMessage;
     delete this.renderer;
-    delete this.statsInterval;
     delete this.viewport;
 
     this.loading = false;
@@ -81,20 +78,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   }
 
   ngOnDestroy(): void {
-    if (typeof this.cancelMouseDownListener === 'function') {
-      this.cancelMouseDownListener();
-    }
-    if (this.dataset !== undefined) {
-      this.dataset.destroy();
-    }
-    if (this.renderer !== undefined) {
-      if (typeof this.renderer.destroy === 'function') {
-        this.renderer.destroy();
-      }
-    }
-    if (this.statsInterval !== undefined) {
-      clearInterval(this.statsInterval);
-    }
+    this.destroyers.forEach(destroyer => destroyer());
   }
 
   onResize(size: { width: number; height: number }): void {
@@ -128,6 +112,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     this.config = config;
     this.showConfig = false;
     this.loading = true;
+    this.destroyers = [];
 
     try {
       const dicomFrames = await this.loader.loadFrames(this.config.dataset);
@@ -139,6 +124,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
 
       const frames = this.computer.computeFrames(dicomFrames);
       this.dataset = new DicomDataset({ frames });
+      this.destroyers.push(() => this.dataset.destroy());
       console.log(this.dataset.frames);
 
     } catch (error) {
@@ -159,13 +145,14 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
           break;
         case RendererType.WebGL:
           this.renderer = new WebGLRenderer(this.canvas);
+          this.destroyers.push(() => this.renderer.destroy());
       }
     } catch (error) {
       error.message = `Unable to instantiate ${this.config.rendererType} renderer: ${error.message}`;
       this.handleError(error);
     }
 
-    const frame = this.dataset.frames[0];
+    const frame = this.dataset.frames[Math.floor(this.dataset.frames.length / 2)];
     const { windowCenter, windowWidth } = frame;
     const camera = Camera.fromFrame(frame);
     this.viewport = new Viewport({ camera, windowCenter, windowWidth });
@@ -181,7 +168,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     this.viewport.zoom = this.viewport.height / frame.rows;
 
     this.activeLeftTool = this.dataset.frames.length > 1 ? MouseTool.Paging : MouseTool.Windowing;
-    this.cancelMouseDownListener = this.disableContextMenu(this.viewportElementRef.nativeElement);
+    this.destroyers.push(this.disableContextMenu(this.viewportElementRef.nativeElement));
 
     this.loading = false;
     this.startRender();
@@ -195,7 +182,13 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     return this.viewRenderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
       const deltaInstance = Math.floor((moveEvent.clientY - startY) * frames.length / this.viewport.height * 1.2);
       const newIndex = Math.min(Math.max(startIndex + deltaInstance, 0), frames.length - 1);
-      this.viewport.camera = Camera.fromFrame(frames[newIndex]);
+
+      if (newIndex !== startIndex) {
+        const frame = frames[newIndex];
+        this.viewport.camera = Camera.fromFrame(frame);
+        this.viewport.windowWidth = frame.windowWidth;
+        this.viewport.windowCenter = frame.windowCenter;
+      }
     });
   }
 
@@ -211,7 +204,8 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
 
       // noinspection JSSuspiciousNameCombination
       if (Math.abs(viewport.deltaX) < DELTA_LIMIT && Math.abs(viewport.deltaY) < DELTA_LIMIT) {
-        viewport.deltaX = viewport.deltaY = 0;
+        viewport.deltaX = 0;
+        viewport.deltaY = 0;
       }
     });
   }
@@ -295,12 +289,12 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     const startY = downEvent.clientY;
 
     const startWindowWidth = this.viewport.windowWidth;
-    const startWindowLevel = this.viewport.windowCenter;
+    const startWindowCenter = this.viewport.windowCenter;
 
     return this.viewRenderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
-      this.viewport.windowWidth = startWindowWidth + (moveEvent.clientX - startX) * WINDOW_WIDTH_SENSIBILITY;
-      this.viewport.windowCenter = startWindowLevel - (moveEvent.clientY - startY) * WINDOW_LEVEL_SENSIBILITY;
-      this.viewport.windowWidth = Math.max(this.viewport.windowWidth, WINDOW_WIDTH_MIN);
+      const windowWidth = startWindowWidth + (moveEvent.clientX - startX) * WINDOW_WIDTH_SENSIBILITY;
+      this.viewport.windowWidth = Math.max(windowWidth, WINDOW_WIDTH_MIN);
+      this.viewport.windowCenter = startWindowCenter - (moveEvent.clientY - startY) * WINDOW_LEVEL_SENSIBILITY;
     });
   }
 
@@ -354,7 +348,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     this.frameDurations = [];
     this.renderDurations = [];
 
-    this.statsInterval = window.setInterval(() => {
+    const statsInterval = window.setInterval(() => {
       if (this.frameDurations.length > 0) {
         const meanFrameDuration = this.frameDurations.reduce((sum, d) => sum + d, 0) / this.frameDurations.length;
         this.fps = Math.round(1000 / meanFrameDuration);
@@ -370,6 +364,8 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
         this.meanRenderDuration = 0;
       }
     }, ANNOTATIONS_REFRESH_DELAY);
+
+    this.destroyers.push(() => clearInterval(statsInterval));
 
     render();
   }
