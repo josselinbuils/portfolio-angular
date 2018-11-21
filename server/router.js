@@ -5,7 +5,8 @@ const { join } = require('path');
 const serveStatic = require('serve-static');
 
 const {
-  ASSETS_DIR, ASSETS_DIR_DEV, ENV_DEV, ENV_PROD, HTTP_DEFAULT_PREFIX, HTTP_INTERNAL_ERROR, HTTP_NOT_FOUND, PUBLIC_DIR
+  ASSETS_DIR, ASSETS_DIR_DEV, ENV_DEV, ENV_PROD, HTTP_DEFAULT_PREFIX, HTTP_INTERNAL_ERROR, HTTP_NOT_FOUND, MAX_AGE_DAYS,
+  PUBLIC_DIR
 } = require('./constants.json');
 const DependenciesRoutes = require('./api/dependencies/dependencies.routes');
 const DicomRoutes = require('./api/dicom/dicom.routes');
@@ -45,7 +46,7 @@ module.exports = class Router {
       next();
     });
 
-    router.use(ASSETS_DIR, serveStatic(ASSETS_PATH));
+    router.use(ASSETS_DIR, serveStatic(ASSETS_PATH, { immutable: true, maxAge: MAX_AGE_DAYS * 24 * 60 * 60 * 1000 }));
     router.use(serveStatic(CLIENT_PATH));
     router.use(bodyParser.json());
 

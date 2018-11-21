@@ -116,33 +116,31 @@ export class DicomLoaderService {
       /**
        * DICOM fields
        */
-      const bitsAllocated = parsedFile.uint16('x00280100');
-      const columns = parsedFile.uint16('x00280011');
-      const imagePosition = this.floatStringsToArray(parsedFile, 'x00200032');
-      const imageOrientation = this.floatStringsToArray(parsedFile, 'x00200037', 3);
+      const instance: any = {
+        bitsAllocated: parsedFile.uint16('x00280100'),
+        columns: parsedFile.uint16('x00280011'),
+        imagePosition: this.floatStringsToArray(parsedFile, 'x00200032'),
+        imageOrientation: this.floatStringsToArray(parsedFile, 'x00200037', 3),
+        patientName: parsedFile.string('x00100010'),
+        photometricInterpretation: parsedFile.string('x00280004') as PhotometricInterpretation,
+        pixelRepresentation: parsedFile.uint16('x00280103'),
+        pixelSpacing: this.floatStringsToArray(parsedFile, 'x00280030'),
+        rescaleIntercept: parsedFile.intString('x00281052'),
+        rescaleSlope: parsedFile.floatString('x00281053'),
+        rows: parsedFile.uint16('x00280010'),
+        sliceLocation: parsedFile.floatString('x00201041'),
+        sopInstanceUID: parsedFile.string('x00080018'),
+        spacingBetweenSlices: parsedFile.floatString('x00180088'),
+        windowCenter: parsedFile.intString('x00281050'),
+        windowWidth: parsedFile.intString('x00281051'),
+      };
+
       const numberOfFrames = parsedFile.intString('x00280008');
-      const patientName = parsedFile.string('x00100010');
-      const photometricInterpretation = parsedFile.string('x00280004') as PhotometricInterpretation;
       const pixelDataElement = parsedFile.elements.x7fe00010;
       const pixelData: Uint8Array = (window as any).dicomParser
         .sharedCopy(dicomData, pixelDataElement.dataOffset, pixelDataElement.length);
-      const pixelRepresentation = parsedFile.uint16('x00280103');
-      const pixelSpacing = this.floatStringsToArray(parsedFile, 'x00280030');
-      const rescaleIntercept = parsedFile.intString('x00281052');
-      const rescaleSlope = parsedFile.floatString('x00281053');
-      const rows = parsedFile.uint16('x00280010');
-      const sliceLocation = parsedFile.floatString('x00201041');
-      const sopInstanceUID = parsedFile.string('x00080018');
-      const spacingBetweenSlices = parsedFile.floatString('x00180088');
-      const windowCenter = parsedFile.intString('x00281050');
-      const windowWidth = parsedFile.intString('x00281051');
 
       const frames: DicomFrame[] = [];
-      const instance: any = {
-        bitsAllocated, columns, imagePosition, imageOrientation, numberOfFrames, patientName, photometricInterpretation,
-        pixelRepresentation, pixelSpacing, rescaleIntercept, rescaleSlope, rows, sliceLocation, sopInstanceUID,
-        spacingBetweenSlices, windowCenter, windowWidth,
-      };
 
       if (Number.isInteger(numberOfFrames)) {
         const frameLength = pixelData.length / numberOfFrames;

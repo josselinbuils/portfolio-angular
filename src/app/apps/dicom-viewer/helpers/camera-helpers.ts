@@ -50,9 +50,9 @@ function findFrameBinary(dataset: DicomDataset, camera: Camera): Frame {
     } else if (left !== index) {
       left = index;
     } else {
-      console.log(camera.lookPoint);
-      console.log(index - 1, frames[index - 1].imageCenter, previousFrameDistance);
-      console.log(index, frames[index].imageCenter, frameDistance);
+      console.log('Binary search:');
+      console.log(`- slice ${index - 1} with a distance of ${previousFrameDistance}mm`);
+      console.log(`- slice ${index} with a distance of ${frameDistance}mm`);
       break;
     }
 
@@ -68,6 +68,7 @@ function findFrameLinear(dataset: DicomDataset, camera: Camera): Frame {
     const distance = getDistanceBetweenPoints(frame.imageCenter, camera.lookPoint, direction);
 
     if (distance < Number.EPSILON) {
+      console.log(`Linear search: slice ${dataset.frames.indexOf(frame)} with a distance of ${distance}mm`);
       return frame;
     }
   }
