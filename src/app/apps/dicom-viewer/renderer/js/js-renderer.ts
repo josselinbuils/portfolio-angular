@@ -71,7 +71,7 @@ export class JsRenderer implements Renderer {
       for (let y = displayY0; y <= displayY1; y++) {
         for (let x = displayX0; x <= displayX1; x++) {
           const pixelDataIndex = ((y - y0) / zoom | 0) * columns + ((x - x0) / zoom | 0);
-          const rawValue = pixelData[pixelDataIndex] * rescaleSlope + rescaleIntercept;
+          const rawValue = pixelData[pixelDataIndex] * rescaleSlope + rescaleIntercept | 0;
           let intensity = 255;
 
           if (rawValue < leftLimit) {

@@ -18,11 +18,11 @@ void render(
     for (double x = displayX0; x <= displayX1; x++) {
       int pixelDataIndex = (int) (round((y - y0) / zoom) * sliceWidth + (x - x0) / zoom);
       int rawValue = (int) (((double) rawImageData[pixelDataIndex]) * rescaleSlope) + rescaleIntercept;
-      int intensity = 0;
+      int intensity = 255;
 
-      if (rawValue >= rightLimit) {
-        intensity = 255;
-      } else if (rawValue > leftLimit) {
+      if (rawValue < leftLimit) {
+        intensity = 0;
+      } else if (rawValue < rightLimit) {
         intensity = table[rawValue - leftLimit];
       }
 
