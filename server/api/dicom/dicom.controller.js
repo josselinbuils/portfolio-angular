@@ -16,6 +16,7 @@ module.exports = class DicomController {
 
   static getList(req, res) {
     if (ENV === ENV_DEV) {
+      previews = readdirSync(previewsPath);
       datasetDescriptors = getDatasetDescriptors();
     }
     res.json(datasetDescriptors);

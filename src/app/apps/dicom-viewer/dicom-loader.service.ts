@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import untar from 'js-untar';
 import { cloneDeep } from 'lodash';
 
 import { DEV_SERVER_URL } from 'app/constants';
@@ -14,21 +15,32 @@ export class DicomLoaderService {
   constructor(private readonly http: HttpClient) {}
 
   async loadFrames(dataset: DatasetDescriptor): Promise<DicomFrame[]> {
-    const { files } = dataset;
     let frames: DicomFrame[];
+    const fileBuffers = [];
 
-    if (files.length === 1) {
-      frames = await this.loadInstance(files[0]);
-    } else if (files.length > 0) {
+    for (const file of dataset.files) {
+      if (/\.tar$/.test(file)) {
+        const tarBuffer = await this.getDicomFile(file);
+        const tarFiles = await untar(tarBuffer);
+        fileBuffers.push(...tarFiles.map(res => res.buffer));
+      } else {
+        fileBuffers.push(await this.getDicomFile(file));
+      }
+    }
+
+    if (fileBuffers.length === 1) {
+      frames = await this.loadInstance(fileBuffers[0]);
+    } else if (fileBuffers.length > 0) {
       frames = [];
 
-      for (const file of files) {
-        frames.push(...await this.loadInstance(file));
+      for (const fileBuffer of fileBuffers) {
+        frames.push(...await this.loadInstance(fileBuffer));
       }
 
       frames = frames.every(frame => frame.sliceLocation !== undefined)
         ? frames.sort((a, b) => a.sliceLocation > b.sliceLocation ? 1 : -1)
         : frames.sort((a, b) => a.sopInstanceUID > b.sopInstanceUID ? 1 : -1);
+
     } else {
       throw new Error('No file to load');
     }
@@ -80,17 +92,15 @@ export class DicomLoaderService {
     return undefined;
   }
 
-  private async getDicomFile(path: string): Promise<Uint8Array> {
+  private async getDicomFile(path: string): Promise<ArrayBuffer> {
     try {
       const url = location.hostname === 'localhost'
         ? `${DEV_SERVER_URL}${DATASETS_PATH}${path}`
         : `${DATASETS_PATH}${path}`;
 
-      const dicomFile = await this.http
+      return this.http
         .get(url, { responseType: 'arraybuffer' })
         .toPromise();
-
-      return new Uint8Array(dicomFile);
 
     } catch (error) {
       error.message = `Unable to retrieve DICOM file: ${error.message}`;
@@ -98,10 +108,10 @@ export class DicomLoaderService {
     }
   }
 
-  private async loadInstance(path: string): Promise<DicomFrame[]> {
+  private async loadInstance(dicomBuffer: ArrayBuffer): Promise<DicomFrame[]> {
     try {
-      const dicomFile = await this.getDicomFile(path);
-      const parsedFile = this.parseDicom(dicomFile);
+      const dicomData = new Uint8Array(dicomBuffer);
+      const parsedFile = this.parseDicom(dicomData);
 
       /**
        * DICOM fields
@@ -115,7 +125,7 @@ export class DicomLoaderService {
       const photometricInterpretation = parsedFile.string('x00280004') as PhotometricInterpretation;
       const pixelDataElement = parsedFile.elements.x7fe00010;
       const pixelData: Uint8Array = (window as any).dicomParser
-        .sharedCopy(dicomFile, pixelDataElement.dataOffset, pixelDataElement.length);
+        .sharedCopy(dicomData, pixelDataElement.dataOffset, pixelDataElement.length);
       const pixelRepresentation = parsedFile.uint16('x00280103');
       const pixelSpacing = this.floatStringsToArray(parsedFile, 'x00280030');
       const rescaleIntercept = parsedFile.intString('x00281052');
