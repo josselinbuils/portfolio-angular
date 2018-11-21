@@ -22,6 +22,74 @@
   overflow-x: hidden;
   overflow-y: auto;
   margin-top: -30px;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: lighten($background-color, 15%);
+    border-radius: $radius;
+  }
+
+  &::-webkit-scrollbar-track {
+    border-radius: $radius;
+  }
+
+  &.dataset-choice {
+    height: 350px;
+  }
+
+  &.renderer-choice {
+    height: 180px;
+  }
+
+  h1 {
+    margin-top: 0;
+  }
+
+  .container {
+    display: flex;
+    flex-wrap: wrap;
+    width: calc(100% + 20px);
+    margin: 20px 0 0 -10px;
+
+    .selectable {
+      cursor: pointer;
+      margin: 12px;
+
+      &:hover {
+        filter: brightness(115%);
+      }
+    }
+
+    .dataset {
+      @extend .selectable;
+      height: 130px;
+      width: 130px;
+      background: #080808;
+      line-height: 130px;
+      text-align: center;
+
+      img {
+        height: 100%;
+      }
+
+      span {
+        display: block;
+        width: calc(100% - 10px);
+        margin: 0 auto;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+
+    .renderer {
+      @extend .selectable;
+      max-height: 100px;
+    }
+  }
 }
 
 * {
@@ -29,76 +97,7 @@
 }
 
 button {
-  @extend .element;
-  padding: 3px 5px;
   position: absolute;
   left: 10px;
   top: 10px;
-
-  &:active:hover {
-    background: lighten($background-color, 25%);
-  }
-
-  &:hover {
-    background: lighten($background-color, 15%);
-  }
-}
-
-.dataset-choice {
-  height: 370px;
-}
-
-.element {
-  background: $background-color;
-  color: $color;
-  border-radius: 4px;
-  outline: none;
-  border: 1px solid $color;
-}
-
-.container {
-  display: flex;
-  flex-wrap: wrap;
-  width: calc(100% + 20px);
-  margin: 20px 0 0 -10px;
-
-  .selectable {
-    cursor: pointer;
-    margin: 12px;
-
-    &:hover {
-      filter: brightness(115%);
-    }
-  }
-
-  .dataset {
-    @extend .selectable;
-    height: 130px;
-    width: 130px;
-    background: #080808;
-    line-height: 130px;
-    text-align: center;
-
-    img {
-      height: 100%;
-    }
-
-    span {
-      display: block;
-      width: calc(100% - 10px);
-      margin: 0 auto;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-  }
-
-  .renderer {
-    @extend .selectable;
-    max-height: 100px;
-  }
-}
-
-.renderer-choice {
-  height: 200px;
 }
