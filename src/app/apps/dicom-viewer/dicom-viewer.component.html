@@ -2,8 +2,9 @@
             (resize)="onResize($event)">
   <div class="container">
     <app-dicom-viewer-config [hidden]="!showConfig" (config)="start($event)"></app-dicom-viewer-config>
-    <app-dicom-viewer-toolbar *ngIf="dataset" [activeLeftTool]="activeLeftTool" [activeRightTool]="activeRightTool"
-                              [dataset]="dataset" (toolSelected)="selectActiveTool($event)"></app-dicom-viewer-toolbar>
+    <app-dicom-viewer-toolbar *ngIf="viewport" [activeLeftTool]="activeLeftTool" [activeRightTool]="activeRightTool"
+                              [dataset]="viewport.dataset"
+                              (toolSelected)="selectActiveTool($event)"></app-dicom-viewer-toolbar>
     <div #viewportElement class="viewport" [hidden]="showConfig">
       <button (click)="back()">Back</button>
       <div *ngIf="!!viewport" class="overlay">
@@ -12,15 +13,16 @@
         </div>
         <div class="overlay-top-right">
           <p>renderer: {{config.rendererType}}</p>
-          <p>framerate: {{fps ? fps + 'fps' : '-'}}</p>
-          <p>rendering: {{meanRenderDuration > 0 ? (meanRenderDuration | number: '1.2-2') + 'ms' : '-'}}</p>
+          <p>framerate: {{annotations.fps ? annotations.fps + 'fps' : '-'}}</p>
+          <p>
+            rendering: {{annotations.meanRenderDuration > 0 ? (annotations.meanRenderDuration | number: '1.2-2') + 'ms' : '-'}}</p>
         </div>
         <div class="overlay-bottom-right">
-          <p>zoom: {{viewport.zoom | number: '1.2-2'}}</p>
+          <p>zoom: {{annotations.zoom ? (annotations.zoom | number: '1.2-2') : '-'}}</p>
         </div>
         <div class="overlay-bottom-left">
-          <p>WW: {{viewport.windowWidth}}</p>
-          <p>WC: {{viewport.windowCenter}}</p>
+          <p>ww: {{viewport.windowWidth}}</p>
+          <p>wc: {{viewport.windowCenter}}</p>
         </div>
       </div>
     </div>

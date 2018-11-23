@@ -1,9 +1,10 @@
 import { DicomFrame } from 'app/apps/dicom-viewer/models/dicom-frame';
 
 import { NormalizedImageFormat, PhotometricInterpretation, PixelRepresentation } from '../constants';
-import { fillProperties } from '../helpers/model-helpers';
 
-export class Frame {
+import { Model } from './model';
+
+export class Frame extends Model {
   /**
    * Computed
    */
@@ -36,6 +37,7 @@ export class Frame {
   windowWidth: number = 400;
 
   constructor(config: object) {
-    fillProperties(this, config);
+    super();
+    super.fillProperties(this, config);
   }
 }

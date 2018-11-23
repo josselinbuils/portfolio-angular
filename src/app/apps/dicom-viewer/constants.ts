@@ -28,3 +28,10 @@ export enum RendererType {
   JavaScript = 'JavaScript',
   WebGL = 'WebGL',
 }
+
+export enum ViewType {
+  Axial = 'Axial',
+  Coronal = 'Coronal',
+  Oblique = 'Oblique',
+  Sagittal = 'Sagittal',
+}

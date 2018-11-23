@@ -22,13 +22,6 @@ export class ToolbarComponent {
   readonly windowing = MouseTool.Windowing;
   readonly zoom = MouseTool.Zoom;
 
-  getCssClass(tool: MouseTool): object {
-    return {
-      'active-left': this.activeLeftTool === tool,
-      'active-right': this.activeRightTool === tool,
-    };
-  }
-
   selectLeftTool(tool: MouseTool): void {
     const button = MouseButton.Left;
     this.toolSelected.emit({ button, tool });

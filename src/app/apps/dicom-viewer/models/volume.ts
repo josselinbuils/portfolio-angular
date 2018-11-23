@@ -1,7 +1,9 @@
-import { fillProperties } from '../helpers/model-helpers';
+import { math } from '../helpers/maths-helpers';
+
+import { Model } from './model';
 
 // All vectors are in LPS space
-export class Volume {
+export class Volume extends Model {
   corners: {
     x0y0z0: number[];
     x1y0z0: number[];
@@ -16,6 +18,7 @@ export class Volume {
   dimensionsMm: number[];
   // Voxels
   dimensionsVoxels: number[];
+  displayRatio: number[];
   firstVoxelCenter: number[];
   // Unit vectors
   orientation: number[][];
@@ -27,6 +30,32 @@ export class Volume {
   voxelSpacing: number[];
 
   constructor(config: object) {
-    fillProperties(this, config);
+    super();
+    super.fillProperties(this, config);
+  }
+
+  // Provides dimensions in pixels, works only with canonical orientations
+  getSliceDimensions(basis: number[][]): { height: number; heightRatio: number; width: number; widthRatio: number } {
+    let width: number;
+    let widthRatio: number;
+    let height: number;
+    let heightRatio: number;
+
+    this.orientedDimensionsVoxels.forEach((orientedDimension, index) => {
+      const potentialWidth = math.chain(orientedDimension).dot(basis[0]).abs().done();
+      const potentialHeight = math.chain(orientedDimension).dot(basis[1]).abs().done();
+
+      if (width === undefined || potentialWidth > width) {
+        width = potentialWidth;
+        widthRatio = this.displayRatio[index];
+      }
+      if (height === undefined || potentialHeight > height) {
+        height = potentialHeight;
+        heightRatio = this.displayRatio[index];
+      }
+    });
+
+    // noinspection JSUnusedAssignment
+    return { height, heightRatio, width, widthRatio };
   }
 }

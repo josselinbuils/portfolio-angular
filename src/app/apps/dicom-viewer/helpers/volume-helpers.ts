@@ -1,45 +1,34 @@
-import * as math from 'mathjs';
+import { Camera, Frame, Volume } from '../models';
 
-import { Camera, Dataset, Frame, Volume } from '../models';
+import { math } from './maths-helpers';
 
-function findClosestFramesLinear(dataset: Dataset, point: number[]): { distance: number; frame: Frame }[] {
-  const frames = dataset.frames;
-  let closestFrames: { distance: number; frame: Frame }[] = frames.slice(0, 2)
-    .map(frame => {
-      const distance = getDistanceBetweenPoints(frame.imageCenter, point);
-      return { distance, frame };
-    })
-    .sort((a, b) => a.distance > b.distance ? 1 : -1);
+export function convertImageToLPS(point: number[], imageWidth: number, imageHeight: number, camera: Camera,
+                                  volume: Volume): number[] {
 
-  for (const frame of dataset.frames) {
-    const distance = getDistanceBetweenPoints(frame.imageCenter, point);
+  const cameraBasis = camera.getBasis();
+  const x = math.chain(cameraBasis[0]).dotMultiply(volume.voxelSpacing);
+  const y = math.chain(cameraBasis[1]).dotMultiply(volume.voxelSpacing);
 
-    if (distance < closestFrames[0].distance) {
-      closestFrames = [{ distance, frame }, closestFrames[0]];
-    } else if (distance < closestFrames[1].distance) {
-      closestFrames = [closestFrames[0], { distance, frame }];
-    }
-  }
-
-  return closestFrames;
+  return math.chain(camera.lookPoint)
+    .add(x.multiply(-(imageWidth - 1) / 2 + point[0]).done())
+    .add(y.multiply(-(imageHeight - 1) / 2 + point[1]).done())
+    .done();
 }
 
-export function getDistanceBetweenPoints(pointA: number[], pointB: number[], axe?: number[]): number {
+export function convertLPSToImage(point: number[], frame: Frame, volume: Volume): number[] {
+  const { imagePosition, imageOrientation } = frame;
+
+  const imagePositionToPoint = math.chain(point)
+    .subtract(imagePosition)
+    .dotDivide(volume.voxelSpacing);
+
+  return [
+    imagePositionToPoint.dot(imageOrientation[0]).done(),
+    imagePositionToPoint.dot(imageOrientation[1]).done(),
+  ];
+}
+
+export function getDistanceBetweenPoints(pointA: number[], pointB: number[], axe: number[]): number {
   const vector = math.chain(pointA).subtract(pointB);
   return axe !== undefined ? vector.dot(axe).abs().done() : vector.norm().done();
-}
-
-// Provides dimensions in pixels, works only with canonical orientations
-export function getSliceDimensions(volume: Volume, camera: Camera): { width: number; height: number } {
-  const direction = camera.getDirection();
-  const right = math.cross(direction, camera.upVector);
-  console.log(direction, camera.upVector, right);
-
-  const width = Math.max(...volume.orientedDimensionsVoxels
-    .map(orientedDimension => math.chain(orientedDimension).dot(right).abs().done()));
-
-  const height = Math.max(...volume.orientedDimensionsVoxels
-    .map(orientedDimension => math.chain(orientedDimension).dot(camera.upVector).abs().done()));
-
-  return { width, height };
 }

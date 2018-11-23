@@ -4,13 +4,13 @@ import { WindowInstance } from 'app/platform/window/window-instance';
 import { WindowComponent } from 'app/platform/window/window.component';
 
 import { Config } from './config/config';
-import { MouseTool, RendererType } from './constants';
+import { MouseTool, RendererType, ViewType } from './constants';
 import { DicomComputerService } from './dicom-computer.service';
 import { DicomLoaderService } from './dicom-loader.service';
-import { findFrame } from './helpers/camera-helpers';
-import { getSliceDimensions } from './helpers/volume-helpers';
+import { math } from './helpers/maths-helpers';
 import { Camera, Dataset, Viewport } from './models';
 import { JsFrameRenderer } from './renderer/js/js-frame-renderer';
+import { JsVolumeRenderer } from './renderer/js/js-volume-renderer';
 import { Renderer } from './renderer/renderer';
 import { WebGLRenderer } from './renderer/webgl/webgl-renderer';
 
@@ -19,7 +19,7 @@ const DELTA_LIMIT = 0.02;
 const ZOOM_LIMIT = 0.07;
 const ZOOM_MAX = 5;
 const ZOOM_MIN = 0.2;
-const ZOOM_SENSIBILITY = 3;
+const ZOOM_SENSIBILITY = 1000;
 const WINDOW_LEVEL_SENSIBILITY = 3;
 const WINDOW_WIDTH_SENSIBILITY = 5;
 const WINDOW_WIDTH_MIN = 1;
@@ -38,13 +38,11 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
 
   activeLeftTool: MouseTool;
   activeRightTool: MouseTool = MouseTool.Zoom;
+  annotations: { fps?: number; meanRenderDuration?: number; zoom?: number };
   canvas: HTMLCanvasElement;
   config?: Config;
-  dataset?: Dataset;
   errorMessage?: string;
-  fps = 0;
   loading = false;
-  meanRenderDuration: number;
   showConfig = true;
   title = DicomViewerComponent.appName;
   viewport: Viewport;
@@ -68,7 +66,6 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
 
     delete this.canvas;
     delete this.config;
-    delete this.dataset;
     delete this.errorMessage;
     delete this.renderer;
     delete this.viewport;
@@ -85,9 +82,13 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     const viewRenderer = this.viewRenderer;
     const viewport = this.viewport;
 
+    if (viewRenderer === undefined || viewport === undefined) {
+      return;
+    }
+
     size.height -= 42;
 
-    if (viewRenderer !== undefined && viewport !== undefined) {
+    if (size.width !== viewport.width || size.height !== viewport.height) {
       viewRenderer.setAttribute(this.canvas, 'width', size.width.toString());
       viewRenderer.setAttribute(this.canvas, 'height', size.height.toString());
 
@@ -109,6 +110,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   }
 
   async start(config: Config): Promise<void> {
+    this.annotations = {};
     this.config = config;
     this.showConfig = false;
     this.loading = true;
@@ -123,10 +125,17 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       }
 
       const frames = this.computer.computeFrames(dicomFrames);
-      const volume = this.computer.computeVolume(frames);
-      this.dataset = new Dataset({ frames, volume });
-      this.destroyers.push(() => this.dataset.destroy());
-      console.log(this.dataset);
+      const sharedProperties = this.computer.computeSharedProperties(frames);
+      const volume = this.computer.computeVolume(frames, sharedProperties);
+      const dataset = new Dataset({ frames, ...sharedProperties, volume });
+      const frame = frames[Math.floor(dataset.frames.length / 2)];
+      const camera = volume !== undefined ? Camera.fromVolume(volume, ViewType.Coronal) : Camera.fromFrame(frame);
+      const { windowCenter, windowWidth } = frame;
+
+      this.viewport = new Viewport({ camera, dataset, windowCenter, windowWidth });
+      this.destroyers.push(() => this.viewport.destroy());
+
+      console.log(this.viewport);
 
     } catch (error) {
       this.handleError(error);
@@ -139,7 +148,9 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     try {
       switch (this.config.rendererType) {
         case RendererType.JavaScript:
-          this.renderer = new JsFrameRenderer(this.canvas);
+          this.renderer = this.viewport.dataset.is3D
+            ? new JsVolumeRenderer(this.canvas)
+            : new JsFrameRenderer(this.canvas);
           break;
         case RendererType.WebGL:
           this.renderer = new WebGLRenderer(this.canvas);
@@ -150,16 +161,6 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       this.handleError(error);
     }
 
-    const frame = this.dataset.frames[Math.floor(this.dataset.frames.length / 2)];
-    const { windowCenter, windowWidth } = frame;
-    const camera = Camera.fromFrame(frame);
-    this.viewport = new Viewport({ camera, windowCenter, windowWidth });
-    console.log(this.viewport);
-
-    if (this.dataset.volume !== undefined) {
-      console.log(getSliceDimensions(this.dataset.volume, this.viewport.camera));
-    }
-
     const windowNativeElement = this.windowComponent.windowElementRef.nativeElement;
 
     this.onResize({
@@ -167,9 +168,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       height: windowNativeElement.clientHeight,
     });
 
-    this.viewport.zoom = this.viewport.height / frame.rows;
-
-    this.activeLeftTool = this.dataset.frames.length > 1 ? MouseTool.Paging : MouseTool.Windowing;
+    this.activeLeftTool = this.viewport.dataset.frames.length > 1 ? MouseTool.Paging : MouseTool.Windowing;
     this.destroyers.push(this.disableContextMenu(this.viewportElementRef.nativeElement));
 
     this.loading = false;
@@ -178,20 +177,36 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
 
   startPaging(downEvent: MouseEvent): () => void {
     const startY = downEvent.clientY;
-    const frames = this.dataset.frames;
-    const startIndex = frames.indexOf(findFrame(this.dataset, this.viewport.camera));
-    let currentIndex = startIndex;
+    const { camera } = this.viewport;
+
+    const direction = camera.getDirection();
+    const startLookPoint = camera.lookPoint;
+    let currentLookPoint = camera.lookPoint;
+
+    const { max, min } = this.viewport.dataset.getLimitsAlongAxe(direction);
+
+    const correctLookPoint = (point: number[]) => {
+      const correctionVectorNorm = math.chain(point).subtract(camera.lookPoint).dot(direction).done();
+      const correctionVector = math.multiply(direction, correctionVectorNorm);
+      return math.add(camera.lookPoint, correctionVector) as number[];
+    };
 
     return this.viewRenderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
-      const deltaInstance = Math.floor((moveEvent.clientY - startY) * frames.length / this.viewport.height * 1.2);
-      const newIndex = Math.min(Math.max(startIndex + deltaInstance, 0), frames.length - 1);
+      const sensitivity = (max.positionOnAxe - min.positionOnAxe) / this.viewport.height * 1.2;
+      const deltaPosition = (moveEvent.clientY - startY) * sensitivity;
+      let newLookPoint = math.add(startLookPoint, math.multiply(direction, deltaPosition)) as number[];
+      const positionOnDirection = math.dot(newLookPoint, direction);
 
-      if (newIndex !== currentIndex) {
-        const frame = frames[newIndex];
-        this.viewport.camera = Camera.fromFrame(frame);
-        this.viewport.windowWidth = frame.windowWidth;
-        this.viewport.windowCenter = frame.windowCenter;
-        currentIndex = newIndex;
+      if (positionOnDirection < min.positionOnAxe) {
+        newLookPoint = correctLookPoint(min.point);
+      } else if (positionOnDirection > max.positionOnAxe) {
+        newLookPoint = correctLookPoint(max.point);
+      }
+
+      if (math.distance(newLookPoint, currentLookPoint) > Number.EPSILON) {
+        camera.lookPoint = newLookPoint;
+        camera.eyePoint = math.subtract(camera.lookPoint, direction) as number[];
+        currentLookPoint = newLookPoint;
       }
     });
   }
@@ -263,28 +278,34 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   }
 
   startZoom(downEvent: MouseEvent): () => void {
-    const viewport = this.viewport;
+    const { camera, deltaX, deltaY, height } = this.viewport;
+    const { baseFieldOfView } = camera;
     const startY = downEvent.clientY;
-    const startZoom = viewport.zoom;
-    const frame = findFrame(this.dataset, this.viewport.camera);
+    const startFOV = camera.fieldOfView;
 
     return this.viewRenderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
-      viewport.zoom = startZoom - (moveEvent.clientY - startY) * ZOOM_SENSIBILITY / this.canvas.clientHeight;
-      viewport.zoom = Math.min(Math.max(viewport.zoom, ZOOM_MIN), ZOOM_MAX);
+      const maxFOV = baseFieldOfView / ZOOM_MIN;
+      const minFOV = baseFieldOfView / ZOOM_MAX;
+      const newFieldOfView = startFOV + (moveEvent.clientY - startY) * ZOOM_SENSIBILITY / height;
+
+      camera.fieldOfView = Math.max(Math.min(newFieldOfView, maxFOV), minFOV);
+
+      const zoom = this.viewport.getSliceZoom();
 
       // Helps to set zoom at 1
-      if (Math.abs(viewport.zoom - 1) < ZOOM_LIMIT) {
-        viewport.zoom = 1;
+      if (Math.abs(zoom - 1) < ZOOM_LIMIT) {
+        camera.fieldOfView *= zoom;
       }
 
       // Helps to fit the viewport of image is centered
-      if (viewport.deltaX === 0 && viewport.deltaY === 0) {
-        const fitViewportZoom = viewport.height / frame.rows;
-
-        if (Math.abs(viewport.zoom - fitViewportZoom) < ZOOM_LIMIT) {
-          viewport.zoom = fitViewportZoom;
+      if (deltaX === 0 && deltaY === 0) {
+        if (Math.abs(baseFieldOfView / camera.fieldOfView - 1) < ZOOM_LIMIT) {
+          camera.fieldOfView = baseFieldOfView;
         }
       }
+
+      // TODO move that shit
+      this.annotations.zoom = this.viewport.getSliceZoom();
     });
   }
 
@@ -333,8 +354,8 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
         const t = performance.now();
 
         try {
-          const { camera, deltaX, deltaY, windowCenter, windowWidth, zoom } = this.viewport;
-          this.renderer.render(this.dataset, { deltaX, deltaY, camera, windowCenter, windowWidth, zoom });
+          const { camera, deltaX, deltaY, windowCenter, windowWidth } = this.viewport;
+          this.renderer.render(this.viewport.dataset, { deltaX, deltaY, camera, windowCenter, windowWidth });
           this.viewport.makeClean();
           this.renderDurations.push(performance.now() - t);
           this.frameDurations.push(t - this.lastTime);
@@ -352,20 +373,28 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     this.renderDurations = [];
 
     const statsInterval = window.setInterval(() => {
+      let fps: number;
+      let meanRenderDuration: number;
+
       if (this.frameDurations.length > 0) {
         const meanFrameDuration = this.frameDurations.reduce((sum, d) => sum + d, 0) / this.frameDurations.length;
-        this.fps = Math.round(1000 / meanFrameDuration);
+        fps = Math.round(1000 / meanFrameDuration);
         this.frameDurations = [];
       } else {
-        this.fps = 0;
+        fps = 0;
       }
 
       if (this.renderDurations.length > 0) {
-        this.meanRenderDuration = this.renderDurations.reduce((sum, d) => sum + d, 0) / this.renderDurations.length;
+        meanRenderDuration = this.renderDurations.reduce((sum, d) => sum + d, 0) / this.renderDurations.length;
         this.renderDurations = [];
       } else {
-        this.meanRenderDuration = 0;
+        meanRenderDuration = 0;
       }
+
+      const zoom = this.viewport.getSliceZoom();
+
+      this.annotations = { fps, meanRenderDuration, zoom };
+
     }, ANNOTATIONS_REFRESH_DELAY);
 
     this.destroyers.push(() => clearInterval(statsInterval));

@@ -1,14 +1,25 @@
 import { Injectable } from '@angular/core';
 import { cloneDeep } from 'lodash';
-import * as math from 'mathjs';
+
+import { math } from './helpers/maths-helpers';
 
 import { NormalizedImageFormat, PhotometricInterpretation, PixelRepresentation } from './constants';
-import { getDistanceBetweenPoints } from './helpers/volume-helpers';
 import { DicomFrame, Frame, Volume } from './models';
 
 @Injectable()
 export class DicomComputerService {
   computeFrames(dicomFrames: DicomFrame[]): Frame[] {
+    const firstFrame = dicomFrames[0];
+    let spacingBetweenSlices = firstFrame.spacingBetweenSlices;
+
+    if (spacingBetweenSlices === undefined) {
+      const haveFramesImagePosition = dicomFrames.slice(0, 3).every(frame => frame.imagePosition !== undefined);
+
+      spacingBetweenSlices = dicomFrames.length > 1 && haveFramesImagePosition
+        ? Math.abs(math.distance(firstFrame.imagePosition, dicomFrames[1].imagePosition) as number)
+        : 1;
+    }
+
     return dicomFrames.map((frame, frameIndex) => {
       const dicom = frame;
       const id = `${frame.sopInstanceUID}-${frameIndex}`;
@@ -22,12 +33,18 @@ export class DicomComputerService {
 
       return new Frame({
         ...cloneDeep(frame), dicom, dimensionsMm, id, imageCenter, imageFormat, imageNormal, imageOrientation,
-        imagePosition, pixelData, pixelSpacing, sliceLocation,
+        imagePosition, pixelData, pixelSpacing, sliceLocation, spacingBetweenSlices,
       });
     });
   }
 
-  computeVolume(frames: Frame[]): Volume | undefined {
+  computeSharedProperties(frames: Frame[]): SharedProperties {
+    const { pixelSpacing, spacingBetweenSlices } = frames[0];
+    const voxelSpacing = [...pixelSpacing, spacingBetweenSlices];
+    return { voxelSpacing };
+  }
+
+  computeVolume(frames: Frame[], sharedProperties: SharedProperties): Volume | undefined {
     const isVolume = frames.length > 30 && frames.every(frame => {
       return frame.imageFormat === NormalizedImageFormat.Int16 &&
         frame.dicom.imageOrientation !== undefined &&
@@ -39,7 +56,8 @@ export class DicomComputerService {
       return undefined;
     }
 
-    const { columns, imageOrientation, imageNormal, pixelSpacing, rows } = frames[0];
+    const { voxelSpacing } = sharedProperties;
+    const { columns, imageOrientation, imageNormal, rows } = frames[0];
 
     const dimensionsVoxels = [columns, rows, frames.length];
     const firstVoxelCenter = frames[0].imagePosition;
@@ -51,8 +69,7 @@ export class DicomComputerService {
       pixelData.push(frame.pixelData as Int16Array);
     });
 
-    const sliceDistance = Math.abs(getDistanceBetweenPoints(frames[0].imageCenter, frames[1].imageCenter, imageNormal));
-    const voxelSpacing = [...pixelSpacing, sliceDistance];
+    const displayRatio = voxelSpacing.map(v => v / voxelSpacing[1]);
     const dimensionsMm = math.dotMultiply(dimensionsVoxels, voxelSpacing);
     const orientedDimensionsMm = orientation.map(o => math.dotMultiply(o, dimensionsMm));
     const orientedDimensionsVoxels = orientation.map(o => math.dotMultiply(o, dimensionsVoxels));
@@ -62,6 +79,7 @@ export class DicomComputerService {
         .add(math.multiply(orientedDimensionsMm[0], x))
         .add(math.multiply(orientedDimensionsMm[1], y))
         .add(math.multiply(orientedDimensionsMm[2], z))
+        .subtract(math.dotMultiply(voxelSpacing, [x, y, z]))
         .done();
     };
 
@@ -77,7 +95,7 @@ export class DicomComputerService {
     };
 
     return new Volume({
-      dimensionsMm, dimensionsVoxels, corners, firstVoxelCenter, orientation, orientedDimensionsMm,
+      dimensionsMm, dimensionsVoxels, displayRatio, corners, firstVoxelCenter, orientation, orientedDimensionsMm,
       orientedDimensionsVoxels, pixelData, voxelSpacing,
     });
   }
@@ -107,7 +125,7 @@ export class DicomComputerService {
       .add(math.multiply(imageOrientation[1], (rows - 1) * pixelSpacing[1] * 0.5))
       .done();
 
-    const imageNormal = math.cross(imageOrientation[0], imageOrientation[1]) as number[];
+    const imageNormal = math.chain(imageOrientation[0]).cross(imageOrientation[1]).normalize().done();
 
     return { dimensionsMm, imageCenter, imageNormal, imageOrientation, imagePosition, pixelSpacing, sliceLocation };
   }
@@ -186,4 +204,8 @@ interface FrameGeometry {
 interface NormalizedPixelData {
   imageFormat: NormalizedImageFormat;
   pixelData: Int16Array | Uint8Array;
+}
+
+interface SharedProperties {
+  voxelSpacing: number[];
 }

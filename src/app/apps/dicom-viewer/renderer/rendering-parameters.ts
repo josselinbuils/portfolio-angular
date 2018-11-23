@@ -6,5 +6,4 @@ export interface RenderingParameters {
   deltaY: number;
   windowWidth: number;
   windowCenter: number;
-  zoom: number;
 }

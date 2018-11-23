@@ -1,7 +1,8 @@
 import { PhotometricInterpretation, PixelRepresentation } from '../constants';
-import { fillProperties } from '../helpers/model-helpers';
 
-export class DicomFrame {
+import { Model } from './model';
+
+export class DicomFrame extends Model {
   bitsAllocated: number;
   columns: number;
   imageOrientation?: number[][];
@@ -21,6 +22,7 @@ export class DicomFrame {
   windowWidth?: number;
 
   constructor(config: object) {
-    fillProperties(this, config);
+    super();
+    super.fillProperties(this, config);
   }
 }

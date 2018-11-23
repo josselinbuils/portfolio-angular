@@ -1,6 +1,8 @@
 import { Subject } from 'rxjs';
 
-export class Renderable {
+import { Model } from './model';
+
+export class Renderable extends Model {
   onUpdate: Subject<void>;
 
   private dirty: boolean;
@@ -29,6 +31,18 @@ export class Renderable {
     this.onUpdate = new Subject();
   }
 
+  fillProperties(model: any, config: any): void {
+    for (const [key, value] of Object.entries(config)) {
+      if (value !== undefined) {
+        model[key] = value;
+
+        if (value !== undefined && (value as any).onUpdate instanceof Subject) {
+          (value as Renderable).onUpdate.subscribe(() => this.makeDirty());
+        }
+      }
+    }
+  }
+
   isDirty(): boolean {
     return this.dirty;
   }
@@ -45,6 +59,6 @@ export class Renderable {
 
   private makeDirty(): void {
     this.dirty = true;
-    this.onUpdate = new Subject();
+    this.onUpdate.next();
   }
 }

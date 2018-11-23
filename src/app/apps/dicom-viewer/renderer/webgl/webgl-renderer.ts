@@ -1,8 +1,8 @@
 import { NormalizedImageFormat } from '../../constants';
-import { findFrame } from '../../helpers/camera-helpers';
 import { Dataset, Frame } from '../../models';
 import { Renderer } from '../renderer';
 import { RenderingParameters } from '../rendering-parameters';
+import { validateCamera2D } from '../rendering-utils';
 
 import { getFragmentShaderSrc, getTextureFormat } from './fragment-shader';
 import { VERTEX_SHADER_SRC } from './vertex-shader';
@@ -37,10 +37,12 @@ export class WebGLRenderer implements Renderer {
 
   render(dataset: Dataset, renderingParameters: RenderingParameters): void {
     const gl = this.gl;
-    const { deltaX, deltaY, camera, windowCenter, windowWidth, zoom } = renderingParameters;
-    const frame = findFrame(dataset, camera);
+    const { deltaX, deltaY, camera, windowCenter, windowWidth } = renderingParameters;
+    const frame = dataset.findClosestFrame(camera.lookPoint);
     const { columns, id, imageFormat, rescaleIntercept, rescaleSlope, rows } = frame;
     const { width, height } = this.canvas;
+
+    validateCamera2D(frame, camera);
 
     if (this.glViewportWidth !== width || this.glViewportHeight !== height) {
       this.gl.viewport(0, 0, width, height);
@@ -88,6 +90,7 @@ export class WebGLRenderer implements Renderer {
     const matrixLocation = gl.getUniformLocation(this.program, 'u_matrix');
 
     // Convert dst pixel coordinates to clip space coordinates
+    const zoom = height / frame.rows * camera.baseFieldOfView / camera.fieldOfView;
     const displayWidth = Math.round(columns * zoom);
     const displayHeight = Math.round(rows * zoom);
     const clipX = (0.5 - displayWidth / width / 2 + deltaX) * 2 - 1;
