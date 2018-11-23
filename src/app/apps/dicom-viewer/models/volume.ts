@@ -42,8 +42,8 @@ export class Volume extends Model {
     let heightRatio: number;
 
     this.orientedDimensionsVoxels.forEach((orientedDimension, index) => {
-      const potentialWidth = math.chain(orientedDimension).dot(basis[0]).abs().done();
-      const potentialHeight = math.chain(orientedDimension).dot(basis[1]).abs().done();
+      const potentialWidth = math.chain(orientedDimension).dot(basis[0]).abs().round().done();
+      const potentialHeight = math.chain(orientedDimension).dot(basis[1]).abs().round().done();
 
       if (width === undefined || potentialWidth > width) {
         width = potentialWidth;

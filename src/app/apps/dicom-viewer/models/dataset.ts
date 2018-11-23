@@ -23,12 +23,12 @@ export class Dataset extends Model {
   }
 
   findClosestFrame(point: number[]): Frame {
-    const { imagePosition, imageNormal } = this.frames[0];
+    const { imagePosition, imageNormal, spacingBetweenSlices } = this.frames[0];
 
     const index = math.chain(point)
       .subtract(imagePosition)
-      .dotDivide(this.voxelSpacing)
       .dot(imageNormal)
+      .divide(spacingBetweenSlices)
       .round()
       .done();
 

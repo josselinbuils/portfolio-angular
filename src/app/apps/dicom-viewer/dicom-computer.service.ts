@@ -71,8 +71,8 @@ export class DicomComputerService {
 
     const displayRatio = voxelSpacing.map(v => v / voxelSpacing[1]);
     const dimensionsMm = math.dotMultiply(dimensionsVoxels, voxelSpacing);
-    const orientedDimensionsMm = orientation.map(o => math.dotMultiply(o, dimensionsMm));
-    const orientedDimensionsVoxels = orientation.map(o => math.dotMultiply(o, dimensionsVoxels));
+    const orientedDimensionsMm = orientation.map((orient, index) => math.multiply(orient, dimensionsMm[index]));
+    const orientedDimensionsVoxels = orientation.map((orient, index) => math.multiply(orient, dimensionsVoxels[index]));
 
     const getCorner = (x: number, y: number, z: number): number[] => {
       return math.chain(firstVoxelCenter)

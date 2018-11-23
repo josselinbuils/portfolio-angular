@@ -76,7 +76,7 @@ export class JsVolumeRenderer implements Renderer {
     );
 
     const {
-      columns, imagePosition, imageOrientation, pixelData, rescaleIntercept, rescaleSlope, rows,
+      columns, imagePosition, imageOrientation, pixelData, rescaleIntercept, rescaleSlope,
     } = dataset.frames[index];
 
     const imagePositionToPoint = [
@@ -97,13 +97,7 @@ export class JsVolumeRenderer implements Renderer {
       imagePositionToPoint[2] * imageOrientation[1][2]
     ) | 0;
 
-    let rawValue = -Number.MAX_SAFE_INTEGER;
-
-    if (i >= 0 && i < columns && j >= 0 && j < rows) {
-      rawValue = pixelData[j * columns + i] * rescaleSlope + rescaleIntercept;
-    }
-
-    return rawValue;
+    return pixelData[j * columns + i] * rescaleSlope + rescaleIntercept;
   }
 
   private renderImagePixels(dataset: Dataset, renderingParameters: RenderingParameters,

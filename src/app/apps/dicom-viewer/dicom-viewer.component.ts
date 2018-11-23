@@ -410,39 +410,43 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   }
 
   private updateAnnotations(updatedProperties?: any): void {
+    try {
+      if (updatedProperties !== undefined) {
+        this.annotations = { ...this.annotations, ...updatedProperties };
+        return;
+      }
 
-    if (updatedProperties !== undefined) {
-      this.annotations = { ...this.annotations, ...updatedProperties };
-      return;
+      const datasetName = this.config.dataset.name;
+      const rendererType = this.config.rendererType;
+      const viewType = this.viewport.viewType;
+      const windowCenter = this.viewport.windowCenter;
+      const windowWidth = this.viewport.windowWidth;
+      const zoom = this.viewport.getSliceZoom();
+
+      let fps: number;
+      let meanRenderDuration: number;
+
+      if (this.frameDurations.length > 0) {
+        const meanFrameDuration = this.frameDurations.reduce((sum, d) => sum + d, 0) / this.frameDurations.length;
+        fps = Math.round(1000 / meanFrameDuration);
+        this.frameDurations = [];
+      } else {
+        fps = 0;
+      }
+
+      if (this.renderDurations.length > 0) {
+        meanRenderDuration = this.renderDurations.reduce((sum, d) => sum + d, 0) / this.renderDurations.length;
+        this.renderDurations = [];
+      } else {
+        meanRenderDuration = 0;
+      }
+
+      this.annotations = {
+        datasetName, fps, meanRenderDuration, rendererType, viewType, windowCenter, windowWidth, zoom,
+      };
+    } catch (error) {
+      error.message = `Unable to compute annotations: ${error.message}`;
+      this.handleError(error);
     }
-
-    const datasetName = this.config.dataset.name;
-    const rendererType = this.config.rendererType;
-    const viewType = this.viewport.viewType;
-    const windowCenter = this.viewport.windowCenter;
-    const windowWidth = this.viewport.windowWidth;
-    const zoom = this.viewport.getSliceZoom();
-
-    let fps: number;
-    let meanRenderDuration: number;
-
-    if (this.frameDurations.length > 0) {
-      const meanFrameDuration = this.frameDurations.reduce((sum, d) => sum + d, 0) / this.frameDurations.length;
-      fps = Math.round(1000 / meanFrameDuration);
-      this.frameDurations = [];
-    } else {
-      fps = 0;
-    }
-
-    if (this.renderDurations.length > 0) {
-      meanRenderDuration = this.renderDurations.reduce((sum, d) => sum + d, 0) / this.renderDurations.length;
-      this.renderDurations = [];
-    } else {
-      meanRenderDuration = 0;
-    }
-
-    this.annotations = {
-      datasetName, fps, meanRenderDuration, rendererType, viewType, windowCenter, windowWidth, zoom,
-    };
   }
 }
