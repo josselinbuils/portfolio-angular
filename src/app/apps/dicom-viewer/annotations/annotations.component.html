@@ -1,0 +1,17 @@
+<div class="overlay-top-left">
+  <p>{{annotations.datasetName}}</p>
+  <p #viewType (click)="openViewTypeMenu($event)">{{annotations.viewType}}</p>
+</div>
+<div class="overlay-top-right">
+  <p>renderer: {{annotations.rendererType}}</p>
+  <p>framerate: {{annotations.fps ? annotations.fps + 'fps' : '-'}}</p>
+  <p>
+    rendering: {{annotations.meanRenderDuration > 0 ? (annotations.meanRenderDuration | number: '1.2-2') + 'ms' : '-'}}</p>
+</div>
+<div class="overlay-bottom-right">
+  <p>zoom: {{annotations.zoom ? (annotations.zoom | number: '1.2-2') : '-'}}</p>
+</div>
+<div class="overlay-bottom-left">
+  <p>wc: {{annotations.windowCenter ? annotations.windowCenter : '-'}}</p>
+  <p>ww: {{annotations.windowWidth ? annotations.windowWidth : '-'}}</p>
+</div>

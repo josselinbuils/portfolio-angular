@@ -1,3 +1,5 @@
+import { ViewType } from '../constants';
+
 import { Camera } from './camera';
 import { Dataset } from './dataset';
 import { Renderable } from './renderable';
@@ -8,6 +10,7 @@ export class Viewport extends Renderable {
   deltaX = 0;
   deltaY = 0;
   height = 0;
+  viewType: ViewType;
   width = 0;
   windowCenter = 30;
   windowWidth = 400;

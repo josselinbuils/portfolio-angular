@@ -7,24 +7,9 @@
                               (toolSelected)="selectActiveTool($event)"></app-dicom-viewer-toolbar>
     <div #viewportElement class="viewport" [hidden]="showConfig">
       <button (click)="back()">Back</button>
-      <div *ngIf="!!viewport" class="overlay">
-        <div class="overlay-top-left">
-          <p>{{config.dataset.name}}</p>
-        </div>
-        <div class="overlay-top-right">
-          <p>renderer: {{config.rendererType}}</p>
-          <p>framerate: {{annotations.fps ? annotations.fps + 'fps' : '-'}}</p>
-          <p>
-            rendering: {{annotations.meanRenderDuration > 0 ? (annotations.meanRenderDuration | number: '1.2-2') + 'ms' : '-'}}</p>
-        </div>
-        <div class="overlay-bottom-right">
-          <p>zoom: {{annotations.zoom ? (annotations.zoom | number: '1.2-2') : '-'}}</p>
-        </div>
-        <div class="overlay-bottom-left">
-          <p>ww: {{viewport.windowWidth}}</p>
-          <p>wc: {{viewport.windowCenter}}</p>
-        </div>
-      </div>
+      <app-dicom-viewer-annotations *ngIf="annotations" [annotations]="annotations"
+                                    [availableViewTypes]="availableViewTypes"
+                                    (viewType)="selectViewType($event)"></app-dicom-viewer-annotations>
     </div>
     <div class="loading" *ngIf="loading">
       <p>Loading...</p>

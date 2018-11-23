@@ -4,6 +4,7 @@ import { BrowserModule } from '@angular/platform-browser';
 
 import { WindowModule } from 'app/platform/window/window.module';
 
+import { AnnotationsComponent } from './annotations/annotations.component';
 import { ConfigComponent } from './config/config.component';
 import { DicomComputerService } from './dicom-computer.service';
 import { DicomLoaderService } from './dicom-loader.service';
@@ -12,11 +13,13 @@ import { ToolbarComponent } from './toolbar/toolbar.component';
 
 @NgModule({
   declarations: [
+    AnnotationsComponent,
     ConfigComponent,
     DicomViewerComponent,
     ToolbarComponent,
   ],
   entryComponents: [
+    AnnotationsComponent,
     ConfigComponent,
     DicomViewerComponent,
     ToolbarComponent,

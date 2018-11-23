@@ -32,6 +32,7 @@ export enum RendererType {
 export enum ViewType {
   Axial = 'Axial',
   Coronal = 'Coronal',
+  Native = 'Native',
   Oblique = 'Oblique',
   Sagittal = 'Sagittal',
 }

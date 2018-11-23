@@ -29,16 +29,16 @@ export class ContextMenuComponent {
 
       this.descriptor = descriptor;
 
+      if (descriptor.style !== undefined) {
+        this.style = { ...descriptor.style };
+      }
+
       if (descriptor.position !== undefined) {
         this.style['top.px'] = descriptor.position.top;
         this.style['left.px'] = descriptor.position.left;
       } else {
         this.style['top.px'] = descriptor.event.clientY;
         this.style['left.px'] = descriptor.event.clientX;
-      }
-
-      if (descriptor.style !== undefined) {
-        Object.assign(this.style, descriptor.style);
       }
 
       this.showMenu();

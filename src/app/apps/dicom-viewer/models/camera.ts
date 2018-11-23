@@ -35,21 +35,21 @@ export class Camera extends Renderable {
 
     switch (viewType) {
       case ViewType.Axial:
-        direction = [0, 0, 1];
+        direction = [0, 0, -1];
         upVector = [0, 1, 0];
         break;
       case ViewType.Coronal:
       case ViewType.Oblique:
         direction = [0, 1, 0];
-        upVector = [0, 0, 1];
+        upVector = [0, 0, -1];
         break;
       case ViewType.Sagittal:
         direction = [1, 0, 0];
-        upVector = [0, 0, 1];
+        upVector = [0, 0, -1];
     }
 
     const baseFieldOfView = Math.max(
-      ...orientedDimensionsMm.map(dimensionVector => math.dot(dimensionVector, upVector)),
+      ...orientedDimensionsMm.map(dimensionVector => Math.abs(math.dot(dimensionVector, upVector))),
     );
     const fieldOfView = baseFieldOfView;
     const lookPoint = math.chain(firstVoxelCenter)

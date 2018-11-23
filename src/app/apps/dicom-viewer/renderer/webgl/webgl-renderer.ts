@@ -7,7 +7,7 @@ import { validateCamera2D } from '../rendering-utils';
 import { getFragmentShaderSrc, getTextureFormat } from './fragment-shader';
 import { VERTEX_SHADER_SRC } from './vertex-shader';
 
-export class WebGLRenderer implements Renderer {
+export class WebglRenderer implements Renderer {
 
   private readonly gl: WebGLRenderingContext;
   private program: WebGLProgram;
