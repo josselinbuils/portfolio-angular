@@ -149,12 +149,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
 
       this.viewport = new Viewport({ camera, dataset, viewType, windowCenter, windowWidth });
       this.destroyers.push(() => this.viewport.destroy());
-
-      this.availableViewTypes = [ViewType.Native];
-
-      if (dataset.is3D) {
-        this.availableViewTypes.push(...[ViewType.Axial, ViewType.Coronal, ViewType.Sagittal]);
-      }
+      this.availableViewTypes = this.getAvailableViewTypes();
 
       console.log(this.viewport);
 
@@ -238,6 +233,15 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
         });
       }
     });
+  }
+
+  private getAvailableViewTypes(): ViewType[] {
+    const availableViewTypes = [ViewType.Native];
+
+    if (this.viewport.dataset.is3D && this.config.rendererType !== RendererType.WebGL) {
+      availableViewTypes.push(...[ViewType.Axial, ViewType.Coronal, ViewType.Sagittal]);
+    }
+    return availableViewTypes;
   }
 
   private handleError(error: Error): Error {
