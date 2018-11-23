@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "build": "ng build --prod",
+    "build": "ng build --prod && rimraf dist && cpx tmp/**/* dist && rimraf tmp",
     "lint": "ng lint --type-check",
     "start": "node server.js"
   },
@@ -25,6 +25,7 @@
     "@types/mathjs": "^4.4.3",
     "body-parser": "^1.18.3",
     "core-js": "^2.5.7",
+    "cpx": "^1.5.0",
     "dicom-parser": "^1.8.1",
     "express": "^4.16.4",
     "express-content-length-validator": "^1.0.0",
@@ -37,6 +38,7 @@
     "moment": "^2.22.2",
     "request": "^2.88.0",
     "request-promise-native": "^1.0.5",
+    "rimraf": "^2.6.2",
     "rxjs": "^6.3.3",
     "serve-static": "^1.13.2",
     "snoowrap": "^1.15.2",
