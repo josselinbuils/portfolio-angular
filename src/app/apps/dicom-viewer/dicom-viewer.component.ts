@@ -9,6 +9,7 @@ import { MouseTool, RendererType, ViewType } from './constants';
 import { DicomComputerService } from './dicom-computer.service';
 import { DicomLoaderService } from './dicom-loader.service';
 import { math } from './helpers/maths-helpers';
+import { computeRotation, computeTrackball, rotateCamera } from './helpers/rotation-helpers';
 import { Camera, Dataset, Viewport } from './models';
 import { JsFrameRenderer } from './renderer/js/js-frame-renderer';
 import { JsVolumeRenderer } from './renderer/js/js-volume-renderer';
@@ -112,18 +113,6 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     }
   }
 
-  selectViewType(viewType: ViewType): void {
-    const { frames, volume } = this.viewport.dataset;
-    const frame = frames[Math.floor(frames.length / 2)];
-
-    this.viewport.camera = viewType === ViewType.Native ? Camera.fromFrame(frame) : Camera.fromVolume(volume, viewType);
-    this.viewport.viewType = viewType;
-    this.viewport.windowCenter = frame.windowCenter;
-    this.viewport.windowWidth = frame.windowWidth;
-
-    this.instantiateRenderer();
-  }
-
   async start(config: Config): Promise<void> {
     this.config = config;
     this.showConfig = false;
@@ -143,7 +132,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       const volume = this.computer.computeVolume(frames, sharedProperties);
       const dataset = new Dataset({ frames, ...sharedProperties, volume });
       const frame = frames[Math.floor(dataset.frames.length / 2)];
-      const viewType = ViewType.Native;
+      const viewType = dataset.is3D ? ViewType.Axial : ViewType.Native;
       const camera = viewType === ViewType.Native ? Camera.fromFrame(frame) : Camera.fromVolume(volume, viewType);
       const { windowCenter, windowWidth } = frame;
 
@@ -201,11 +190,17 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       case MouseTool.Pan:
         cancelMouseMove = this.startPan(downEvent);
         break;
+      case MouseTool.Rotate:
+        cancelMouseMove = this.startRotate(downEvent);
+        break;
       case MouseTool.Windowing:
         cancelMouseMove = this.startWindowing(downEvent);
         break;
       case MouseTool.Zoom:
         cancelMouseMove = this.startZoom(downEvent);
+        break;
+      default:
+        throw new Error('Unknown tool');
     }
 
     if ([MouseButton.Left, MouseButton.Middle].includes(downEvent.button) || isMacOS) {
@@ -222,6 +217,19 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
         return false;
       });
     }
+  }
+
+  switchViewType(viewType: ViewType): void {
+    const { frames, volume } = this.viewport.dataset;
+    const frame = frames[Math.floor(frames.length / 2)];
+
+    this.viewport.camera = viewType === ViewType.Native ? Camera.fromFrame(frame) : Camera.fromVolume(volume, viewType);
+    this.viewport.viewType = viewType;
+    this.viewport.windowCenter = frame.windowCenter;
+    this.viewport.windowWidth = frame.windowWidth;
+
+    this.instantiateRenderer();
+    this.updateAnnotations();
   }
 
   private disableContextMenu(element: HTMLElement): () => void {
@@ -359,6 +367,33 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     this.destroyers.push(() => clearInterval(statsInterval));
 
     render();
+  }
+
+  private startRotate(downEvent: MouseEvent): () => void {
+    const { height, width } = this.viewport;
+    const { top, left } = this.viewportElementRef.nativeElement.getBoundingClientRect();
+    const trackballCenter = [width / 2, height / 2];
+    const trackballRadius = Math.min(width, height) / 2;
+    const cursorStartPosition = [downEvent.clientX - left, downEvent.clientY - top];
+    let previousVector = computeTrackball(trackballCenter, trackballRadius, cursorStartPosition);
+
+    return this.viewRenderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
+      const cursorPosition = [moveEvent.clientX - left, moveEvent.clientY - top];
+      const currentVector = computeTrackball(trackballCenter, trackballRadius, cursorPosition);
+      const { angle, axis } = computeRotation(previousVector, currentVector);
+
+      if (Math.abs(angle) > 0) {
+        const camera = this.viewport.camera;
+        rotateCamera(camera, axis, angle);
+        camera.baseFieldOfView = this.viewport.dataset.volume.getOrientedDimensionMm(camera.upVector);
+        previousVector = currentVector;
+
+        if (this.viewport.viewType !== ViewType.Oblique) {
+          this.viewport.viewType = ViewType.Oblique;
+          this.updateAnnotations();
+        }
+      }
+    });
   }
 
   private startWindowing(downEvent: MouseEvent): () => void {

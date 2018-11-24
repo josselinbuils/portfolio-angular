@@ -8,7 +8,8 @@ import {
 } from './rendering-properties';
 
 export function getRenderingProperties(renderingParameters: RenderingParameters, zoom: number, imageWidth: number,
-                                       widthCorrectionRatio: number, imageHeight: number, viewportWidth: number,
+                                       widthCorrectionRatio: number, heightCorrectionRatio: number,
+                                       imageHeight: number, viewportWidth: number,
                                        viewportHeight: number): RenderingProperties {
 
   const { windowCenter, windowWidth } = renderingParameters;
@@ -17,7 +18,7 @@ export function getRenderingProperties(renderingParameters: RenderingParameters,
   const rightLimit = Math.floor(windowCenter + windowWidth / 2);
 
   const viewportSpace = computeViewportSpaceCoordinates(
-    renderingParameters, zoom, imageWidth * widthCorrectionRatio, imageHeight, viewportWidth,
+    renderingParameters, zoom, imageWidth, imageHeight,  widthCorrectionRatio, heightCorrectionRatio, viewportWidth,
     viewportHeight,
   );
 
@@ -29,7 +30,7 @@ export function getRenderingProperties(renderingParameters: RenderingParameters,
   if (isImageInViewport) {
     renderingProperties.boundedViewportSpace = computeBoundedViewportSpaceCoordinates(viewportSpace);
     renderingProperties.imageSpace = computeImageSpace(
-      zoom, imageWidth, widthCorrectionRatio, imageHeight, viewportSpace,
+      zoom, imageWidth, imageHeight, widthCorrectionRatio, heightCorrectionRatio, viewportSpace,
     );
   }
 
@@ -65,17 +66,18 @@ function computeBoundedViewportSpaceCoordinates(viewportSpace: ViewportSpaceCoor
   return { imageX0, imageY0, imageX1, imageY1, imageWidth, imageHeight };
 }
 
-function computeImageSpace(zoom: number, imageWidth: number, widthCorrectionRatio: number, imageHeight: number,
+function computeImageSpace(zoom: number, imageWidth: number, imageHeight: number, widthCorrectionRatio: number,
+                           heightCorrectionRatio: number,
                            viewportSpace: ViewportSpaceCoordinates): ImageSpaceCoordinates {
 
   const displayX0 = viewportSpace.imageX0 < 0 ? Math.round(-viewportSpace.imageX0 / zoom / widthCorrectionRatio) : 0;
-  const displayY0 = viewportSpace.imageY0 < 0 ? Math.round(-viewportSpace.imageY0 / zoom) : 0;
+  const displayY0 = viewportSpace.imageY0 < 0 ? Math.round(-viewportSpace.imageY0 / zoom / heightCorrectionRatio) : 0;
 
   const displayX1 = viewportSpace.imageX1 > viewportSpace.lastPixelX
     ? imageWidth - Math.round((viewportSpace.imageX1 - viewportSpace.lastPixelX) / zoom / widthCorrectionRatio) - 1
     : imageWidth - 1;
   const displayY1 = viewportSpace.imageY1 > viewportSpace.lastPixelY
-    ? imageHeight - Math.round((viewportSpace.imageY1 - viewportSpace.lastPixelY) / zoom) - 1
+    ? imageHeight - Math.round((viewportSpace.imageY1 - viewportSpace.lastPixelY) / zoom / heightCorrectionRatio) - 1
     : imageHeight - 1;
 
   const displayWidth = displayX1 - displayX0 + 1;
@@ -85,13 +87,14 @@ function computeImageSpace(zoom: number, imageWidth: number, widthCorrectionRati
 }
 
 function computeViewportSpaceCoordinates(renderingParameters: RenderingParameters, zoom: number, baseImageWidth: number,
-                                         baseImageHeight: number, viewportWidth: number,
+                                         baseImageHeight: number, widthCorrectionRatio: number,
+                                         heightCorrectionRatio: number, viewportWidth: number,
                                          viewportHeight: number): ViewportSpaceCoordinates {
 
   const { deltaX, deltaY } = renderingParameters;
 
-  const imageWidth = Math.round(baseImageWidth * zoom);
-  const imageHeight = Math.round(baseImageHeight * zoom);
+  const imageWidth = Math.round(baseImageWidth * zoom * widthCorrectionRatio);
+  const imageHeight = Math.round(baseImageHeight * zoom * heightCorrectionRatio);
 
   const imageX0 = Math.round(((viewportWidth - imageWidth) / 2 + deltaX * viewportWidth));
   const imageY0 = Math.round(((viewportHeight - imageHeight) / 2 + deltaY * viewportHeight));

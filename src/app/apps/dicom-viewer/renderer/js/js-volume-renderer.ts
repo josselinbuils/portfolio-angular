@@ -23,10 +23,10 @@ export class JsVolumeRenderer implements Renderer {
     this.context.fillRect(0, 0, width, height);
 
     const sliceDimensions = dataset.volume.getSliceDimensions(camera.getBasis());
-    const widthCorrectionRatio = sliceDimensions.widthRatio / sliceDimensions.heightRatio;
     const zoom = height / sliceDimensions.height * camera.baseFieldOfView / camera.fieldOfView;
     const renderingProperties = getRenderingProperties(
-      renderingParameters, zoom, sliceDimensions.width, widthCorrectionRatio, sliceDimensions.height, width, height,
+      renderingParameters, zoom, sliceDimensions.width, sliceDimensions.widthRatio, sliceDimensions.heightRatio,
+      sliceDimensions.height, width, height,
     );
 
     if (!renderingProperties.isImageInViewport) {
@@ -42,7 +42,7 @@ export class JsVolumeRenderer implements Renderer {
     if (zoom < 1) {
       this.renderViewportPixels(
         dataset, renderingParameters, renderingProperties, zoom, sliceDimensions.width, sliceDimensions.height,
-        widthCorrectionRatio,
+        sliceDimensions.widthRatio, sliceDimensions.heightRatio,
       );
     } else {
       this.renderImagePixels(
@@ -62,7 +62,6 @@ export class JsVolumeRenderer implements Renderer {
   }
 
   private getPixelValue(dataset: Dataset, pointLPS: number[]): number {
-
     const { firstVoxelCenter, orientation, voxelSpacing } = dataset.volume;
 
     const vector = [
@@ -74,10 +73,15 @@ export class JsVolumeRenderer implements Renderer {
     const index = Math.round(
       vector[0] * orientation[2][0] + vector[1] * orientation[2][1] + vector[2] * orientation[2][2],
     );
+    const frame = dataset.frames[index];
+
+    if (frame === undefined) {
+      return -Number.MAX_SAFE_INTEGER;
+    }
 
     const {
-      columns, imagePosition, imageOrientation, pixelData, rescaleIntercept, rescaleSlope,
-    } = dataset.frames[index];
+      columns, imagePosition, imageOrientation, pixelData, rescaleIntercept, rescaleSlope, rows,
+    } = frame;
 
     const imagePositionToPoint = [
       (pointLPS[0] - imagePosition[0]) / voxelSpacing[0],
@@ -97,7 +101,9 @@ export class JsVolumeRenderer implements Renderer {
       imagePositionToPoint[2] * imageOrientation[1][2]
     ) | 0;
 
-    return pixelData[j * columns + i] * rescaleSlope + rescaleIntercept;
+    return i >= 0 || i < columns || j >= 0 || j < rows
+      ? pixelData[j * columns + i] * rescaleSlope + rescaleIntercept
+      : -Number.MAX_SAFE_INTEGER;
   }
 
   private renderImagePixels(dataset: Dataset, renderingParameters: RenderingParameters,
@@ -115,7 +121,8 @@ export class JsVolumeRenderer implements Renderer {
 
     // convertImageToLPS
     const cameraBasis = camera.getBasis();
-    const right = math.chain(cameraBasis[0]).dotMultiply(dataset.volume.voxelSpacing).done();
+    // TODO understand why inverse
+    const right = math.chain(cameraBasis[0]).dotMultiply(dataset.volume.voxelSpacing).multiply(-1).done();
     const up = math.chain(cameraBasis[1]).dotMultiply(dataset.volume.voxelSpacing).done();
     const pointBaseLPS = math.chain(camera.lookPoint)
       .add(math.multiply(right, -(sliceWidth - 1) / 2))
@@ -153,7 +160,7 @@ export class JsVolumeRenderer implements Renderer {
 
   private renderViewportPixels(dataset: Dataset, renderingParameters: RenderingParameters,
                                renderingProperties: RenderingProperties, zoom: number, sliceWidth: number,
-                               sliceHeight: number, widthCorrectionRatio: number): void {
+                               sliceHeight: number, widthCorrectionRatio: number, heightCorrectionRatio: number): void {
 
     const { camera } = renderingParameters;
     const { boundedViewportSpace, leftLimit, rightLimit, viewportSpace } = renderingProperties;
@@ -168,7 +175,8 @@ export class JsVolumeRenderer implements Renderer {
 
     // convertImageToLPS
     const cameraBasis = camera.getBasis();
-    const right = math.chain(cameraBasis[0]).dotMultiply(dataset.volume.voxelSpacing).done();
+    // TODO understand why inverse
+    const right = math.chain(cameraBasis[0]).dotMultiply(dataset.volume.voxelSpacing).multiply(-1).done();
     const up = math.chain(cameraBasis[1]).dotMultiply(dataset.volume.voxelSpacing).done();
     const pointBaseLPS = math.chain(camera.lookPoint)
       .add(math.multiply(right, -(sliceWidth - 1) / 2))
@@ -178,7 +186,7 @@ export class JsVolumeRenderer implements Renderer {
     for (let y = imageY0; y <= imageY1; y++) {
       for (let x = imageX0; x <= imageX1; x++) {
         const pixX = (x - viewportSpaceImageX0) / zoom / widthCorrectionRatio | 0;
-        const pixY = (y - viewportSpaceImageY0) / zoom | 0;
+        const pixY = (y - viewportSpaceImageY0) / zoom / heightCorrectionRatio | 0;
         const pointLPS = [
           pointBaseLPS[0] + right[0] * pixX + up[0] * pixY,
           pointBaseLPS[1] + right[1] * pixX + up[1] * pixY,

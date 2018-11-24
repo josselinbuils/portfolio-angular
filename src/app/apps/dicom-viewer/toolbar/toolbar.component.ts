@@ -2,8 +2,8 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 import { MouseButton } from 'app/constants';
 
-import { MouseTool } from '../constants';
-import { Dataset } from '../models';
+import { MouseTool, ViewType } from '../constants';
+import { Viewport } from '../models';
 
 @Component({
   selector: 'app-dicom-viewer-toolbar',
@@ -13,14 +13,12 @@ import { Dataset } from '../models';
 export class ToolbarComponent {
   @Input() activeLeftTool: MouseTool;
   @Input() activeRightTool: MouseTool;
-  @Input() dataset: Dataset;
+  @Input() viewport: Viewport;
 
   @Output() toolSelected = new EventEmitter<{ button: MouseButton; tool: MouseTool }>();
 
-  readonly paging = MouseTool.Paging;
-  readonly pan = MouseTool.Pan;
-  readonly windowing = MouseTool.Windowing;
-  readonly zoom = MouseTool.Zoom;
+  readonly MouseTool = MouseTool;
+  readonly ViewType = ViewType;
 
   selectLeftTool(tool: MouseTool): void {
     const button = MouseButton.Left;

@@ -34,28 +34,40 @@ export class Volume extends Model {
     super.fillProperties(this, config);
   }
 
+  getOrientedDimensionMm(axe: number[]): number {
+    return Math.max(
+      ...this.orientedDimensionsMm.map(dimensionVector => Math.abs(math.dot(dimensionVector, axe))),
+    );
+  }
+
   // Provides dimensions in pixels, works only with canonical orientations
   getSliceDimensions(basis: number[][]): { height: number; heightRatio: number; width: number; widthRatio: number } {
-    let width: number;
-    let widthRatio: number;
-    let height: number;
-    let heightRatio: number;
+    let width = 0;
+    let widthRatio = 1;
+    let height = 0;
+    let heightRatio = 1;
 
-    this.orientedDimensionsVoxels.forEach((orientedDimension, index) => {
+    this.orientedDimensionsVoxels.forEach(orientedDimension => {
       const potentialWidth = math.chain(orientedDimension).dot(basis[0]).abs().round().done();
       const potentialHeight = math.chain(orientedDimension).dot(basis[1]).abs().round().done();
 
-      if (width === undefined || potentialWidth > width) {
+      if (potentialWidth > width) {
         width = potentialWidth;
-        widthRatio = this.displayRatio[index];
+        widthRatio = math.chain(this.displayRatio).dot(basis[0].map(Math.abs)).done();
       }
-      if (height === undefined || potentialHeight > height) {
+      if (potentialHeight > height) {
         height = potentialHeight;
-        heightRatio = this.displayRatio[index];
+        heightRatio = math.chain(this.displayRatio).dot(basis[1].map(Math.abs)).done();
       }
     });
 
-    // noinspection JSUnusedAssignment
+    // Use this in oblique ?
+    // width *= heightRatio;
+    // height *= heightRatio;
+
+    widthRatio /= heightRatio;
+    heightRatio = 1;
+
     return { height, heightRatio, width, widthRatio };
   }
 }

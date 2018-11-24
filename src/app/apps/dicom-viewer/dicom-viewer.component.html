@@ -3,13 +3,13 @@
   <div class="container">
     <app-dicom-viewer-config [hidden]="!showConfig" (config)="start($event)"></app-dicom-viewer-config>
     <app-dicom-viewer-toolbar *ngIf="viewport" [activeLeftTool]="activeLeftTool" [activeRightTool]="activeRightTool"
-                              [dataset]="viewport.dataset"
+                              [viewport]="viewport"
                               (toolSelected)="selectActiveTool($event)"></app-dicom-viewer-toolbar>
     <div #viewportElement class="viewport" [hidden]="showConfig">
       <button (click)="back()">Back</button>
       <app-dicom-viewer-annotations *ngIf="annotations" [annotations]="annotations"
                                     [availableViewTypes]="availableViewTypes"
-                                    (viewType)="selectViewType($event)"></app-dicom-viewer-annotations>
+                                    (viewType)="switchViewType($event)"></app-dicom-viewer-annotations>
     </div>
     <div class="loading" *ngIf="loading">
       <p>Loading...</p>

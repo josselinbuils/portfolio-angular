@@ -26,7 +26,7 @@ export class JsFrameRenderer implements Renderer {
 
     const zoom = height / frame.rows * camera.baseFieldOfView / camera.fieldOfView;
     // TODO put the real correction ratio
-    const renderingProperties = getRenderingProperties(renderingParameters, zoom, columns, 1, rows, width, height);
+    const renderingProperties = getRenderingProperties(renderingParameters, zoom, columns, 1, 1, rows, width, height);
 
     if (!renderingProperties.isImageInViewport) {
       return;

@@ -39,7 +39,6 @@ export class Camera extends Renderable {
         upVector = [0, 1, 0];
         break;
       case ViewType.Coronal:
-      case ViewType.Oblique:
         direction = [0, 1, 0];
         upVector = [0, 0, -1];
         break;
@@ -48,9 +47,7 @@ export class Camera extends Renderable {
         upVector = [0, 0, -1];
     }
 
-    const baseFieldOfView = Math.max(
-      ...orientedDimensionsMm.map(dimensionVector => Math.abs(math.dot(dimensionVector, upVector))),
-    );
+    const baseFieldOfView = volume.getOrientedDimensionMm(upVector);
     const fieldOfView = baseFieldOfView;
     const lookPoint = math.chain(firstVoxelCenter)
       .add(math.multiply(orientedDimensionsMm[0], 0.5))
@@ -74,17 +71,17 @@ export class Camera extends Renderable {
   }
 
   /*
-   * y
-   * 🡑     z
-   * │   ╱
-   * │ ╱
-   * └───────> x
+   * LPS
+   *    ------> x
+   *   /|
+   *  / |
+   * z  y
    */
   getBasis(): number[][] {
     if (this.basis === undefined) {
       const y = math.normalize(this.upVector);
       const z = this.getDirection();
-      const x = math.chain(z).cross(y).normalize().done();
+      const x = math.chain(y).cross(z).normalize().done();
       this.basis = [x, y, z];
     }
     return this.basis;

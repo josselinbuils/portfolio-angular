@@ -30,10 +30,14 @@ export class AnnotationsComponent {
     const { bottom, left } = this.viewTypeElementRef.nativeElement.getBoundingClientRect();
 
     const items: ContextMenuItem[] = this.availableViewTypes
-      .filter(viewType => viewType !== this.annotations.viewType)
       .map(viewType => ({
+        iconClass: viewType === this.annotations.viewType ? 'fa fa-check' : '',
         title: viewType,
-        click: () => this.viewType.emit(viewType),
+        click: () => {
+          if (viewType !== this.annotations.viewType) {
+            this.viewType.emit(viewType);
+          }
+        },
       }));
 
     if (items.length > 0) {
