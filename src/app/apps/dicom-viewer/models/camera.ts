@@ -39,7 +39,8 @@ export class Camera extends Renderable {
         upVector = [0, 1, 0];
         break;
       case ViewType.Coronal:
-        direction = [0, 1, 0];
+        // TODO check why it is -1
+        direction = [0, -1, 0];
         upVector = [0, 0, -1];
         break;
       case ViewType.Sagittal:
