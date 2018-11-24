@@ -101,7 +101,7 @@ export class JsVolumeRenderer implements Renderer {
       imagePositionToPoint[2] * imageOrientation[1][2]
     ) | 0;
 
-    return i >= 0 || i < columns || j >= 0 || j < rows
+    return i >= 0 && i < columns && j >= 0 && j < rows
       ? pixelData[j * columns + i] * rescaleSlope + rescaleIntercept
       : -Number.MAX_SAFE_INTEGER;
   }
@@ -121,9 +121,8 @@ export class JsVolumeRenderer implements Renderer {
 
     // convertImageToLPS
     const cameraBasis = camera.getBasis();
-    // TODO understand why inverse
-    const right = math.chain(cameraBasis[0]).dotMultiply(dataset.volume.voxelSpacing).multiply(-1).done();
-    const up = math.chain(cameraBasis[1]).dotMultiply(dataset.volume.voxelSpacing).done();
+    const right = math.chain(cameraBasis[0]).dotMultiply(dataset.volume.voxelSpacing).done();
+    const up = math.chain(cameraBasis[1]).dotMultiply(dataset.volume.voxelSpacing).multiply(-1).done();
     const pointBaseLPS = math.chain(camera.lookPoint)
       .add(math.multiply(right, -(sliceWidth - 1) / 2))
       .add(math.multiply(up, -(sliceHeight - 1) / 2))
@@ -175,9 +174,8 @@ export class JsVolumeRenderer implements Renderer {
 
     // convertImageToLPS
     const cameraBasis = camera.getBasis();
-    // TODO understand why inverse
-    const right = math.chain(cameraBasis[0]).dotMultiply(dataset.volume.voxelSpacing).multiply(-1).done();
-    const up = math.chain(cameraBasis[1]).dotMultiply(dataset.volume.voxelSpacing).done();
+    const right = math.chain(cameraBasis[0]).dotMultiply(dataset.volume.voxelSpacing).done();
+    const up = math.chain(cameraBasis[1]).dotMultiply(dataset.volume.voxelSpacing).multiply(-1).done();
     const pointBaseLPS = math.chain(camera.lookPoint)
       .add(math.multiply(right, -(sliceWidth - 1) / 2))
       .add(math.multiply(up, -(sliceHeight - 1) / 2))

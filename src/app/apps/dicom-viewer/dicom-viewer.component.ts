@@ -18,6 +18,7 @@ import { WebglRenderer } from './renderer/webgl/webgl-renderer';
 
 const ANNOTATIONS_REFRESH_DELAY = 500;
 const DELTA_LIMIT = 0.02;
+const PAGING_SENSIBILITY = 1.2;
 const ZOOM_LIMIT = 0.07;
 const ZOOM_MAX = 5;
 const ZOOM_MIN = 0.2;
@@ -296,8 +297,8 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     };
 
     return this.viewRenderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
-      const sensitivity = (max.positionOnAxe - min.positionOnAxe) / this.viewport.height * 1.2;
-      const deltaPosition = (moveEvent.clientY - startY) * sensitivity;
+      const sensitivity = (max.positionOnAxe - min.positionOnAxe) / this.viewport.height * PAGING_SENSIBILITY;
+      const deltaPosition = (startY - moveEvent.clientY) * sensitivity;
       let newLookPoint = math.add(startLookPoint, math.multiply(direction, deltaPosition)) as number[];
       const positionOnDirection = math.dot(newLookPoint, direction);
 

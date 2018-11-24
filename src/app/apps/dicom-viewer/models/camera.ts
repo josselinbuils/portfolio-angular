@@ -35,17 +35,16 @@ export class Camera extends Renderable {
 
     switch (viewType) {
       case ViewType.Axial:
-        direction = [0, 0, -1];
-        upVector = [0, 1, 0];
+        direction = [0, 0, 1];
+        upVector = [0, -1, 0];
         break;
       case ViewType.Coronal:
-        // TODO check why it is -1
-        direction = [0, -1, 0];
-        upVector = [0, 0, -1];
+        direction = [0, 1, 0];
+        upVector = [0, 0, 1];
         break;
       case ViewType.Sagittal:
-        direction = [1, 0, 0];
-        upVector = [0, 0, -1];
+        direction = [-1, 0, 0];
+        upVector = [0, 0, 1];
     }
 
     const baseFieldOfView = volume.getOrientedDimensionMm(upVector);
@@ -82,7 +81,7 @@ export class Camera extends Renderable {
     if (this.basis === undefined) {
       const y = math.normalize(this.upVector);
       const z = this.getDirection();
-      const x = math.chain(y).cross(z).normalize().done();
+      const x = math.chain(z).cross(y).normalize().done();
       this.basis = [x, y, z];
     }
     return this.basis;

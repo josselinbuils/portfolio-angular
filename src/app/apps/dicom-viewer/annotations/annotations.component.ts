@@ -40,16 +40,14 @@ export class AnnotationsComponent {
         },
       }));
 
-    if (items.length > 0) {
-      this.contextMenuService.show({
-        event,
-        items,
-        position: {
-          left,
-          top: bottom + 5,
-        },
-        style: viewTypeSelectorStyle,
-      });
-    }
+    this.contextMenuService.show({
+      event,
+      items,
+      position: {
+        left,
+        top: bottom + 5,
+      },
+      style: viewTypeSelectorStyle,
+    });
   }
 }

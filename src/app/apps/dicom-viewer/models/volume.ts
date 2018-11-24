@@ -61,10 +61,7 @@ export class Volume extends Model {
       }
     });
 
-    // Use this in oblique ?
-    // width *= heightRatio;
-    // height *= heightRatio;
-
+    // Height is the reference
     widthRatio /= heightRatio;
     heightRatio = 1;
 
