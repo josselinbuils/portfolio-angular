@@ -40,31 +40,56 @@ export class Volume extends Model {
     );
   }
 
-  // Provides dimensions in pixels, works only with canonical orientations
-  getSliceDimensions(basis: number[][]): { height: number; heightRatio: number; width: number; widthRatio: number } {
-    let width = 0;
-    let widthRatio = 1;
-    let height = 0;
-    let heightRatio = 1;
+  // TODO Optimize this
+  getSliceDimensions(basis: number[][]): {
+    fieldOfView: number; height: number; heightRatio: number; width: number; widthRatio: number;
+  } {
+    // Compute volume limits in computer service
+    const halfVerticalSpacing = math.chain(this.voxelSpacing).multiply(0.5).dot(basis[1]).abs().done();
 
-    this.orientedDimensionsVoxels.forEach(orientedDimension => {
-      const potentialWidth = math.chain(orientedDimension).dot(basis[0]).abs().round().done();
-      const potentialHeight = math.chain(orientedDimension).dot(basis[1]).abs().round().done();
+    let minHorizontal: number = Number.MAX_SAFE_INTEGER;
+    let maxHorizontal: number = -Number.MAX_SAFE_INTEGER;
+    let maxVertical: number = -Number.MAX_SAFE_INTEGER;
+    let minVertical: number = Number.MAX_SAFE_INTEGER;
+    let maxVerticalMm: number = -Number.MAX_SAFE_INTEGER;
+    let minVerticalMm: number = Number.MAX_SAFE_INTEGER;
 
-      if (potentialWidth > width) {
-        width = potentialWidth;
-        widthRatio = math.chain(this.displayRatio).dot(basis[0].map(Math.abs)).done();
+    Object.values(this.corners).forEach(corner => {
+      const left = math.chain(corner).dotDivide(this.voxelSpacing).dot(basis[0]).done();
+      const top = math.chain(corner).dotDivide(this.voxelSpacing).dot(basis[1]).done();
+      const topMm = math.chain(corner).dot(basis[1]).done();
+
+      if (left < minHorizontal) {
+        minHorizontal = left - 0.5;
       }
-      if (potentialHeight > height) {
-        height = potentialHeight;
-        heightRatio = math.chain(this.displayRatio).dot(basis[1].map(Math.abs)).done();
+      if (left > maxHorizontal) {
+        maxHorizontal = left + 0.5;
+      }
+      if (top < minVertical) {
+        minVertical = top - 0.5;
+      }
+      if (top > maxVertical) {
+        maxVertical = top + 0.5;
+      }
+      if (topMm < minVerticalMm) {
+        minVerticalMm = topMm - halfVerticalSpacing;
+      }
+      if (topMm > maxVerticalMm) {
+        maxVerticalMm = topMm + halfVerticalSpacing;
       }
     });
+
+    const width = Math.round(maxHorizontal - minHorizontal);
+    const height = Math.round(maxVertical - minVertical);
+    const fieldOfView = Math.round(maxVerticalMm - minVerticalMm);
+
+    let heightRatio = math.chain(this.displayRatio).dot(basis[1].map(Math.abs)).done();
+    let widthRatio = math.chain(this.displayRatio).dot(basis[0].map(Math.abs)).done();
 
     // Height is the reference
     widthRatio /= heightRatio;
     heightRatio = 1;
 
-    return { height, heightRatio, width, widthRatio };
+    return { fieldOfView, height, heightRatio, width, widthRatio };
   }
 }

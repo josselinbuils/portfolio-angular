@@ -23,7 +23,7 @@ export class JsVolumeRenderer implements Renderer {
     this.context.fillRect(0, 0, width, height);
 
     const sliceDimensions = dataset.volume.getSliceDimensions(camera.getBasis());
-    const zoom = height / sliceDimensions.height * camera.baseFieldOfView / camera.fieldOfView;
+    const zoom = height / sliceDimensions.height * sliceDimensions.fieldOfView / camera.fieldOfView;
     const renderingProperties = getRenderingProperties(
       renderingParameters, zoom, sliceDimensions.width, sliceDimensions.widthRatio, sliceDimensions.heightRatio,
       sliceDimensions.height, width, height,

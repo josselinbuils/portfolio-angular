@@ -229,6 +229,15 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     this.viewport.windowCenter = frame.windowCenter;
     this.viewport.windowWidth = frame.windowWidth;
 
+    if (viewType === ViewType.Native) {
+      if (this.activeLeftTool === MouseTool.Rotate) {
+        this.activeLeftTool = MouseTool.Paging;
+      }
+      if (this.activeRightTool === MouseTool.Rotate) {
+        this.activeRightTool = MouseTool.Paging;
+      }
+    }
+
     this.instantiateRenderer();
     this.updateAnnotations();
   }
