@@ -13,10 +13,14 @@ export class DicomComputerService {
     let spacingBetweenSlices = firstFrame.spacingBetweenSlices;
 
     if (spacingBetweenSlices === undefined) {
-      const haveFramesImagePosition = dicomFrames.slice(0, 3).every(frame => frame.imagePosition !== undefined);
+      const isComputable = dicomFrames.length > 1 && firstFrame.imagePosition !== undefined &&
+        dicomFrames[0].imagePosition !== undefined;
 
-      spacingBetweenSlices = dicomFrames.length > 1 && haveFramesImagePosition
-        ? Math.abs(math.distance(firstFrame.imagePosition, dicomFrames[1].imagePosition) as number)
+      spacingBetweenSlices = isComputable
+        ? math.chain(firstFrame.imagePosition)
+          .distance(dicomFrames[1].imagePosition as number[])
+          .abs()
+          .done()
         : 1;
     }
 
@@ -172,6 +176,9 @@ export class DicomComputerService {
           break;
         case DicomImageFormat.UInt16:
           typedPixelData = new Uint16Array(rawPixelData.buffer, rawPixelData.byteOffset, rawPixelData.length / 2);
+          break;
+        default:
+          throw new Error('Unknown dicom format');
       }
 
       // Normalizes pixel data

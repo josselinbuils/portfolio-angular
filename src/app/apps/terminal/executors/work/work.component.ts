@@ -8,5 +8,5 @@ import { Executor } from '../executor';
   styleUrls: ['./work.component.scss'],
 })
 export class WorkComponent implements Executor {
-  args: string[];
+  args!: string[];
 }

@@ -21,61 +21,69 @@ const LEFT_OFFSET = 60;
   styleUrls: ['./window.component.scss'],
 })
 export class WindowComponent implements AfterContentInit {
-  @ViewChild('buttons') buttonsElementRef: ElementRef<HTMLDivElement>;
-  @ViewChild('content') contentElementRef: ElementRef<HTMLDivElement>;
-  @ViewChild('window') windowElementRef: ElementRef<HTMLDivElement>;
+  @ViewChild('buttons') buttonsElementRef!: ElementRef<HTMLDivElement>;
+  @ViewChild('content') contentElementRef!: ElementRef<HTMLDivElement>;
+  @ViewChild('window') windowElementRef!: ElementRef<HTMLDivElement>;
 
-  @Input() background: string;
+  @Input() background!: string;
 
   @Input()
   set height(height: number) {
     this.effectiveHeight = height;
 
     if (this.contentInitialized) {
-      this.startAnimation().ready(() => this.setSize(this.effectiveWidth, height));
+      this.startAnimation().ready(() => {
+        if (this.effectiveWidth !== undefined) {
+          this.setSize(this.effectiveWidth, height);
+        }
+      });
     }
   }
 
   @Input() keepContentRatio = false;
-  @Input() maxHeight: number;
-  @Input() maxWidth: number;
+  @Input() maxHeight!: number;
+  @Input() maxWidth!: number;
   @Input() minHeight = 100;
   @Input() minWidth = 100;
   @Input() resizable = true;
-  @Input() titleBackground: string;
-  @Input() titleColor: string;
+  @Input() titleBackground!: string;
+  @Input() titleColor!: string;
 
   @Input()
   set width(width: number) {
     this.effectiveWidth = width;
 
     if (this.contentInitialized) {
-      this.startAnimation().ready(() => this.setSize(width, this.effectiveHeight));
+      this.startAnimation().ready(() => {
+        if (this.effectiveHeight !== undefined) {
+          this.setSize(width, this.effectiveHeight);
+        }
+      });
     }
   }
 
-  @Input() windowTitle: string;
+  @Input() windowTitle!: string;
 
   @Output() resize = new EventEmitter<{ width: number; height: number }>();
 
   active = false;
   animate = false;
-  id: number;
+  id!: number;
   maximized = false;
   minimized = false;
-  parentRef: ComponentRef<{}>;
+  parentRef!: ComponentRef<{}>;
   visible = true;
-  zIndex: number;
+  zIndex!: number;
 
-  private buttons: HTMLElement;
-  private content: HTMLElement;
+  private buttons?: HTMLElement;
+  private content?: HTMLElement;
   private contentInitialized = false;
-  private contentRatio: number;
-  private effectiveHeight: number;
-  private effectiveWidth: number;
+  private contentRatio?: number;
+  private effectiveHeight?: number;
+  private effectiveWidth?: number;
   private readonly lastDisplayProperties: { maximize?: ClientRect; minimize?: ClientRect } = {};
-  private minimizedTopPosition: number;
-  private window: HTMLElement;
+  private minimizedTopPosition?: number;
+  private window?: HTMLElement;
 
   constructor(private readonly deviceManagerService: DeviceManagerService,
               private readonly renderer: Renderer2,
@@ -93,10 +101,13 @@ export class WindowComponent implements AfterContentInit {
       } else {
         this.startAnimation()
           .ready(() => {
-            this.lastDisplayProperties.minimize = this.window.getBoundingClientRect();
+            this.lastDisplayProperties.minimize = (this.window as HTMLElement).getBoundingClientRect();
             this.minimized = true;
             this.setSize(0, 0, true);
-            this.setPosition(60, this.minimizedTopPosition);
+
+            if (this.minimizedTopPosition !== undefined) {
+              this.setPosition(60, this.minimizedTopPosition);
+            }
           })
           .finished(() => this.visible = false);
       }
@@ -108,8 +119,6 @@ export class WindowComponent implements AfterContentInit {
   }
 
   ngAfterContentInit(): void {
-    let size: { width: number; height: number };
-
     this.buttons = this.buttonsElementRef.nativeElement;
     this.content = this.contentElementRef.nativeElement;
     this.window = this.windowElementRef.nativeElement;
@@ -117,21 +126,17 @@ export class WindowComponent implements AfterContentInit {
     if (this.deviceManagerService.isMobile()) {
       this.maximized = true;
     } else {
-      if (typeof this.effectiveWidth !== 'number' || typeof this.effectiveHeight !== 'number') {
-        size = this.getSize();
-      }
-
-      const width = typeof this.effectiveWidth === 'number'
+      const width = this.effectiveWidth !== undefined
         ? this.effectiveWidth
-        : size.width;
+        : this.getSize().width;
 
-      const height = typeof this.effectiveHeight === 'number'
+      const height = this.effectiveHeight !== undefined
         ? this.effectiveHeight
-        : size.height;
+        : this.getSize().height;
 
       this.setSize(width, height);
 
-      size = this.getSize();
+      const size = this.getSize();
       const x = Math.round((window.innerWidth - size.width) * 0.5);
       const y = Math.round((window.innerHeight - size.height) * 0.2);
 
@@ -169,10 +174,12 @@ export class WindowComponent implements AfterContentInit {
       } else if (this.lastDisplayProperties.minimize !== undefined) {
         this.startAnimation()
           .ready(() => {
-            const { left, top, width, height } = this.lastDisplayProperties.minimize;
-            this.minimized = false;
-            this.setSize(width, height);
-            this.setPosition(left, top, true);
+            if (this.lastDisplayProperties.minimize !== undefined) {
+              const { left, top, width, height } = this.lastDisplayProperties.minimize;
+              this.minimized = false;
+              this.setSize(width, height);
+              this.setPosition(left, top, true);
+            }
           })
           .finished(() => this.visible = true);
       }
@@ -187,11 +194,11 @@ export class WindowComponent implements AfterContentInit {
 
     downEvent.preventDefault();
 
-    if (DOMUtils.closest(<HTMLElement> downEvent.target, '.button') !== undefined) {
+    if (DOMUtils.closest(downEvent.target as HTMLElement, '.button') !== undefined) {
       return;
     }
 
-    const windowBoundingRect = this.window.getBoundingClientRect();
+    const windowBoundingRect = (this.window as HTMLElement).getBoundingClientRect();
     const dy = windowBoundingRect.top - downEvent.clientY;
     let dx = windowBoundingRect.left - downEvent.clientX;
     let maximized = this.maximized;
@@ -202,7 +209,7 @@ export class WindowComponent implements AfterContentInit {
       if (moveEvent.clientX === downEvent.clientX && moveEvent.clientY === downEvent.clientY) {
         return;
       }
-      if (maximized) {
+      if (maximized && this.lastDisplayProperties.maximize !== undefined) {
         const widthRatio = this.lastDisplayProperties.maximize.width / windowBoundingRect.width;
 
         // Keeps the same position on the title bar in proportion to its width
@@ -260,7 +267,7 @@ export class WindowComponent implements AfterContentInit {
     }
     this.startAnimation(animationDelay)
       .ready(() => {
-        if (this.maximized) {
+        if (this.maximized && this.lastDisplayProperties.maximize !== undefined) {
           const { left, top, width, height } = this.lastDisplayProperties.maximize;
 
           if (!keepPosition) {
@@ -269,7 +276,7 @@ export class WindowComponent implements AfterContentInit {
           this.setSize(width, height);
 
         } else {
-          this.lastDisplayProperties.maximize = this.window.getBoundingClientRect();
+          this.lastDisplayProperties.maximize = (this.window as HTMLElement).getBoundingClientRect();
 
           if (!keepPosition) {
             this.setPosition(LEFT_OFFSET, 0);
@@ -280,18 +287,26 @@ export class WindowComponent implements AfterContentInit {
       .finished(() => this.maximized = !this.maximized);
   }
 
-  private getContentSize(): { width: number; height: number } {
-    return {
-      width: this.content.clientWidth,
-      height: this.content.clientHeight,
-    };
+  private getContentSize(): { height: number; width: number } {
+    let width = 0;
+    let height = 0;
+
+    if (this.content !== undefined) {
+      width = this.content.clientWidth;
+      height = this.content.clientHeight;
+    }
+    return { height, width };
   }
 
   private getSize(): { width: number; height: number } {
-    return {
-      width: this.window.clientWidth,
-      height: this.window.clientHeight,
-    };
+    let width = 0;
+    let height = 0;
+
+    if (this.window !== undefined) {
+      width = this.window.clientWidth;
+      height = this.window.clientHeight;
+    }
+    return { height, width };
   }
 
   private setMaxSize(): void {
@@ -333,11 +348,11 @@ export class WindowComponent implements AfterContentInit {
       width = Math.max(width, this.minWidth);
       height = Math.max(height, this.minHeight);
 
-      if (typeof this.maxWidth === 'number') {
+      if (this.maxWidth !== undefined) {
         width = Math.min(width, this.maxWidth);
       }
 
-      if (typeof this.maxHeight === 'number') {
+      if (this.maxHeight !== undefined) {
         height = Math.min(height, this.maxHeight);
       }
 

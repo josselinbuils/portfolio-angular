@@ -8,8 +8,8 @@ import { Executor } from '../executor';
   styleUrls: ['./command.component.scss'],
 })
 export class CommandComponent implements Executor, OnInit {
-  args: string[];
-  command: string;
+  args!: string[];
+  command?: string;
 
   ngOnInit(): void {
     this.command = this.args.join(' ');

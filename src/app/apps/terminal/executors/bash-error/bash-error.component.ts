@@ -13,9 +13,9 @@ const commands = [
   styleUrls: ['./bash-error.component.scss'],
 })
 export class BashErrorComponent implements Executor, OnInit {
-  args: string[];
-  command: string;
-  errorMessage: string;
+  args!: string[];
+  command?: string;
+  errorMessage?: string;
 
   ngOnInit(): void {
     this.command = this.args[0];

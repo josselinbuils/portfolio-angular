@@ -21,14 +21,14 @@ export class NotesComponent implements WindowInstance {
   static appName = 'Notes';
   static iconClass = 'fa-sticky-note';
 
-  @ViewChild(WindowComponent) windowComponent: WindowComponent;
+  @ViewChild(WindowComponent) windowComponent!: WindowComponent;
 
   notes: string;
   title = NotesComponent.appName;
 
   constructor() {
-    this.notes = typeof localStorage.getItem('notes') === 'string'
-      ? localStorage.getItem('notes')
+    this.notes = localStorage.getItem('notes') !== null
+      ? localStorage.getItem('notes') as string
       : 'Hello there 😃';
   }
 

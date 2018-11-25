@@ -22,7 +22,7 @@ const previews = {
   styleUrls: ['./projects.component.scss'],
 })
 export class ProjectsComponent implements OnInit {
-  projects: Project[];
+  projects?: Project[];
 
   constructor(private readonly http: HttpClient) {}
 

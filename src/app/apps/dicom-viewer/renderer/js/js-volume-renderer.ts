@@ -1,32 +1,45 @@
 import { math } from '../../helpers/maths-helpers';
-import { Dataset } from '../../models';
+import { Dataset, Volume } from '../../models';
 import { Renderer } from '../renderer';
 import { RenderingParameters } from '../rendering-parameters';
-import { RenderingProperties } from '../rendering-properties';
+import { BoundedViewportSpaceCoordinates, ImageSpaceCoordinates, RenderingProperties } from '../rendering-properties';
 import { getRenderingProperties } from '../rendering-utils';
 
 export class JsVolumeRenderer implements Renderer {
 
   private readonly context: CanvasRenderingContext2D;
   private lut?: { table: number[]; windowWidth: number };
-  private readonly renderingContext = (document.createElement('canvas') as HTMLCanvasElement).getContext('2d');
+  private readonly renderingContext: CanvasRenderingContext2D;
 
   constructor(private readonly canvas: HTMLCanvasElement) {
-    this.context = canvas.getContext('2d');
+    const context = canvas.getContext('2d');
+    const renderingContext = (document.createElement('canvas') as HTMLCanvasElement).getContext('2d');
+
+    if (context === null || renderingContext === null) {
+      throw new Error('Unable to retrieve contexts');
+    }
+
+    this.context = context;
+    this.renderingContext = renderingContext;
   }
 
   render(dataset: Dataset, renderingParameters: RenderingParameters): void {
+
+    if (dataset.volume === undefined) {
+      throw new Error('Volume not defined');
+    }
+
     const { width, height } = this.canvas;
     const { camera } = renderingParameters;
 
     this.context.fillStyle = 'black';
     this.context.fillRect(0, 0, width, height);
 
-    const sliceDimensions = dataset.volume.getSliceDimensions(camera.getBasis());
-    const zoom = height / sliceDimensions.height * sliceDimensions.fieldOfView / camera.fieldOfView;
+    const imageDimensions = dataset.volume.getImageDimensions(camera.getBasis());
+    const zoom = height / imageDimensions.height * imageDimensions.fieldOfView / camera.fieldOfView;
     const renderingProperties = getRenderingProperties(
-      renderingParameters, zoom, sliceDimensions.width, sliceDimensions.widthRatio, sliceDimensions.heightRatio,
-      sliceDimensions.height, width, height,
+      renderingParameters, zoom, imageDimensions.width, imageDimensions.widthRatio, imageDimensions.heightRatio,
+      imageDimensions.height, width, height,
     );
 
     if (!renderingProperties.isImageInViewport) {
@@ -41,17 +54,17 @@ export class JsVolumeRenderer implements Renderer {
 
     if (zoom < 1) {
       this.renderViewportPixels(
-        dataset, renderingParameters, renderingProperties, zoom, sliceDimensions.width, sliceDimensions.height,
-        sliceDimensions.widthRatio, sliceDimensions.heightRatio,
+        dataset, renderingParameters, renderingProperties, zoom, imageDimensions.width, imageDimensions.height,
+        imageDimensions.widthRatio, imageDimensions.heightRatio,
       );
     } else {
       this.renderImagePixels(
-        dataset, renderingParameters, renderingProperties, sliceDimensions.width, sliceDimensions.height,
+        dataset, renderingParameters, renderingProperties, imageDimensions.width, imageDimensions.height,
       );
     }
   }
 
-  private getVOILut(windowWidth: number): { table: number[]; windowWidth: number } {
+  private getVOILut(windowWidth: number): VOILut {
     const table: number[] = [];
 
     for (let i = 0; i < windowWidth; i++) {
@@ -62,7 +75,7 @@ export class JsVolumeRenderer implements Renderer {
   }
 
   private getPixelValue(dataset: Dataset, pointLPS: number[]): number {
-    const { firstVoxelCenter, orientation, voxelSpacing } = dataset.volume;
+    const { firstVoxelCenter, orientation, voxelSpacing } = dataset.volume as Volume;
 
     const vector = [
       (pointLPS[0] - firstVoxelCenter[0]) / voxelSpacing[0],
@@ -111,18 +124,21 @@ export class JsVolumeRenderer implements Renderer {
 
     const { camera } = renderingParameters;
     const { boundedViewportSpace, leftLimit, rightLimit, imageSpace } = renderingProperties;
-    const { imageX0, imageY0, imageWidth, imageHeight } = boundedViewportSpace;
-    const { displayHeight, displayWidth, displayX0, displayX1, displayY0, displayY1 } = imageSpace;
+    const { imageX0, imageY0, imageWidth, imageHeight } = boundedViewportSpace as BoundedViewportSpaceCoordinates;
+    const {
+      displayHeight, displayWidth, displayX0, displayX1, displayY0, displayY1,
+    } = imageSpace as ImageSpaceCoordinates;
 
-    const table = this.lut.table;
+    const table = (this.lut as VOILut).table;
     const imageData32 = new Uint32Array(displayWidth * displayHeight);
 
     let dataIndex = 0;
 
     // convertImageToLPS
     const cameraBasis = camera.getBasis();
-    const right = math.chain(cameraBasis[0]).dotMultiply(dataset.volume.voxelSpacing).done();
-    const up = math.chain(cameraBasis[1]).dotMultiply(dataset.volume.voxelSpacing).multiply(-1).done();
+    const voxelSpacing = (dataset.volume as Volume).voxelSpacing;
+    const right = math.chain(cameraBasis[0]).dotMultiply(voxelSpacing).done();
+    const up = math.chain(cameraBasis[1]).dotMultiply(voxelSpacing).multiply(-1).done();
     const pointBaseLPS = math.chain(camera.lookPoint)
       .add(math.multiply(right, -(sliceWidth - 1) / 2))
       .add(math.multiply(up, -(sliceHeight - 1) / 2))
@@ -163,19 +179,22 @@ export class JsVolumeRenderer implements Renderer {
 
     const { camera } = renderingParameters;
     const { boundedViewportSpace, leftLimit, rightLimit, viewportSpace } = renderingProperties;
-    const { imageHeight, imageWidth, imageX0, imageX1, imageY0, imageY1 } = boundedViewportSpace;
+    const {
+      imageHeight, imageWidth, imageX0, imageX1, imageY0, imageY1,
+    } = boundedViewportSpace as BoundedViewportSpaceCoordinates;
 
     const viewportSpaceImageX0 = viewportSpace.imageX0;
     const viewportSpaceImageY0 = viewportSpace.imageY0;
-    const table = this.lut.table;
+    const table = (this.lut as VOILut).table;
     const imageData32 = new Uint32Array(imageWidth * imageHeight);
 
     let dataIndex = 0;
 
     // convertImageToLPS
     const cameraBasis = camera.getBasis();
-    const right = math.chain(cameraBasis[0]).dotMultiply(dataset.volume.voxelSpacing).done();
-    const up = math.chain(cameraBasis[1]).dotMultiply(dataset.volume.voxelSpacing).multiply(-1).done();
+    const voxelSpacing = (dataset.volume as Volume).voxelSpacing;
+    const right = math.chain(cameraBasis[0]).dotMultiply(voxelSpacing).done();
+    const up = math.chain(cameraBasis[1]).dotMultiply(voxelSpacing).multiply(-1).done();
     const pointBaseLPS = math.chain(camera.lookPoint)
       .add(math.multiply(right, -(sliceWidth - 1) / 2))
       .add(math.multiply(up, -(sliceHeight - 1) / 2))
@@ -207,4 +226,9 @@ export class JsVolumeRenderer implements Renderer {
     const imageDataInstance = new ImageData(imageData, imageWidth, imageHeight);
     this.context.putImageData(imageDataInstance, imageX0, imageY0);
   }
+}
+
+interface VOILut {
+  table: number[];
+  windowWidth: number;
 }

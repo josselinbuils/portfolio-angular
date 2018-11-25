@@ -6,11 +6,11 @@ import { WindowComponent } from './window.component';
 
 @Injectable()
 export class WindowManagerService {
-  windowInstancesSubject = new BehaviorSubject<WindowInstance[]>(<WindowInstance[]> []);
+  windowInstancesSubject = new BehaviorSubject<WindowInstance[]>([]);
 
   private readonly windows: WindowComponent[] = [];
   private id = -1;
-  private viewContainerRef: ViewContainerRef;
+  private viewContainerRef?: ViewContainerRef;
 
   constructor(private readonly componentFactoryResolver: ComponentFactoryResolver) {}
 
@@ -37,9 +37,9 @@ export class WindowManagerService {
 
   openWindow(component: Type<{}>): void {
     const componentFactory = this.componentFactoryResolver.resolveComponentFactory(component);
-    const componentRef = this.viewContainerRef.createComponent(componentFactory);
+    const componentRef = (this.viewContainerRef as ViewContainerRef).createComponent(componentFactory);
 
-    const window = (<WindowInstance> componentRef.instance).windowComponent;
+    const window = (componentRef.instance as any).windowComponent as WindowComponent;
     window.id = ++this.id;
     window.parentRef = componentRef;
 
@@ -82,7 +82,12 @@ export class WindowManagerService {
   }
 
   private getWindowComponent(id: number): WindowComponent {
-    return this.windows.find(window => window.id === id);
+    const windowComponent = this.windows.find(window => window.id === id);
+
+    if (windowComponent === undefined) {
+      throw new Error(`Unable to find a window component with id ${id}`);
+    }
+    return windowComponent;
   }
 
   private publishWindowInstances(): void {

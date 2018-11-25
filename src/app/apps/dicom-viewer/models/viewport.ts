@@ -1,23 +1,28 @@
 import { ViewType } from '../constants';
 
+import { Annotations } from './annotations';
 import { Camera } from './camera';
 import { Dataset } from './dataset';
 import { Renderable } from './renderable';
 
+const MANDATORY_FIELDS = ['camera', 'dataset', 'viewType'];
+
 export class Viewport extends Renderable {
-  camera: Camera;
-  dataset: Dataset;
+  annotations?: Annotations;
+  camera!: Camera;
+  dataset!: Dataset;
   deltaX = 0;
   deltaY = 0;
   height = 0;
-  viewType: ViewType;
+  viewType!: ViewType;
   width = 0;
   windowCenter = 30;
   windowWidth = 400;
 
   constructor(config: object) {
     super();
-    super.fillProperties(this, config);
+    super.fillProperties(config);
+    super.checkMandatoryFieldsPresence(MANDATORY_FIELDS);
     super.decorateProperties();
   }
 
@@ -25,9 +30,9 @@ export class Viewport extends Renderable {
     this.dataset.destroy();
   }
 
-  getSliceZoom(): number {
-    const sliceHeight = this.dataset.is3D
-      ? this.dataset.volume.getSliceDimensions(this.camera.getBasis()).height
+  getImageZoom(): number {
+    const sliceHeight = this.dataset.volume !== undefined
+      ? this.dataset.volume.getImageDimensions(this.camera.getBasis()).height
       : this.dataset.findClosestFrame(this.camera.lookPoint).rows;
 
     return this.height / sliceHeight * this.camera.baseFieldOfView / this.camera.fieldOfView;

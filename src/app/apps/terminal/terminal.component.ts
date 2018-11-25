@@ -44,9 +44,9 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
   static appName = 'Terminal';
   static iconClass = 'fa-terminal';
 
-  @ViewChild('commands', { read: ViewContainerRef }) commandsViewContainerRef: ViewContainerRef;
-  @ViewChild('terminal') terminalElementRef: ElementRef<HTMLDivElement>;
-  @ViewChild(WindowComponent) windowComponent: WindowComponent;
+  @ViewChild('commands', { read: ViewContainerRef }) commandsViewContainerRef!: ViewContainerRef;
+  @ViewChild('terminal') terminalElementRef!: ElementRef<HTMLDivElement>;
+  @ViewChild(WindowComponent) windowComponent!: WindowComponent;
 
   caretIndex = 0;
   prefix = 'user$';
@@ -132,7 +132,7 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
   private loadComponent(component: Type<{}>, args: any[]): void {
     const componentFactory = this.componentFactoryResolver.resolveComponentFactory(component);
     const componentRef = this.commandsViewContainerRef.createComponent(componentFactory);
-    (<Executor> componentRef.instance).args = args;
+    (componentRef.instance as Executor).args = args;
     this.components.push(componentRef);
   }
 

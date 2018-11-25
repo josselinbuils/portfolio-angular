@@ -42,11 +42,11 @@ export class TaskBarComponent {
       let refTask = this.tasks.find(task => windowInstance instanceof task.component);
 
       if (refTask === undefined) {
-        refTask = new Task(<Type<{}>> windowInstance.constructor);
+        refTask = new Task(windowInstance.constructor as Type<{}>);
         this.tasks.push(refTask);
       }
 
-      let newTask: Task;
+      let newTask: Task | undefined;
 
       if (refTask.instance === undefined) {
         refTask.instance = windowInstance;
@@ -58,7 +58,13 @@ export class TaskBarComponent {
 
       if (newTask !== undefined) {
         setTimeout(() => {
-          const taskClientRect = document.getElementById(newTask.id).getBoundingClientRect();
+          const taskElement = document.getElementById((newTask as Task).id);
+
+          if (taskElement === null) {
+            throw new Error('Task element not found');
+          }
+
+          const taskClientRect = taskElement.getBoundingClientRect();
           const topPosition = Math.round(taskClientRect.top + taskClientRect.height / 3);
           windowInstance.windowComponent.setMinimizedTopPosition(topPosition);
         });
@@ -68,7 +74,11 @@ export class TaskBarComponent {
 
   openContextMenu(task: Task, event: MouseEvent): void {
     const taskBarElement = this.viewContainerRef.element.nativeElement;
-    const taskElement = DOMUtils.closest(<HTMLElement> event.target, '.task');
+    const taskElement = DOMUtils.closest(event.target as HTMLElement, '.task');
+
+    if (taskElement === undefined) {
+      throw new Error('Task element not found');
+    }
 
     const left = taskBarElement.getBoundingClientRect().right;
     const top = taskElement.getBoundingClientRect().top;
@@ -83,7 +93,10 @@ export class TaskBarComponent {
       items.push({
         iconClass: 'fa-close',
         title: 'Close',
-        click: () => this.windowManagerService.closeWindow(task.instance.windowComponent.id),
+        click: () => {
+          const instance = (task as Task).instance as WindowInstance;
+          this.windowManagerService.closeWindow(instance.windowComponent.id);
+        },
       });
     }
 

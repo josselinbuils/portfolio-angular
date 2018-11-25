@@ -2,9 +2,14 @@ import { math } from '../helpers/maths-helpers';
 
 import { Model } from './model';
 
+const MANDATORY_FIELDS = [
+  'corners', 'dimensionsMm', 'dimensionsVoxels', 'displayRatio', 'firstVoxelCenter', 'orientation',
+  'orientedDimensionsMm', 'orientedDimensionsVoxels', 'voxelSpacing',
+];
+
 // All vectors are in LPS space
 export class Volume extends Model {
-  corners: {
+  corners!: {
     x0y0z0: number[];
     x1y0z0: number[];
     x1y1z0: number[];
@@ -15,23 +20,24 @@ export class Volume extends Model {
     x0y1z1: number[];
   };
   // mm
-  dimensionsMm: number[];
+  dimensionsMm!: number[];
   // Voxels
-  dimensionsVoxels: number[];
-  displayRatio: number[];
-  firstVoxelCenter: number[];
+  dimensionsVoxels!: number[];
+  displayRatio!: number[];
+  firstVoxelCenter!: number[];
   // Unit vectors
-  orientation: number[][];
+  orientation!: number[][];
   // Orientation vectors scaled with volume dimensions in mm
-  orientedDimensionsMm: number[][];
+  orientedDimensionsMm!: number[][];
   // Orientation vectors scaled with volume dimensions in voxels
-  orientedDimensionsVoxels: number[][];
+  orientedDimensionsVoxels!: number[][];
   // mm
-  voxelSpacing: number[];
+  voxelSpacing!: number[];
 
   constructor(config: object) {
     super();
-    super.fillProperties(this, config);
+    super.fillProperties(config);
+    super.checkMandatoryFieldsPresence(MANDATORY_FIELDS);
   }
 
   getOrientedDimensionMm(axe: number[]): number {
@@ -41,23 +47,23 @@ export class Volume extends Model {
   }
 
   // TODO Optimize this
-  getSliceDimensions(basis: number[][]): {
+  getImageDimensions(basis: number[][]): {
     fieldOfView: number; height: number; heightRatio: number; width: number; widthRatio: number;
   } {
     // Compute volume limits in computer service
-    const halfVerticalSpacing = math.chain(this.voxelSpacing).multiply(0.5).dot(basis[1]).abs().done();
+    const halfVerticalSpacing = math.chain(this.voxelSpacing).multiply(0.5).dot(basis[1]).abs().done() as number;
 
-    let minHorizontal: number = Number.MAX_SAFE_INTEGER;
-    let maxHorizontal: number = -Number.MAX_SAFE_INTEGER;
-    let maxVertical: number = -Number.MAX_SAFE_INTEGER;
-    let minVertical: number = Number.MAX_SAFE_INTEGER;
-    let maxVerticalMm: number = -Number.MAX_SAFE_INTEGER;
-    let minVerticalMm: number = Number.MAX_SAFE_INTEGER;
+    let minHorizontal = Number.MAX_SAFE_INTEGER;
+    let maxHorizontal = -Number.MAX_SAFE_INTEGER;
+    let maxVertical = -Number.MAX_SAFE_INTEGER;
+    let minVertical = Number.MAX_SAFE_INTEGER;
+    let maxVerticalMm = -Number.MAX_SAFE_INTEGER;
+    let minVerticalMm = Number.MAX_SAFE_INTEGER;
 
     Object.values(this.corners).forEach(corner => {
-      const left = math.chain(corner).dotDivide(this.voxelSpacing).dot(basis[0]).done();
-      const top = math.chain(corner).dotDivide(this.voxelSpacing).dot(basis[1]).done();
-      const topMm = math.chain(corner).dot(basis[1]).done();
+      const left = math.chain(corner).dotDivide(this.voxelSpacing).dot(basis[0]).done() as number;
+      const top = math.chain(corner).dotDivide(this.voxelSpacing).dot(basis[1]).done() as number;
+      const topMm = math.chain(corner).dot(basis[1]).done() as number;
 
       if (left < minHorizontal) {
         minHorizontal = left - 0.5;

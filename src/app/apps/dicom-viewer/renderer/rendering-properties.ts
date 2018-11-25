@@ -15,12 +15,12 @@ export interface RenderingProperties {
  */
 export interface ImageSpaceCoordinates {
   // Position of the first displayed pixel in the image space
-  displayX0?: number;
-  displayY0?: number;
+  displayX0: number;
+  displayY0: number;
 
   // Position of the last displayed pixel in the image space
-  displayX1?: number;
-  displayY1?: number;
+  displayX1: number;
+  displayY1: number;
 
   // Dimensions of the image in the image space
   displayWidth: number;
@@ -35,12 +35,12 @@ export interface ImageSpaceCoordinates {
  */
 export interface BoundedViewportSpaceCoordinates {
   // Position of the first image pixel in the viewport
-  imageX0?: number;
-  imageY0?: number;
+  imageX0: number;
+  imageY0: number;
 
   // Position of the last image pixel in the viewport
-  imageX1?: number;
-  imageY1?: number;
+  imageX1: number;
+  imageY1: number;
 
   // Dimensions of the image in the viewport space
   imageWidth: number;

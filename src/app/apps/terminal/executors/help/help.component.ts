@@ -8,7 +8,7 @@ import { Executor } from '../executor';
   styleUrls: ['./help.component.scss'],
 })
 export class HelpComponent implements Executor {
-  args: string[];
+  args!: string[];
   commands = [{
     command: 'projects',
     description: 'my GitHub projects',

@@ -16,7 +16,7 @@ export class DicomLoaderService {
 
   async loadFrames(dataset: DatasetDescriptor): Promise<DicomFrame[]> {
     let frames: DicomFrame[];
-    const fileBuffers = [];
+    const fileBuffers: any[] = [];
 
     for (const file of dataset.files) {
       if (/\.tar$/.test(file)) {
@@ -38,7 +38,7 @@ export class DicomLoaderService {
       }
 
       frames = frames.every(frame => frame.sliceLocation !== undefined)
-        ? frames.sort((a, b) => a.sliceLocation > b.sliceLocation ? 1 : -1)
+        ? frames.sort((a, b) => (a as any).sliceLocation > (b as any).sliceLocation ? 1 : -1)
         : frames.sort((a, b) => a.sopInstanceUID > b.sopInstanceUID ? 1 : -1);
 
     } else {
@@ -67,18 +67,20 @@ export class DicomLoaderService {
     return undefined;
   }
 
-  private floatStringsToArray(parsedFile: ParsedDicomFile, tag: string, slice?: number): number[] | undefined {
+  private floatStringsToArray(parsedFile: ParsedDicomFile, tag: string,
+                              slice?: number): number[] | number[][] | undefined {
+
     const nbValues = parsedFile.numStringValues(tag);
 
     if (nbValues > 0) {
-      const array = [];
+      const array: number[] = [];
 
       for (let i = 0; i < nbValues; i++) {
-        array.push(parsedFile.floatString(tag, i));
+        array.push(parsedFile.floatString(tag, i) as number);
       }
 
       if (slice !== undefined) {
-        const slicedArray = [];
+        const slicedArray: number[][] = [];
 
         for (let j = 0; j < array.length; j += slice) {
           slicedArray.push(array.slice(j, j + slice));

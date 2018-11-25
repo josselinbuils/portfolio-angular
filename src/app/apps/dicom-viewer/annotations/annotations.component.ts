@@ -3,8 +3,7 @@ import { ContextMenuItem } from 'app/platform/context-menu/context-menu-item';
 import { ContextMenuService } from 'app/platform/context-menu/context-menu.service';
 
 import { ViewType } from '../constants';
-
-import { Annotations } from './annotations';
+import { Annotations } from '../models/annotations';
 
 const viewTypeSelectorStyle = {
   background: 'black',
@@ -17,12 +16,12 @@ const viewTypeSelectorStyle = {
   styleUrls: ['./annotations.component.scss'],
 })
 export class AnnotationsComponent {
-  @Input() annotations: Annotations;
-  @Input() availableViewTypes: ViewType[];
+  @Input() annotations!: Annotations;
+  @Input() availableViewTypes!: ViewType[];
 
   @Output() viewType = new EventEmitter<ViewType>();
 
-  @ViewChild('viewType') viewTypeElementRef: ElementRef<HTMLParagraphElement>;
+  @ViewChild('viewType') viewTypeElementRef!: ElementRef<HTMLParagraphElement>;
 
   constructor(private readonly contextMenuService: ContextMenuService) {}
 

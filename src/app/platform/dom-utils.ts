@@ -9,13 +9,15 @@ export class DOMUtils {
    * @param selector Selector to find
    * @returns Element if found, null otherwise
    */
-  static closest(element: HTMLElement, selector: string): HTMLElement {
+  static closest(element: HTMLElement, selector: string): HTMLElement | undefined {
+    let closestElement: HTMLElement | null = element;
+
     do {
-      if (element.matches(selector)) {
-        return element;
+      if (closestElement.matches(selector)) {
+        return closestElement;
       }
-      element = element.parentElement;
-    } while (element instanceof HTMLElement);
+      closestElement = closestElement.parentElement;
+    } while (closestElement !== null);
 
     return undefined;
   }

@@ -12,7 +12,7 @@ export class TeraviaComponent implements WindowInstance {
   static appName = 'Teravia';
   static iconClass = 'fa-gamepad';
 
-  @ViewChild(WindowComponent) windowComponent: WindowComponent;
+  @ViewChild(WindowComponent) windowComponent!: WindowComponent;
 
   title = TeraviaComponent.appName;
 }

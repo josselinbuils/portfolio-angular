@@ -5,15 +5,17 @@ import { Frame } from './frame';
 import { Renderable } from './renderable';
 import { Volume } from './volume';
 
+const MANDATORY_FIELDS = ['baseFieldOfView', 'eyePoint', 'fieldOfView', 'lookPoint', 'upVector'];
+
 export class Camera extends Renderable {
-  baseFieldOfView: number;
-  eyePoint: number[];
-  fieldOfView: number;
-  lookPoint: number[];
-  upVector: number[];
+  baseFieldOfView!: number;
+  eyePoint!: number[];
+  fieldOfView!: number;
+  lookPoint!: number[];
+  upVector!: number[];
 
   private basis?: number[][];
-  private direction: number[];
+  private direction?: number[];
 
   static fromFrame(frame: Frame): Camera {
     const { dimensionsMm, imageCenter, imageNormal, imageOrientation } = frame;
@@ -45,6 +47,9 @@ export class Camera extends Renderable {
       case ViewType.Sagittal:
         direction = [-1, 0, 0];
         upVector = [0, 0, 1];
+        break;
+      default:
+        throw new Error(`Unknown view type: ${viewType}`);
     }
 
     const baseFieldOfView = volume.getOrientedDimensionMm(upVector);
@@ -62,7 +67,8 @@ export class Camera extends Renderable {
 
   constructor(config: any) {
     super();
-    super.fillProperties(this, config);
+    super.fillProperties(config);
+    super.checkMandatoryFieldsPresence(MANDATORY_FIELDS);
     super.decorateProperties();
     this.onUpdate.subscribe(() => {
       delete this.basis;
@@ -89,7 +95,7 @@ export class Camera extends Renderable {
 
   getDirection(): number[] {
     if (this.direction === undefined) {
-      this.direction = math.chain(this.lookPoint).subtract(this.eyePoint).normalize().done();
+      this.direction = math.chain(this.lookPoint).subtract(this.eyePoint).normalize().done() as number[];
     }
     return this.direction;
   }

@@ -1,7 +1,7 @@
 import { WindowComponent } from './window.component';
 
-export class WindowInstance {
+export abstract class WindowInstance {
   static appName: string;
   static iconClass: string;
-  windowComponent: WindowComponent;
+  windowComponent!: WindowComponent;
 }

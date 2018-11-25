@@ -22,7 +22,7 @@ export class ConfigComponent implements OnInit {
 
   @Output() config = new EventEmitter<Config>();
 
-  datasets: DatasetDescriptor[];
+  datasets?: DatasetDescriptor[];
   previewsPath = location.hostname === 'localhost'
     ? `${DEV_SERVER_URL}${PREVIEWS_PATH}`
     : `${PREVIEWS_PATH}`;
@@ -30,7 +30,7 @@ export class ConfigComponent implements OnInit {
     { type: RendererType.JavaScript, logo: 'javascript.png' },
     { type: RendererType.WebGL, logo: 'webgl.png' },
   ];
-  rendererType: string;
+  rendererType?: string;
   step = Step.Renderer;
 
   constructor(private readonly http: HttpClient) {}
@@ -47,7 +47,7 @@ export class ConfigComponent implements OnInit {
   chooseDataset(dataset: DatasetDescriptor): void {
     this.config.emit({
       dataset,
-      rendererType: this.rendererType,
+      rendererType: this.rendererType as RendererType,
     });
   }
 

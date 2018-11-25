@@ -3,9 +3,9 @@ import { Subject } from 'rxjs';
 import { Model } from './model';
 
 export class Renderable extends Model {
-  onUpdate: Subject<void>;
+  onUpdate = new Subject<void>();
 
-  private dirty: boolean;
+  private dirty = true;
 
   decorateProperties(): void {
     for (const [key, startValue] of Object.entries(this)) {
@@ -19,7 +19,7 @@ export class Renderable extends Model {
           if (newValue !== value) {
             value = newValue;
 
-            if (value !== undefined && value.onUpdate instanceof Subject) {
+            if (value !== undefined && value.onUpdate !== undefined) {
               value.onUpdate.subscribe(() => this.makeDirty());
             }
             this.makeDirty();
@@ -27,16 +27,14 @@ export class Renderable extends Model {
         },
       });
     }
-    this.dirty = true;
-    this.onUpdate = new Subject();
   }
 
-  fillProperties(model: any, config: any): void {
+  fillProperties(config: any): void {
     for (const [key, value] of Object.entries(config)) {
       if (value !== undefined) {
-        model[key] = value;
+        this[key] = value;
 
-        if (value !== undefined && (value as any).onUpdate instanceof Subject) {
+        if (value !== undefined && (value as any).onUpdate !== undefined) {
           (value as Renderable).onUpdate.subscribe(() => this.makeDirty());
         }
       }

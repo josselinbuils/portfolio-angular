@@ -15,11 +15,11 @@ import { ContextMenuService } from './context-menu.service';
 })
 export class ContextMenuComponent {
 
-  descriptor: ContextMenuDescriptor;
+  descriptor?: ContextMenuDescriptor;
   show = false;
   style: { [name: string]: number } = {};
 
-  private destroyMouseDownListener: () => void;
+  private destroyMouseDownListener?: () => void;
 
   constructor(contextMenuService: ContextMenuService,
               private readonly renderer: Renderer2) {
@@ -53,7 +53,9 @@ export class ContextMenuComponent {
   }
 
   private hideMenu(): void {
-    this.destroyMouseDownListener();
+    if (this.destroyMouseDownListener !== undefined) {
+      this.destroyMouseDownListener();
+    }
     this.show = false;
   }
 
@@ -63,7 +65,7 @@ export class ContextMenuComponent {
       return;
     }
 
-    const isContextMenuChild = DOMUtils.closest(<HTMLElement> event.target, '.context-menu') !== undefined;
+    const isContextMenuChild = DOMUtils.closest(event.target as HTMLElement, '.context-menu') !== undefined;
 
     if (!isContextMenuChild) {
       this.hideMenu();

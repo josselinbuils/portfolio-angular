@@ -15,8 +15,8 @@ const apps: { [name: string]: Type<{}> } = {
   styleUrls: ['./open.component.scss'],
 })
 export class OpenComponent implements OnInit, Executor {
-  args: string[];
-  error: string;
+  args!: string[];
+  error?: string;
 
   constructor(private readonly windowManagerService: WindowManagerService) {}
 

@@ -27,15 +27,15 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
   static appName = 'MP3Player';
   static iconClass = 'fa-headphones';
 
-  @ViewChild('audio') audioElementRef: ElementRef<HTMLAudioElement>;
-  @ViewChild('currentTime') currentTimeElementRef: ElementRef<HTMLDivElement>;
-  @ViewChild('progressBar') progressElementRef: ElementRef<HTMLDivElement>;
-  @ViewChild('source') sourceElementRef: ElementRef<HTMLSourceElement>;
-  @ViewChild(WindowComponent) windowComponent: WindowComponent;
+  @ViewChild('audio') audioElementRef!: ElementRef<HTMLAudioElement>;
+  @ViewChild('currentTime') currentTimeElementRef!: ElementRef<HTMLDivElement>;
+  @ViewChild('progressBar') progressElementRef!: ElementRef<HTMLDivElement>;
+  @ViewChild('source') sourceElementRef!: ElementRef<HTMLSourceElement>;
+  @ViewChild(WindowComponent) windowComponent!: WindowComponent;
 
-  audioElement: HTMLAudioElement;
-  currentItem: Item;
-  currentMusic: Music;
+  audioElement!: HTMLAudioElement;
+  currentItem?: Item;
+  currentMusic?: Music;
 
   items: Item[] = [
     { name: 'Top 50', path: '/tracks' },
@@ -75,7 +75,7 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
     return this.showPlaylist ? Mp3PlayerComponent.appName : '';
   }
 
-  private currentTimeInterval: number;
+  private currentTimeInterval?: number;
 
   constructor(private readonly http: HttpClient,
               private readonly renderer: Renderer2) {}
@@ -99,6 +99,10 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
   }
 
   async next(): Promise<void> {
+
+    if (this.currentMusic === undefined) {
+      return;
+    }
 
     if (this.random) {
       return this.rand();
@@ -172,6 +176,10 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
 
   async prev(): Promise<void> {
 
+    if (this.currentMusic === undefined) {
+      return;
+    }
+
     if (this.random) {
       return this.rand();
     }
@@ -198,7 +206,7 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
     this.loadMusic(this.playlist[newIndex]);
 
     if (!paused) {
-     await this.play();
+      await this.play();
     }
   }
 

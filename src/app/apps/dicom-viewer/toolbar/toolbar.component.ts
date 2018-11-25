@@ -11,9 +11,9 @@ import { Viewport } from '../models';
   styleUrls: ['./toolbar.component.scss'],
 })
 export class ToolbarComponent {
-  @Input() activeLeftTool: MouseTool;
-  @Input() activeRightTool: MouseTool;
-  @Input() viewport: Viewport;
+  @Input() activeLeftTool!: MouseTool;
+  @Input() activeRightTool!: MouseTool;
+  @Input() viewport!: Viewport;
 
   @Output() toolSelected = new EventEmitter<{ button: MouseButton; tool: MouseTool }>();
 

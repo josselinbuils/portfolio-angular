@@ -2,27 +2,33 @@ import { PhotometricInterpretation, PixelRepresentation } from '../constants';
 
 import { Model } from './model';
 
+const MANDATORY_FIELDS = [
+  'bitsAllocated', 'columns', 'patientName', 'photometricInterpretation', 'pixelData', 'pixelRepresentation', 'rows',
+  'sopInstanceUID',
+];
+
 export class DicomFrame extends Model {
-  bitsAllocated: number;
-  columns: number;
+  bitsAllocated!: number;
+  columns!: number;
   imageOrientation?: number[][];
   imagePosition?: number[];
-  patientName: string;
-  photometricInterpretation: PhotometricInterpretation;
-  pixelData: Uint8Array;
-  pixelRepresentation: PixelRepresentation;
+  patientName!: string;
+  photometricInterpretation!: PhotometricInterpretation;
+  pixelData!: Uint8Array;
+  pixelRepresentation!: PixelRepresentation;
   pixelSpacing?: number[];
   rescaleIntercept?: number;
   rescaleSlope?: number;
-  rows: number;
+  rows!: number;
   sliceLocation?: number;
-  sopInstanceUID: string;
-  spacingBetweenSlices: number;
+  sopInstanceUID!: string;
+  spacingBetweenSlices?: number;
   windowCenter?: number;
   windowWidth?: number;
 
   constructor(config: object) {
     super();
-    super.fillProperties(this, config);
+    super.fillProperties(config);
+    super.checkMandatoryFieldsPresence(MANDATORY_FIELDS);
   }
 }

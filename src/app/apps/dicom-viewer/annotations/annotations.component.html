@@ -4,12 +4,12 @@
 </div>
 <div class="overlay-top-right">
   <p>renderer: {{annotations.rendererType}}</p>
-  <p>framerate: {{annotations.fps ? annotations.fps + 'fps' : '-'}}</p>
+  <p>framerate: {{!!annotations.fps ? annotations.fps + 'fps' : '-'}}</p>
   <p>
-    rendering: {{annotations.meanRenderDuration > 0 ? (annotations.meanRenderDuration | number: '1.2-2') + 'ms' : '-'}}</p>
+    rendering: {{!!annotations.meanRenderDuration ? (annotations.meanRenderDuration | number: '1.2-2') + 'ms' : '-'}}</p>
 </div>
 <div class="overlay-bottom-right">
-  <p>zoom: {{annotations.zoom ? (annotations.zoom | number: '1.2-2') : '-'}}</p>
+  <p>zoom: {{!!annotations.zoom ? (annotations.zoom | number: '1.2-2') : '-'}}</p>
 </div>
 <div class="overlay-bottom-left">
   <p>wc: {{annotations.windowCenter ? annotations.windowCenter : '-'}}</p>

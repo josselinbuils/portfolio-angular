@@ -10,16 +10,16 @@ import { VERTEX_SHADER_SRC } from './vertex-shader';
 export class WebglRenderer implements Renderer {
 
   private readonly gl: WebGLRenderingContext;
-  private program: WebGLProgram;
-  private texture: { id: string; instance: WebGLTexture };
-  private glViewportWidth: number;
-  private glViewportHeight: number;
+  private program?: WebGLProgram;
+  private texture?: { id: string; instance: WebGLTexture };
+  private glViewportWidth?: number;
+  private glViewportHeight?: number;
 
   constructor(private readonly canvas: HTMLCanvasElement) {
     if (canvas.getContext('webgl') instanceof WebGLRenderingContext) {
-      this.gl = canvas.getContext('webgl');
+      this.gl = canvas.getContext('webgl') as WebGLRenderingContext;
     } else if (canvas.getContext('experimental-webgl') instanceof WebGLRenderingContext) {
-      this.gl = canvas.getContext('experimental-webgl');
+      this.gl = canvas.getContext('experimental-webgl') as WebGLRenderingContext;
     } else {
       throw new Error('Cannot retrieve WebGL context');
     }
@@ -28,8 +28,12 @@ export class WebglRenderer implements Renderer {
   destroy(): void {
     const gl = this.gl;
 
-    gl.deleteTexture(this.texture.instance);
-    gl.deleteProgram(this.program);
+    if (this.texture !== undefined) {
+      gl.deleteTexture(this.texture.instance);
+    }
+    if (this.program !== undefined) {
+      gl.deleteProgram(this.program);
+    }
 
     delete this.program;
     delete this.texture;
@@ -44,20 +48,18 @@ export class WebglRenderer implements Renderer {
 
     validateCamera2D(frame, camera);
 
+    if (this.program === undefined) {
+      this.program = this.createProgram(imageFormat);
+    }
+
     if (this.glViewportWidth !== width || this.glViewportHeight !== height) {
       this.gl.viewport(0, 0, width, height);
       this.glViewportWidth = width;
       this.glViewportHeight = height;
     }
 
-    if (this.program === undefined) {
-      this.program = this.createProgram(imageFormat);
-    }
-
-    const textureChanged = this.texture !== undefined && this.texture.id !== id;
-
-    if (this.texture === undefined || textureChanged) {
-      if (textureChanged) {
+    if (this.texture === undefined || this.texture.id !== id) {
+      if (this.texture !== undefined) {
         gl.deleteTexture(this.texture.instance);
       }
       const instance = this.createTexture(frame);
@@ -109,6 +111,10 @@ export class WebglRenderer implements Renderer {
     const gl = this.gl;
     const program = gl.createProgram();
 
+    if (program === null) {
+      throw new Error('Unable to create program');
+    }
+
     this.program = program;
 
     const { fragmentShader, vertexShader } = this.createShaders(imageFormat);
@@ -128,10 +134,20 @@ export class WebglRenderer implements Renderer {
     const fragmentShaderSrc = getFragmentShaderSrc(imageFormat);
 
     const vertexShader = gl.createShader(gl.VERTEX_SHADER);
+
+    if (vertexShader === null) {
+      throw new Error('Unable to create vertex shader');
+    }
+
     gl.shaderSource(vertexShader, VERTEX_SHADER_SRC);
     gl.compileShader(vertexShader);
 
     const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+
+    if (fragmentShader === null) {
+      throw new Error('Unable to create fragment shader');
+    }
+
     gl.shaderSource(fragmentShader, fragmentShaderSrc);
     gl.compileShader(fragmentShader);
 
@@ -141,6 +157,10 @@ export class WebglRenderer implements Renderer {
   private createTexture(image: Frame): WebGLTexture {
     const gl = this.gl;
     const texture = gl.createTexture();
+
+    if (texture === null) {
+      throw new Error('Unable to create texture');
+    }
 
     gl.bindTexture(gl.TEXTURE_2D, texture);
 

@@ -2,17 +2,25 @@ import { NormalizedImageFormat } from '../../constants';
 import { Dataset, Frame } from '../../models';
 import { Renderer } from '../renderer';
 import { RenderingParameters } from '../rendering-parameters';
-import { RenderingProperties } from '../rendering-properties';
+import { BoundedViewportSpaceCoordinates, ImageSpaceCoordinates, RenderingProperties } from '../rendering-properties';
 import { getRenderingProperties, validateCamera2D } from '../rendering-utils';
 
 export class JsFrameRenderer implements Renderer {
 
   private readonly context: CanvasRenderingContext2D;
   private lut?: { table: number[]; windowWidth: number };
-  private readonly renderingContext = (document.createElement('canvas') as HTMLCanvasElement).getContext('2d');
+  private readonly renderingContext: CanvasRenderingContext2D;
 
   constructor(private readonly canvas: HTMLCanvasElement) {
-    this.context = canvas.getContext('2d');
+    const context = canvas.getContext('2d');
+    const renderingContext = (document.createElement('canvas') as HTMLCanvasElement).getContext('2d');
+
+    if (context === null || renderingContext === null) {
+      throw new Error('Unable to retrieve contexts');
+    }
+
+    this.context = context;
+    this.renderingContext = renderingContext;
   }
 
   render(dataset: Dataset, renderingParameters: RenderingParameters): void {
@@ -58,7 +66,7 @@ export class JsFrameRenderer implements Renderer {
     }
   }
 
-  private getVOILut(windowWidth: number): { table: number[]; windowWidth: number } {
+  private getVOILut(windowWidth: number): VOILut {
     const table: number[] = [];
 
     for (let i = 0; i < windowWidth; i++) {
@@ -72,10 +80,12 @@ export class JsFrameRenderer implements Renderer {
 
     const { columns, pixelData, rescaleIntercept, rescaleSlope } = frame;
     const { boundedViewportSpace, leftLimit, rightLimit, imageSpace } = renderingProperties;
-    const { imageX0, imageY0, imageWidth, imageHeight } = boundedViewportSpace;
-    const { displayHeight, displayWidth, displayX0, displayX1, displayY0, displayY1 } = imageSpace;
+    const { imageX0, imageY0, imageWidth, imageHeight } = boundedViewportSpace as BoundedViewportSpaceCoordinates;
+    const {
+      displayHeight, displayWidth, displayX0, displayX1, displayY0, displayY1,
+    } = imageSpace as ImageSpaceCoordinates;
 
-    const table = this.lut.table;
+    const table = (this.lut as VOILut).table;
     const imageData32 = new Uint32Array(displayWidth * displayHeight);
 
     let dataIndex = 0;
@@ -133,11 +143,13 @@ export class JsFrameRenderer implements Renderer {
 
     const { columns, pixelData, rescaleIntercept, rescaleSlope } = frame;
     const { boundedViewportSpace, leftLimit, rightLimit, viewportSpace } = renderingProperties;
-    const { imageHeight, imageWidth, imageX0, imageX1, imageY0, imageY1 } = boundedViewportSpace;
+    const {
+      imageHeight, imageWidth, imageX0, imageX1, imageY0, imageY1,
+    } = boundedViewportSpace as BoundedViewportSpaceCoordinates;
 
     const viewportSpaceImageX0 = viewportSpace.imageX0;
     const viewportSpaceImageY0 = viewportSpace.imageY0;
-    const table = this.lut.table;
+    const table = (this.lut as VOILut).table;
     const imageData32 = new Uint32Array(imageWidth * imageHeight);
 
     let dataIndex = 0;
@@ -163,4 +175,9 @@ export class JsFrameRenderer implements Renderer {
     const imageDataInstance = new ImageData(imageData, imageWidth, imageHeight);
     this.context.putImageData(imageDataInstance, imageX0, imageY0);
   }
+}
+
+interface VOILut {
+  table: number[];
+  windowWidth: number;
 }

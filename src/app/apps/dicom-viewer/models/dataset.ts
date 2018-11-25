@@ -4,17 +4,20 @@ import { Frame } from './frame';
 import { Model } from './model';
 import { Volume } from './volume';
 
+const MANDATORY_FIELDS = ['frames', 'voxelSpacing'];
+
 export class Dataset extends Model {
-  frames: Frame[];
+  frames!: Frame[];
   is3D: boolean;
   volume?: Volume;
 
   // Shared properties (needed in both 2D/3D)
-  voxelSpacing: number[];
+  voxelSpacing!: number[];
 
   constructor(config: any) {
     super();
-    super.fillProperties(this, config);
+    super.fillProperties(config);
+    super.checkMandatoryFieldsPresence(MANDATORY_FIELDS);
     this.is3D = this.volume !== undefined;
   }
 
@@ -44,38 +47,51 @@ export class Dataset extends Model {
     max: { point: number[]; positionOnAxe: number };
     min: { point: number[]; positionOnAxe: number };
   } {
-    const limits = {
-      max: { point: undefined, positionOnAxe: undefined },
-      min: { point: undefined, positionOnAxe: undefined },
-    };
+    let maxPoint: number[] | undefined;
+    let minPoint: number[] | undefined;
+    let maxPositionOnAxe: number | undefined;
+    let minPositionOnAxe: number | undefined;
 
     if (this.is3D) {
-      limits.max.positionOnAxe = -Number.MAX_SAFE_INTEGER;
-      limits.min.positionOnAxe = Number.MAX_SAFE_INTEGER;
+      if (this.volume === undefined) {
+        throw new Error('Volume is not defined');
+      }
+
+      maxPositionOnAxe = -Number.MAX_SAFE_INTEGER;
+      minPositionOnAxe = Number.MAX_SAFE_INTEGER;
 
       for (const corner of Object.values(this.volume.corners)) {
         const positionAlongAxe = math.dot(corner, axe);
 
-        if (positionAlongAxe > limits.max.positionOnAxe) {
-          limits.max.positionOnAxe = positionAlongAxe;
-          limits.max.point = corner.slice();
+        if (positionAlongAxe > maxPositionOnAxe) {
+          maxPoint = corner.slice();
+          maxPositionOnAxe = positionAlongAxe;
         }
-        if (positionAlongAxe < limits.min.positionOnAxe) {
-          limits.min.positionOnAxe = positionAlongAxe;
-          limits.min.point = corner.slice();
+        if (positionAlongAxe < minPositionOnAxe) {
+          minPoint = corner.slice();
+          minPositionOnAxe = positionAlongAxe;
         }
       }
     } else {
       const firstFrame = this.frames[0];
       const lastFrame = this.frames[this.frames.length - 1];
 
-      limits.max.point = lastFrame.imagePosition;
-      limits.max.positionOnAxe = math.dot(limits.max.point, axe);
+      maxPoint = lastFrame.imagePosition;
+      maxPositionOnAxe = math.dot(maxPoint, axe);
 
-      limits.min.point = firstFrame.imagePosition;
-      limits.min.positionOnAxe = math.dot(limits.min.point, axe);
+      minPoint = firstFrame.imagePosition;
+      minPositionOnAxe = math.dot(minPoint, axe);
     }
 
-    return limits;
+    return {
+      max: {
+        point: maxPoint as number[],
+        positionOnAxe: maxPositionOnAxe,
+      },
+      min: {
+        point: minPoint as number[],
+        positionOnAxe: minPositionOnAxe,
+      },
+    };
   }
 }

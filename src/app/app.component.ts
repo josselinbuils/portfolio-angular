@@ -13,7 +13,7 @@ import { WindowManagerService } from './platform/window/window-manager.service';
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent implements AfterContentInit {
-  @ViewChild('windows', { read: ViewContainerRef }) windowsViewContainerRef: ViewContainerRef;
+  @ViewChild('windows', { read: ViewContainerRef }) windowsViewContainerRef!: ViewContainerRef;
 
   selectionStyle?: { [key: string]: number | string };
 
@@ -72,10 +72,13 @@ export class AppComponent implements AfterContentInit {
     };
 
     const cancelMouseMove = this.renderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
-      this.selectionStyle['left.px'] = Math.min(startX, moveEvent.clientX);
-      this.selectionStyle['top.px'] = Math.min(startY, moveEvent.clientY);
-      this.selectionStyle['width.px'] = Math.abs(moveEvent.clientX - startX);
-      this.selectionStyle['height.px'] = Math.abs(moveEvent.clientY - startY);
+      this.selectionStyle = {
+        ...this.selectionStyle,
+        'left.px': Math.min(startX, moveEvent.clientX),
+        'top.px': Math.min(startY, moveEvent.clientY),
+        'width.px': Math.abs(moveEvent.clientX - startX),
+        'height.px': Math.abs(moveEvent.clientY - startY),
+      };
     });
 
     const cancelMouseUp = this.renderer.listen('window', 'mouseup', () => {

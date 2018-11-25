@@ -17,11 +17,11 @@ export class RedditComponent implements OnInit, WindowInstance {
   static appName = 'Reddit';
   static iconClass = 'fa-reddit-alien';
 
-  @ViewChild(WindowComponent) windowComponent: WindowComponent;
+  @ViewChild(WindowComponent) windowComponent!: WindowComponent;
 
-  data: any[];
-  path: string;
-  subreddit: string;
+  data?: any[];
+  path?: string;
+  subreddit?: string;
   subreddits = ['angularjs', 'CrappyDesign', 'docker', 'javascript', 'node', 'ProgrammerHumor', 'todayilearned'];
   title = RedditComponent.appName;
 
@@ -29,9 +29,8 @@ export class RedditComponent implements OnInit, WindowInstance {
 
   async load(path: string): Promise<any> {
     this.path = path;
-    this.subreddit = path.indexOf('/r/') === 0 ? path.split('/')[2] : null;
+    this.subreddit = path.indexOf('/r/') === 0 ? path.split('/')[2] : '';
 
-    this.data = null;
     this.data = <any[]> await this.http
       .get(`${HTTP_PREFIX}/api/reddit${path}`).pipe(
         first())

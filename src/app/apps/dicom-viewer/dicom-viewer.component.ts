@@ -3,14 +3,13 @@ import { MouseButton } from 'app/constants';
 import { WindowInstance } from 'app/platform/window/window-instance';
 import { WindowComponent } from 'app/platform/window/window.component';
 
-import { Annotations } from './annotations/annotations';
 import { Config } from './config/config';
 import { MouseTool, RendererType, ViewType } from './constants';
 import { DicomComputerService } from './dicom-computer.service';
 import { DicomLoaderService } from './dicom-loader.service';
 import { math } from './helpers/maths-helpers';
 import { computeRotation, computeTrackball, rotateCamera } from './helpers/rotation-helpers';
-import { Camera, Dataset, Viewport } from './models';
+import { Camera, Dataset, Viewport, Volume } from './models';
 import { JsFrameRenderer } from './renderer/js/js-frame-renderer';
 import { JsVolumeRenderer } from './renderer/js/js-volume-renderer';
 import { Renderer } from './renderer/renderer';
@@ -36,26 +35,25 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   static appName = 'DICOM Viewer';
   static iconClass = 'fa-heartbeat';
 
-  @ViewChild('viewportElement') viewportElementRef: ElementRef<HTMLDivElement>;
-  @ViewChild(WindowComponent) windowComponent: WindowComponent;
+  @ViewChild('viewportElement') viewportElementRef!: ElementRef<HTMLDivElement>;
+  @ViewChild(WindowComponent) windowComponent!: WindowComponent;
 
-  activeLeftTool: MouseTool;
+  activeLeftTool: MouseTool = MouseTool.Paging;
   activeRightTool: MouseTool = MouseTool.Zoom;
-  annotations: Annotations;
-  availableViewTypes: ViewType[];
-  canvas: HTMLCanvasElement;
+  availableViewTypes?: ViewType[];
+  canvas!: HTMLCanvasElement;
   config?: Config;
   errorMessage?: string;
   loading = false;
   showConfig = true;
   title = DicomViewerComponent.appName;
-  viewport: Viewport;
+  viewport?: Viewport;
 
-  private destroyers: (() => void)[];
-  private frameDurations: number[];
+  private destroyers: (() => void)[] = [];
+  private frameDurations: number[] = [];
   private lastTime = performance.now();
-  private renderDurations: number[];
-  private renderer: Renderer;
+  private renderDurations: number[] = [];
+  private renderer?: Renderer;
 
   constructor(private readonly viewRenderer: Renderer2,
               private readonly loader: DicomLoaderService,
@@ -68,7 +66,6 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
 
     this.ngOnDestroy();
 
-    delete this.annotations;
     delete this.canvas;
     delete this.config;
     delete this.errorMessage;
@@ -81,6 +78,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
 
   ngOnDestroy(): void {
     this.destroyers.forEach(destroyer => destroyer());
+    this.destroyers = [];
   }
 
   onResize(size: { width: number; height: number }): void {
@@ -118,7 +116,6 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     this.config = config;
     this.showConfig = false;
     this.loading = true;
-    this.destroyers = [];
 
     try {
       const dicomFrames = await this.loader.loadFrames(this.config.dataset);
@@ -134,11 +131,17 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       const dataset = new Dataset({ frames, ...sharedProperties, volume });
       const frame = frames[Math.floor(dataset.frames.length / 2)];
       const viewType = dataset.is3D ? ViewType.Axial : ViewType.Native;
-      const camera = viewType === ViewType.Native ? Camera.fromFrame(frame) : Camera.fromVolume(volume, viewType);
+      const camera = viewType === ViewType.Native
+        ? Camera.fromFrame(frame)
+        : Camera.fromVolume(volume as Volume, viewType);
       const { windowCenter, windowWidth } = frame;
 
       this.viewport = new Viewport({ camera, dataset, viewType, windowCenter, windowWidth });
-      this.destroyers.push(() => this.viewport.destroy());
+      this.destroyers.push(() => {
+        if (this.viewport !== undefined) {
+          this.viewport.destroy();
+        }
+      });
       this.availableViewTypes = this.getAvailableViewTypes();
 
       console.log(this.viewport);
@@ -182,6 +185,9 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
         break;
       case MouseButton.Right:
         tool = this.activeRightTool;
+        break;
+      default:
+        throw new Error('Unknown button');
     }
 
     switch (tool) {
@@ -221,12 +227,23 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   }
 
   switchViewType(viewType: ViewType): void {
+
+    if (this.viewport === undefined) {
+      throw new Error('Viewport not defined');
+    }
+
+    if (viewType !== ViewType.Native && !this.viewport.dataset.is3D) {
+      throw new Error(`Unable to switch to view type ${viewType} on a 2D dataset`);
+    }
+
     const { frames, volume } = this.viewport.dataset;
     const frame = frames[Math.floor(frames.length / 2)];
 
     this.viewport.deltaX = 0;
     this.viewport.deltaY = 0;
-    this.viewport.camera = viewType === ViewType.Native ? Camera.fromFrame(frame) : Camera.fromVolume(volume, viewType);
+    this.viewport.camera = viewType === ViewType.Native
+      ? Camera.fromFrame(frame)
+      : Camera.fromVolume(volume as Volume, viewType);
     this.viewport.viewType = viewType;
     this.viewport.windowCenter = frame.windowCenter;
     this.viewport.windowWidth = frame.windowWidth;
@@ -256,6 +273,11 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   }
 
   private getAvailableViewTypes(): ViewType[] {
+
+    if (this.viewport === undefined || this.config === undefined) {
+      return [];
+    }
+
     const availableViewTypes = [ViewType.Native];
 
     if (this.viewport.dataset.is3D && this.config.rendererType !== RendererType.WebGL) {
@@ -274,32 +296,39 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   }
 
   private instantiateRenderer(): void {
+    const config = this.config as Config;
+
     try {
-      switch (this.config.rendererType) {
+      switch (config.rendererType) {
         case RendererType.JavaScript:
-          this.renderer = this.viewport.viewType === ViewType.Native
+          this.renderer = (this.viewport as Viewport).viewType === ViewType.Native
             ? new JsFrameRenderer(this.canvas)
             : new JsVolumeRenderer(this.canvas);
           break;
         case RendererType.WebGL:
           this.renderer = new WebglRenderer(this.canvas);
-          this.destroyers.push(() => this.renderer.destroy());
+          this.destroyers.push(() => {
+            if (this.renderer !== undefined && this.renderer instanceof WebglRenderer) {
+              this.renderer.destroy();
+            }
+          });
       }
     } catch (error) {
-      error.message = `Unable to instantiate ${this.config.rendererType} renderer: ${error.message}`;
+      error.message = `Unable to instantiate ${config.rendererType} renderer: ${error.message}`;
       this.handleError(error);
     }
   }
 
   private startPaging(downEvent: MouseEvent): () => void {
     const startY = downEvent.clientY;
-    const { camera } = this.viewport;
+    const viewport = this.viewport as Viewport;
+    const { camera } = viewport;
 
     const direction = camera.getDirection();
     const startLookPoint = camera.lookPoint;
     let currentLookPoint = camera.lookPoint;
 
-    const { max, min } = this.viewport.dataset.getLimitsAlongAxe(direction);
+    const { max, min } = viewport.dataset.getLimitsAlongAxe(direction);
 
     const correctLookPoint = (point: number[]) => {
       const correctionVectorNorm = math.chain(point).subtract(camera.lookPoint).dot(direction).done();
@@ -308,7 +337,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     };
 
     return this.viewRenderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
-      const sensitivity = (max.positionOnAxe - min.positionOnAxe) / this.viewport.height * PAGING_SENSIBILITY;
+      const sensitivity = (max.positionOnAxe - min.positionOnAxe) / viewport.height * PAGING_SENSIBILITY;
       const deltaPosition = (startY - moveEvent.clientY) * sensitivity;
       let newLookPoint = math.add(startLookPoint, math.multiply(direction, deltaPosition)) as number[];
       const positionOnDirection = math.dot(newLookPoint, direction);
@@ -329,7 +358,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
 
   private startPan(downEvent: MouseEvent): () => void {
     const canvas = this.canvas;
-    const viewport = this.viewport;
+    const viewport = this.viewport as Viewport;
     const startX = downEvent.clientX - viewport.deltaX * canvas.clientWidth;
     const startY = downEvent.clientY - viewport.deltaY * canvas.clientHeight;
 
@@ -348,7 +377,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   private startRender(): void {
     const render = () => {
 
-      if (this.renderer === undefined) {
+      if (this.renderer === undefined || this.viewport === undefined) {
         return;
       }
 
@@ -382,7 +411,13 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   }
 
   private startRotate(downEvent: MouseEvent): () => void {
-    const { height, width } = this.viewport;
+    const viewport = this.viewport as Viewport;
+
+    if (!viewport.dataset.is3D) {
+      throw new Error('Unable to rotate on a 2D dataset');
+    }
+
+    const { height, width } = viewport;
     const { top, left } = this.viewportElementRef.nativeElement.getBoundingClientRect();
     const trackballCenter = [width / 2, height / 2];
     const trackballRadius = Math.min(width, height) / 2;
@@ -395,13 +430,13 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       const { angle, axis } = computeRotation(previousVector, currentVector);
 
       if (Math.abs(angle) > 0) {
-        const camera = this.viewport.camera;
+        const camera = viewport.camera;
         rotateCamera(camera, axis, angle);
-        camera.baseFieldOfView = this.viewport.dataset.volume.getOrientedDimensionMm(camera.upVector);
+        camera.baseFieldOfView = (viewport.dataset.volume as Volume).getOrientedDimensionMm(camera.upVector);
         previousVector = currentVector;
 
-        if (this.viewport.viewType !== ViewType.Oblique) {
-          this.viewport.viewType = ViewType.Oblique;
+        if (viewport.viewType !== ViewType.Oblique) {
+          viewport.viewType = ViewType.Oblique;
           this.updateAnnotations();
         }
       }
@@ -409,24 +444,26 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   }
 
   private startWindowing(downEvent: MouseEvent): () => void {
+    const viewport = this.viewport as Viewport;
     const startX = downEvent.clientX;
     const startY = downEvent.clientY;
 
-    const startWindowWidth = this.viewport.windowWidth;
-    const startWindowCenter = this.viewport.windowCenter;
+    const startWindowWidth = viewport.windowWidth;
+    const startWindowCenter = viewport.windowCenter;
 
     return this.viewRenderer.listen('window', 'mousemove', (moveEvent: MouseEvent) => {
       const deltaWindowWidth = (moveEvent.clientX - startX) * WINDOW_WIDTH_SENSIBILITY;
       const windowWidth = Math.max(startWindowWidth + deltaWindowWidth, WINDOW_WIDTH_MIN);
       const windowCenter = startWindowCenter - (moveEvent.clientY - startY) * WINDOW_LEVEL_SENSIBILITY;
-      this.viewport.windowWidth = windowWidth;
-      this.viewport.windowCenter = windowCenter;
+      viewport.windowWidth = windowWidth;
+      viewport.windowCenter = windowCenter;
       this.updateAnnotations({ windowCenter, windowWidth });
     });
   }
 
   private startZoom(downEvent: MouseEvent): () => void {
-    const { camera, deltaX, deltaY, height } = this.viewport;
+    const viewport = this.viewport as Viewport;
+    const { camera, deltaX, deltaY, height } = viewport;
     const { baseFieldOfView } = camera;
     const startY = downEvent.clientY;
     const startFOV = camera.fieldOfView;
@@ -438,7 +475,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
 
       camera.fieldOfView = Math.max(Math.min(newFieldOfView, maxFOV), minFOV);
 
-      const zoom = this.viewport.getSliceZoom();
+      const zoom = viewport.getImageZoom();
 
       // Helps to set zoom at 1
       if (Math.abs(zoom - 1) < ZOOM_LIMIT) {
@@ -452,23 +489,29 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
         }
       }
 
-      this.updateAnnotations({ zoom: this.viewport.getSliceZoom() });
+      this.updateAnnotations({ zoom: viewport.getImageZoom() });
     });
   }
 
   private updateAnnotations(updatedProperties?: any): void {
+
+    if (this.viewport === undefined) {
+      return;
+    }
+
     try {
       if (updatedProperties !== undefined) {
-        this.annotations = { ...this.annotations, ...updatedProperties };
+        this.viewport.annotations = { ...this.viewport.annotations, ...updatedProperties };
         return;
       }
 
-      const datasetName = this.config.dataset.name;
-      const rendererType = this.config.rendererType;
+      const config = this.config as Config;
+      const datasetName = config.dataset.name;
+      const rendererType = config.rendererType;
       const viewType = this.viewport.viewType;
       const windowCenter = this.viewport.windowCenter;
       const windowWidth = this.viewport.windowWidth;
-      const zoom = this.viewport.getSliceZoom();
+      const zoom = this.viewport.getImageZoom();
 
       let fps: number;
       let meanRenderDuration: number;
@@ -488,7 +531,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
         meanRenderDuration = 0;
       }
 
-      this.annotations = {
+      this.viewport.annotations = {
         datasetName, fps, meanRenderDuration, rendererType, viewType, windowCenter, windowWidth, zoom,
       };
     } catch (error) {
