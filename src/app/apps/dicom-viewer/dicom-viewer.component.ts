@@ -147,7 +147,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       console.log(this.viewport);
 
     } catch (error) {
-      this.handleError(error);
+      throw this.handleError(error);
     }
 
     this.canvas = this.viewRenderer.createElement('canvas');
@@ -292,7 +292,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     if (this.loading) {
       this.loading = false;
     }
-    throw error;
+    return error;
   }
 
   private instantiateRenderer(): void {
@@ -315,7 +315,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       }
     } catch (error) {
       error.message = `Unable to instantiate ${config.rendererType} renderer: ${error.message}`;
-      this.handleError(error);
+      throw this.handleError(error);
     }
   }
 
@@ -393,7 +393,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
           this.lastTime = t;
         } catch (error) {
           error.message = `Unable to render viewport: ${error.message}`;
-          this.handleError(error);
+          throw this.handleError(error);
         }
       }
 
@@ -536,7 +536,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       };
     } catch (error) {
       error.message = `Unable to compute annotations: ${error.message}`;
-      this.handleError(error);
+      throw this.handleError(error);
     }
   }
 }
