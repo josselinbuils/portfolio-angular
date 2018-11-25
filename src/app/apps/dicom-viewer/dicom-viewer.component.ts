@@ -224,6 +224,8 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     const { frames, volume } = this.viewport.dataset;
     const frame = frames[Math.floor(frames.length / 2)];
 
+    this.viewport.deltaX = 0;
+    this.viewport.deltaY = 0;
     this.viewport.camera = viewType === ViewType.Native ? Camera.fromFrame(frame) : Camera.fromVolume(volume, viewType);
     this.viewport.viewType = viewType;
     this.viewport.windowCenter = frame.windowCenter;

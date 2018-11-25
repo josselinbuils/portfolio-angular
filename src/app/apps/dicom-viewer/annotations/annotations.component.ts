@@ -33,11 +33,7 @@ export class AnnotationsComponent {
       .map(viewType => ({
         iconClass: viewType === this.annotations.viewType ? 'fa fa-check' : '',
         title: viewType,
-        click: () => {
-          if (viewType !== this.annotations.viewType) {
-            this.viewType.emit(viewType);
-          }
-        },
+        click: () => this.viewType.emit(viewType),
       }));
 
     this.contextMenuService.show({
