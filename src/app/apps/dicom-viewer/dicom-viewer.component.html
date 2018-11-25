@@ -2,12 +2,13 @@
             (resize)="onResize($event)">
   <div class="container">
     <app-dicom-viewer-config [hidden]="!showConfig" (config)="start($event)"></app-dicom-viewer-config>
-    <app-dicom-viewer-toolbar *ngIf="viewport" [activeLeftTool]="activeLeftTool" [activeRightTool]="activeRightTool"
+    <app-dicom-viewer-toolbar *ngIf="toolbox" [activeLeftTool]="toolbox.getActiveTool(MouseButton.Left)"
+                              [activeRightTool]="toolbox.getActiveTool(MouseButton.Right)"
                               [viewport]="viewport"
-                              (toolSelected)="selectActiveTool($event)"></app-dicom-viewer-toolbar>
+                              (toolSelected)="toolbox.selectActiveTool($event)"></app-dicom-viewer-toolbar>
     <div #viewportElement class="viewport" [hidden]="showConfig">
       <button (click)="back()">Back</button>
-      <app-dicom-viewer-annotations *ngIf="viewport && viewport.annotations" [annotations]="viewport.annotations"
+      <app-dicom-viewer-annotations *ngIf="viewport" [annotations]="viewport.annotations"
                                     [availableViewTypes]="availableViewTypes"
                                     (viewType)="switchViewType($event)"></app-dicom-viewer-annotations>
     </div>

@@ -3,9 +3,9 @@ import { Subject } from 'rxjs';
 import { Model } from './model';
 
 export class Renderable extends Model {
-  onUpdate = new Subject<void>();
+  onUpdate!: Subject<void>;
 
-  private dirty = true;
+  private dirty!: boolean;
 
   decorateProperties(): void {
     for (const [key, startValue] of Object.entries(this)) {
@@ -27,6 +27,8 @@ export class Renderable extends Model {
         },
       });
     }
+    this.dirty = true;
+    this.onUpdate = new Subject<void>();
   }
 
   fillProperties(config: any): void {
