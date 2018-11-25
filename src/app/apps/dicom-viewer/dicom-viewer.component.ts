@@ -29,7 +29,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   @ViewChild(WindowComponent) windowComponent!: WindowComponent;
 
   availableViewTypes?: ViewType[];
-  canvas!: HTMLCanvasElement;
+  canvas?: HTMLCanvasElement;
   config?: Config;
   errorMessage?: string;
   loading = false;
@@ -60,6 +60,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     delete this.config;
     delete this.errorMessage;
     delete this.renderer;
+    delete this.toolbox;
     delete this.viewport;
 
     this.loading = false;
@@ -91,11 +92,11 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   }
 
   async start(config: Config): Promise<void> {
-    this.config = config;
-    this.showConfig = false;
-    this.loading = true;
-
     try {
+      this.config = config;
+      this.showConfig = false;
+      this.loading = true;
+
       const dicomFrames = await this.loader.loadFrames(this.config.dataset);
 
       // Back button has been clicked
@@ -119,50 +120,53 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       const { windowCenter, windowWidth } = frame;
 
       this.viewport = new Viewport({ annotations, camera, dataset, viewType, windowCenter, windowWidth });
+
+      console.log(this.viewport);
+
       this.destroyers.push(() => {
         if (this.viewport !== undefined) {
           this.viewport.destroy();
         }
       });
+
       this.availableViewTypes = this.getAvailableViewTypes();
+
       this.toolbox = new Toolbox(this.viewport, this.viewportElementRef.nativeElement, this.viewRenderer);
       this.toolbox.selectActiveTool({
         button: MouseButton.Left,
         tool: this.viewport.dataset.frames.length > 1 ? MouseTool.Paging : MouseTool.Windowing,
       });
 
-      console.log(this.viewport);
+      this.canvas = this.viewRenderer.createElement('canvas');
+      this.viewRenderer.appendChild(this.viewportElementRef.nativeElement, this.canvas);
+      this.viewRenderer.listen(this.canvas, 'mousedown', (downEvent: MouseEvent) => {
+        if (this.toolbox !== undefined) {
+          this.toolbox.startTool(downEvent);
+        }
+      });
+      this.instantiateRenderer();
+
+      const windowNativeElement = this.windowComponent.windowElementRef.nativeElement;
+
+      this.onResize({
+        width: windowNativeElement.clientWidth,
+        height: windowNativeElement.clientHeight,
+      });
+
+      this.destroyers.push(this.disableContextMenu(this.viewportElementRef.nativeElement));
+
+      this.loading = false;
+      this.startRender();
 
     } catch (error) {
       throw this.handleError(error);
     }
-
-    this.canvas = this.viewRenderer.createElement('canvas');
-    this.viewRenderer.appendChild(this.viewportElementRef.nativeElement, this.canvas);
-    this.viewRenderer.listen(this.canvas, 'mousedown', (downEvent: MouseEvent) => {
-      if (this.toolbox !== undefined) {
-        this.toolbox.startTool(downEvent);
-      }
-    });
-    this.instantiateRenderer();
-
-    const windowNativeElement = this.windowComponent.windowElementRef.nativeElement;
-
-    this.onResize({
-      width: windowNativeElement.clientWidth,
-      height: windowNativeElement.clientHeight,
-    });
-
-    this.destroyers.push(this.disableContextMenu(this.viewportElementRef.nativeElement));
-
-    this.loading = false;
-    this.startRender();
   }
 
   switchViewType(viewType: ViewType): void {
 
     if (this.viewport === undefined) {
-      throw new Error('Viewport not defined');
+      throw new Error('Viewport undefined');
     }
 
     if (viewType !== ViewType.Native && !this.viewport.dataset.is3D) {
@@ -180,6 +184,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     this.viewport.viewType = viewType;
     this.viewport.windowCenter = frame.windowCenter;
     this.viewport.windowWidth = frame.windowWidth;
+    this.viewport.updateAnnotations();
 
     if (viewType === ViewType.Native) {
       const toolbox = this.toolbox as Toolbox;
@@ -239,6 +244,10 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     const config = this.config as Config;
 
     try {
+      if (this.canvas === undefined) {
+        throw new Error('Canvas undefined;');
+      }
+
       switch (config.rendererType) {
         case RendererType.JavaScript:
           this.renderer = (this.viewport as Viewport).viewType === ViewType.Native

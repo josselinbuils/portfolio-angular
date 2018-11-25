@@ -1,6 +1,5 @@
-import { math } from '../helpers/maths-helpers';
-import { getDistanceBetweenPoints } from '../helpers/volume-helpers';
 import { Camera, Frame } from '../models';
+import { math } from '../utils/math';
 
 import { RenderingParameters } from './rendering-parameters';
 import {
@@ -44,7 +43,11 @@ export function validateCamera2D(frame: Frame, camera: Camera): void {
     throw new Error('Camera direction is not collinear with the frame normal');
   }
 
-  const cameraFrameDistance = getDistanceBetweenPoints(camera.lookPoint, frame.imagePosition, camera.getDirection());
+  const cameraFrameDistance = math.chain(camera.lookPoint)
+    .subtract(frame.imagePosition)
+    .dot(camera.getDirection())
+    .abs()
+    .done();
 
   if (cameraFrameDistance > frame.spacingBetweenSlices) {
     throw new Error(`lookPoint shall be on the frame (${cameraFrameDistance}mm)`);

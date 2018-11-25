@@ -1,5 +1,5 @@
-import { math } from '../../helpers/maths-helpers';
 import { Viewport } from '../../models';
+import { math } from '../../utils/math';
 import { ToolMoveListener } from '../toolbox';
 
 const PAGING_SENSIBILITY = 1.2;

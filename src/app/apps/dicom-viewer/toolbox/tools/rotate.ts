@@ -1,6 +1,6 @@
 import { ViewType } from '../../constants';
-import { math } from '../../helpers/maths-helpers';
-import { Camera, Viewport, Volume } from '../../models';
+import { Camera, Viewport } from '../../models';
+import { math } from '../../utils/math';
 import { ToolMoveListener } from '../toolbox';
 
 export function startRotate(viewport: Viewport, downEvent: MouseEvent,
@@ -14,18 +14,18 @@ export function startRotate(viewport: Viewport, downEvent: MouseEvent,
   const { top, left } = viewportClientRect;
   const trackballCenter = [width / 2, height / 2];
   const trackballRadius = Math.min(width, height) / 2;
-  const cursorStartPosition = [downEvent.clientX - left, downEvent.clientY - top];
+  // Vertical position is inverted as display and camera y axis are inverted
+  const cursorStartPosition = [downEvent.clientX - left, height - downEvent.clientY + top];
   let previousVector = computeTrackball(trackballCenter, trackballRadius, cursorStartPosition);
 
   return (moveEvent: MouseEvent) => {
-    const cursorPosition = [moveEvent.clientX - left, moveEvent.clientY - top];
+    const cursorPosition = [moveEvent.clientX - left, height - moveEvent.clientY + top];
     const currentVector = computeTrackball(trackballCenter, trackballRadius, cursorPosition);
     const { angle, axis } = computeRotation(previousVector, currentVector);
 
     if (Math.abs(angle) > 0) {
       const camera = viewport.camera;
       rotateCamera(camera, axis, angle);
-      camera.baseFieldOfView = (viewport.dataset.volume as Volume).getOrientedDimensionMm(camera.upVector);
       previousVector = currentVector;
 
       if (viewport.viewType !== ViewType.Oblique) {
@@ -37,7 +37,7 @@ export function startRotate(viewport: Viewport, downEvent: MouseEvent,
 }
 
 function computeRotation(previous: number[], current: number[]): { angle: number; axis: number[] } {
-  const axis = math.chain(previous).cross(current).normalize().done();
+  const axis = math.chain(current).cross(previous).normalize().done();
   const angle = math.angle(previous, current);
   return { axis, angle };
 }
@@ -58,10 +58,14 @@ function computeTrackball(center: number[], radius: number, cursorPosition: numb
 }
 
 function rotateCamera(camera: Camera, axis: number[], angle: number): void {
-  const rotationMatrix = computeRotationMatrix(axis, angle);
-  const newCameraBasis = (math.multiply(camera.getBasis(), rotationMatrix) as number[][]).map(math.normalize);
-  camera.eyePoint = math.subtract(camera.lookPoint, newCameraBasis[2]) as number[];
-  camera.upVector = newCameraBasis[1] as number[];
+  const newCameraBasis = math.chain(camera.getBasis())
+    .transpose()
+    .multiply(computeRotationMatrix(axis, angle))
+    .transpose()
+    .done();
+
+  camera.eyePoint = math.subtract(camera.lookPoint, math.normalize(newCameraBasis[2])) as number[];
+  camera.upVector = math.normalize(newCameraBasis[1]) as number[];
 }
 
 function computeRotationMatrix(axis: number[], angle: number): number[][] {

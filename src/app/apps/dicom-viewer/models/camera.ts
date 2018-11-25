@@ -1,13 +1,14 @@
 import { ViewType } from '../constants';
-import { math } from '../helpers/maths-helpers';
+import { math } from '../utils/math';
 
+import { CoordinateSpace } from './coordinate-space';
 import { Frame } from './frame';
 import { Renderable } from './renderable';
 import { Volume } from './volume';
 
 const MANDATORY_FIELDS = ['baseFieldOfView', 'eyePoint', 'fieldOfView', 'lookPoint', 'upVector'];
 
-export class Camera extends Renderable {
+export class Camera extends Renderable implements CoordinateSpace {
   baseFieldOfView!: number;
   eyePoint!: number[];
   fieldOfView!: number;
@@ -98,5 +99,9 @@ export class Camera extends Renderable {
       this.direction = math.chain(this.lookPoint).subtract(this.eyePoint).normalize().done() as number[];
     }
     return this.direction;
+  }
+
+  getOrigin(): number[] {
+    return this.lookPoint;
   }
 }

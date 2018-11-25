@@ -1,4 +1,4 @@
-import { math } from '../helpers/maths-helpers';
+import { math } from '../utils/math';
 
 import { Model } from './model';
 

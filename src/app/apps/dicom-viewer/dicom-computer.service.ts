@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { cloneDeep } from 'lodash';
 
-import { math } from './helpers/maths-helpers';
+import { math } from './utils/math';
 
 import { NormalizedImageFormat, PhotometricInterpretation, PixelRepresentation } from './constants';
 import { DicomFrame, Frame, Volume } from './models';

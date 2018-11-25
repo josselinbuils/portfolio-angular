@@ -1,4 +1,4 @@
-import { math } from '../helpers/maths-helpers';
+import { math } from '../utils/math';
 
 import { Frame } from './frame';
 import { Model } from './model';
@@ -54,7 +54,7 @@ export class Dataset extends Model {
 
     if (this.is3D) {
       if (this.volume === undefined) {
-        throw new Error('Volume is not defined');
+        throw new Error('Volume undefined');
       }
 
       maxPositionOnAxe = -Number.MAX_SAFE_INTEGER;

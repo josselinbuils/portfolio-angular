@@ -1,5 +1,5 @@
-import { math } from '../../helpers/maths-helpers';
 import { Dataset, Volume } from '../../models';
+import { math } from '../../utils/math';
 import { Renderer } from '../renderer';
 import { RenderingParameters } from '../rendering-parameters';
 import { BoundedViewportSpaceCoordinates, ImageSpaceCoordinates, RenderingProperties } from '../rendering-properties';
@@ -26,7 +26,7 @@ export class JsVolumeRenderer implements Renderer {
   render(dataset: Dataset, renderingParameters: RenderingParameters): void {
 
     if (dataset.volume === undefined) {
-      throw new Error('Volume not defined');
+      throw new Error('Volume undefined');
     }
 
     const { width, height } = this.canvas;
