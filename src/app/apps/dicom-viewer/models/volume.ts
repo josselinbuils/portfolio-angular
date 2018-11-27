@@ -1,5 +1,5 @@
+import { V } from '../math';
 import { convert } from '../utils/coordinates';
-import { math } from '../utils/math';
 
 import { Camera } from './camera';
 import { Dataset } from './dataset';
@@ -45,7 +45,7 @@ export class Volume extends Model {
 
   getOrientedDimensionMm(axe: number[]): number {
     return Math.max(
-      ...this.orientedDimensionsMm.map(dimensionVector => Math.abs(math.dot(dimensionVector, axe))),
+      ...this.orientedDimensionsMm.map(dimensionVector => Math.abs(V(dimensionVector).dot(axe))),
     );
   }
 
@@ -55,8 +55,9 @@ export class Volume extends Model {
   } {
     // Compute volume limits in computer service
     const basis = camera.getWorldBasis();
-    const halfHorizontalSpacing = math.chain(this.voxelSpacing).multiply(0.5).dot(basis[0]).abs().done() as number;
-    const halfVerticalSpacing = math.chain(this.voxelSpacing).multiply(0.5).dot(basis[1]).abs().done() as number;
+    const halfSpacing = V(this.voxelSpacing).mul(0.5);
+    const halfHorizontalSpacing = Math.abs(halfSpacing.dot(basis[0]));
+    const halfVerticalSpacing = Math.abs(halfSpacing.dot(basis[1]));
 
     let minHorizontal = Number.MAX_SAFE_INTEGER;
     let maxHorizontal = -Number.MAX_SAFE_INTEGER;
@@ -69,8 +70,8 @@ export class Volume extends Model {
 
     Object.values(this.corners)
       .forEach(corner => {
-        const left = math.chain(corner).dotDivide(this.voxelSpacing).dot(basis[0]).done() as number;
-        const top = math.chain(corner).dotDivide(this.voxelSpacing).dot(basis[1]).done() as number;
+        const left = V(corner).dot(basis[0]) / V(this.voxelSpacing).dot(basis[0]);
+        const top = V(corner).dot(basis[1]) / V(this.voxelSpacing).dot(basis[1]);
         const cornerCamera = convert(corner, dataset, camera, dataset) as number[];
         const leftMm = cornerCamera[0];
         const topMm = cornerCamera[1];
@@ -107,7 +108,7 @@ export class Volume extends Model {
     const heightMm = Math.round(maxVerticalMm - minVerticalMm);
 
     // Height is the reference
-    const widthRatio = 1  / ((width / height) * (heightMm / widthMm));
+    const widthRatio = 1 / ((width / height) * (heightMm / widthMm));
     const heightRatio = 1;
     const fieldOfView = heightMm;
 

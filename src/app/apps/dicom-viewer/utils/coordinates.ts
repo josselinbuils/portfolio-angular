@@ -2,6 +2,7 @@ import { CoordinateSpace } from '../models';
 
 import { math } from './math';
 
+// TODO limit size
 const cache = {};
 
 export function convert(point: number[], originalSpace: CoordinateSpace, finalSpace: CoordinateSpace,

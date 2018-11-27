@@ -293,7 +293,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
             renderer.render(viewport.dataset, { deltaX, deltaY, camera, windowCenter, windowWidth });
           };
 
-          if (renderer instanceof JsVolumeRenderer && viewport.viewType !== ViewType.Native) {
+          if (renderer instanceof JsVolumeRenderer) {
             displayCube(viewport, this.canvas as HTMLCanvasElement, doIt);
           } else {
             doIt();

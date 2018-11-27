@@ -1,5 +1,5 @@
+import { V } from '../../math';
 import { Viewport } from '../../models';
-import { math } from '../../utils/math';
 import { ToolMoveListener } from '../toolbox';
 
 const PAGING_SENSIBILITY = 1.2;
@@ -15,16 +15,16 @@ export function startPaging(viewport: Viewport, downEvent: MouseEvent): ToolMove
   const { max, min } = viewport.dataset.getLimitsAlongAxe(direction);
 
   const correctLookPoint = (point: number[]) => {
-    const correctionVectorNorm = math.chain(point).subtract(camera.lookPoint).dot(direction).done();
-    const correctionVector = math.multiply(direction, correctionVectorNorm);
-    return math.add(camera.lookPoint, correctionVector) as number[];
+    const correctionVectorNorm = V(point).sub(camera.lookPoint).dot(direction);
+    const correctionVector = V(direction).mul(correctionVectorNorm);
+    return V(camera.lookPoint).add(correctionVector) as number[];
   };
 
   return (moveEvent: MouseEvent) => {
     const sensitivity = (max.positionOnAxe - min.positionOnAxe) / viewport.height * PAGING_SENSIBILITY;
     const deltaPosition = (startY - moveEvent.clientY) * sensitivity;
-    let newLookPoint = math.add(startLookPoint, math.multiply(direction, deltaPosition)) as number[];
-    const positionOnDirection = math.dot(newLookPoint, direction);
+    let newLookPoint: number[] = V(startLookPoint).add(V(direction).mul(deltaPosition));
+    const positionOnDirection = V(newLookPoint).dot(direction);
 
     if (positionOnDirection < min.positionOnAxe) {
       newLookPoint = correctLookPoint(min.point);
@@ -32,9 +32,9 @@ export function startPaging(viewport: Viewport, downEvent: MouseEvent): ToolMove
       newLookPoint = correctLookPoint(max.point);
     }
 
-    if (math.distance(newLookPoint, currentLookPoint) > Number.EPSILON) {
+    if (V(newLookPoint).distance(currentLookPoint) > Number.EPSILON) {
       camera.lookPoint = newLookPoint;
-      camera.eyePoint = math.subtract(camera.lookPoint, direction) as number[];
+      camera.eyePoint = V(camera.lookPoint).sub(direction);
       currentLookPoint = newLookPoint;
     }
   };

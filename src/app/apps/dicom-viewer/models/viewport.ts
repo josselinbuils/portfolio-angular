@@ -1,4 +1,5 @@
 import { ViewType } from '../constants';
+import { V } from '../math';
 import { getFromWorldTransformationMatrix } from '../utils/coordinates';
 import { math } from '../utils/math';
 
@@ -47,8 +48,8 @@ export class Viewport extends Renderable implements CoordinateSpace {
       const pixelHeightMm = this.camera.fieldOfView / this.height;
 
       this.basis = [
-        math.chain(cameraBasis[0]).divide(pixelHeightMm).done(),
-        math.chain(cameraBasis[1]).divide(pixelHeightMm).done(),
+        V(cameraBasis[0]).div(pixelHeightMm),
+        V(cameraBasis[1]).div(pixelHeightMm),
         cameraBasis[2],
       ];
     }
@@ -69,11 +70,10 @@ export class Viewport extends Renderable implements CoordinateSpace {
       const direction = this.camera.getDirection();
       const cameraBasis = this.camera.getWorldBasis();
 
-      this.origin = math.chain(this.camera.getWorldOrigin())
-        .add(math.multiply(cameraBasis[0], -this.camera.fieldOfView / this.height * this.width / 2))
-        .add(math.multiply(cameraBasis[1], -this.camera.fieldOfView / 2))
-        .add(direction)
-        .done() as number[];
+      this.origin = V(this.camera.getWorldOrigin())
+        .add(V(cameraBasis[0]).mul(-this.camera.fieldOfView / this.height * this.width / 2))
+        .add(V(cameraBasis[1]).mul(-this.camera.fieldOfView / 2))
+        .add(direction);
     }
     return this.origin;
   }

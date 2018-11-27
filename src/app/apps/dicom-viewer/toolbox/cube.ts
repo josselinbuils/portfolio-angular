@@ -1,3 +1,4 @@
+import { V } from '../math';
 import { Viewport, Volume } from '../models';
 import { convert } from '../utils/coordinates';
 import { math } from '../utils/math';
@@ -136,8 +137,8 @@ export function displayCube(viewport: Viewport, canvas: HTMLCanvasElement, rende
 function getLineInfo(a: number[], b: number[], viewport: Viewport): LineInfo {
   const viewportOrigin = viewport.getWorldOrigin();
   const viewportBasis = viewport.getWorldBasis();
-  const viewportToADistance = math.chain(a).subtract(viewportOrigin).dot(viewportBasis[2]).done();
-  const viewportToBDistance = math.chain(b).subtract(viewportOrigin).dot(viewportBasis[2]).done();
+  const viewportToADistance = V(a).sub(viewportOrigin).dot(viewportBasis[2]);
+  const viewportToBDistance = V(b).sub(viewportOrigin).dot(viewportBasis[2]);
   const crossesViewport = Math.sign(viewportToADistance) !== Math.sign(viewportToBDistance);
   const isInFrontOfViewport = !crossesViewport && viewportToADistance < 0;
   const isBehindViewport = !crossesViewport && viewportToADistance > 0;
@@ -146,9 +147,9 @@ function getLineInfo(a: number[], b: number[], viewport: Viewport): LineInfo {
   if (crossesViewport) {
     const plane = [
       viewportOrigin,
-      math.add(viewportOrigin, viewportBasis[0]),
-      math.add(viewportOrigin, viewportBasis[1]),
-    ] as number[][];
+      V(viewportOrigin).add(viewportBasis[0]),
+      V(viewportOrigin).add(viewportBasis[1]),
+    ];
 
     lineInfo.pointBehindViewport = viewportToADistance > 0 ? a : b;
     lineInfo.pointInFrontOfViewport = viewportToADistance < 0 ? a : b;

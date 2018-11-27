@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { cloneDeep } from 'lodash';
 
-import { math } from './utils/math';
+import { V } from './math';
 
 import { NormalizedImageFormat, PhotometricInterpretation, PixelRepresentation } from './constants';
 import { DicomFrame, Frame, Volume } from './models';
@@ -17,10 +17,7 @@ export class DicomComputerService {
         dicomFrames[0].imagePosition !== undefined;
 
       spacingBetweenSlices = isComputable
-        ? math.chain(firstFrame.imagePosition)
-          .distance(dicomFrames[1].imagePosition as number[])
-          .abs()
-          .done()
+        ? V(firstFrame.imagePosition as number[]).distance(dicomFrames[1].imagePosition as number[])
         : 1;
     }
 
@@ -74,17 +71,20 @@ export class DicomComputerService {
     });
 
     const displayRatio = voxelSpacing.map(v => v / voxelSpacing[1]);
-    const dimensionsMm = math.dotMultiply(dimensionsVoxels, voxelSpacing);
-    const orientedDimensionsMm = orientation.map((orient, index) => math.multiply(orient, dimensionsMm[index]));
-    const orientedDimensionsVoxels = orientation.map((orient, index) => math.multiply(orient, dimensionsVoxels[index]));
+    const dimensionsMm = dimensionsVoxels.map((dim, i) => dim * voxelSpacing[i]);
+    const orientedDimensionsMm = orientation.map((orient, index) => V(orient).mul(dimensionsMm[index]));
+    const orientedDimensionsVoxels = orientation.map((orient, index) => V(orient).mul(dimensionsVoxels[index]));
 
     const getCorner = (x: number, y: number, z: number): number[] => {
-      return math.chain(firstVoxelCenter)
-        .add(math.multiply(orientedDimensionsMm[0], x))
-        .add(math.multiply(orientedDimensionsMm[1], y))
-        .add(math.multiply(orientedDimensionsMm[2], z))
-        .subtract(math.dotMultiply(voxelSpacing, [x, y, z]))
-        .done();
+      return V(firstVoxelCenter)
+        .add(V(orientedDimensionsMm[0]).mul(x))
+        .add(V(orientedDimensionsMm[1]).mul(y))
+        .add(V(orientedDimensionsMm[2]).mul(z))
+        .sub([
+          V(voxelSpacing).mul(x).dot(orientation[0]),
+          V(voxelSpacing).mul(y).dot(orientation[1]),
+          V(voxelSpacing).mul(z).dot(orientation[2]),
+        ]);
     };
 
     const corners = {
@@ -122,14 +122,13 @@ export class DicomComputerService {
 
     const { columns, rows } = frame;
     // TODO use slice thickness
-    const dimensionsMm = math.dotMultiply(pixelSpacing, [columns, rows]) as number[];
+    const dimensionsMm = [pixelSpacing[0] * columns, pixelSpacing[1] * rows];
 
-    const imageCenter = math.chain(imagePosition)
-      .add(math.multiply(imageOrientation[0], (columns - 1) * pixelSpacing[0] * 0.5))
-      .add(math.multiply(imageOrientation[1], (rows - 1) * pixelSpacing[1] * 0.5))
-      .done();
+    const imageCenter = V(imagePosition)
+      .add(V(imageOrientation[0]).mul((columns - 1) * pixelSpacing[0] * 0.5))
+      .add(V(imageOrientation[1]).mul((rows - 1) * pixelSpacing[1] * 0.5));
 
-    const imageNormal = math.chain(imageOrientation[0]).cross(imageOrientation[1]).normalize().done();
+    const imageNormal = V(imageOrientation[0]).cross(imageOrientation[1]).normalize();
 
     return { dimensionsMm, imageCenter, imageNormal, imageOrientation, imagePosition, pixelSpacing, sliceLocation };
   }

@@ -1,4 +1,5 @@
 import { ViewType } from '../constants';
+import { V } from '../math';
 import { getFromWorldTransformationMatrix } from '../utils/coordinates';
 import { math } from '../utils/math';
 
@@ -26,9 +27,9 @@ export class Camera extends Renderable implements CoordinateSpace {
     const baseFieldOfView = dimensionsMm[1];
     const fieldOfView = baseFieldOfView;
     const lookPoint = imageCenter.slice();
-    const eyePoint = math.subtract(lookPoint, imageNormal);
+    const eyePoint = V(lookPoint).sub(imageNormal);
     // Frame vertical axis is inverted compared to axial view
-    const upVector = math.multiply(imageOrientation[1], -1);
+    const upVector = V(imageOrientation[1]).neg();
 
     return new Camera({ baseFieldOfView, eyePoint, fieldOfView, lookPoint, upVector });
   }
@@ -58,13 +59,12 @@ export class Camera extends Renderable implements CoordinateSpace {
 
     const baseFieldOfView = volume.getOrientedDimensionMm(upVector);
     const fieldOfView = baseFieldOfView;
-    const lookPoint = math.chain(firstVoxelCenter)
-      .add(math.multiply(orientedDimensionsMm[0], 0.5))
-      .add(math.multiply(orientedDimensionsMm[1], 0.5))
-      .add(math.multiply(orientedDimensionsMm[2], 0.5))
-      .subtract(math.multiply(voxelSpacing, 0.5))
-      .done();
-    const eyePoint = math.subtract(lookPoint, direction);
+    const lookPoint = V(firstVoxelCenter)
+      .add(V(orientedDimensionsMm[0]).mul(0.5))
+      .add(V(orientedDimensionsMm[1]).mul(0.5))
+      .add(V(orientedDimensionsMm[2]).mul(0.5))
+      .sub(V(voxelSpacing).mul(0.5));
+    const eyePoint = lookPoint.clone().sub(direction);
 
     return new Camera({ baseFieldOfView, eyePoint, fieldOfView, lookPoint, upVector });
   }
@@ -93,9 +93,9 @@ export class Camera extends Renderable implements CoordinateSpace {
    */
   getWorldBasis(): number[][] {
     if (this.basis === undefined) {
-      const y = math.chain(this.upVector).normalize().multiply(-1).done();
+      const y = V(this.upVector).neg().normalize();
       const z = this.getDirection();
-      const x = math.chain(y).cross(z).normalize().done();
+      const x = V(y).cross(z).normalize();
       this.basis = [x, y, z];
     }
     return this.basis;
@@ -103,7 +103,7 @@ export class Camera extends Renderable implements CoordinateSpace {
 
   getDirection(): number[] {
     if (this.direction === undefined) {
-      this.direction = math.chain(this.lookPoint).subtract(this.eyePoint).normalize().done() as number[];
+      this.direction = V(this.lookPoint).sub(this.eyePoint).normalize();
     }
     return this.direction;
   }

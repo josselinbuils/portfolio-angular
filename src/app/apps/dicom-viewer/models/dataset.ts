@@ -1,4 +1,4 @@
-import { math } from '../utils/math';
+import { V } from '../math';
 
 import { CoordinateSpace } from './coordinate-space';
 import { Frame } from './frame';
@@ -28,13 +28,7 @@ export class Dataset extends Model implements CoordinateSpace {
 
   findClosestFrame(point: number[]): Frame {
     const { imagePosition, imageNormal, spacingBetweenSlices } = this.frames[0];
-
-    const index = math.chain(point)
-      .subtract(imagePosition)
-      .dot(imageNormal)
-      .divide(spacingBetweenSlices)
-      .round()
-      .done();
+    const index = Math.round(V(point).sub(imagePosition).dot(imageNormal) / spacingBetweenSlices);
 
     if (index < 0 || index >= this.frames.length) {
       const formattedPoint = JSON.stringify(point.map(c => Math.round(c * 1000) / 1000));
@@ -75,7 +69,7 @@ export class Dataset extends Model implements CoordinateSpace {
       minPositionOnAxe = Number.MAX_SAFE_INTEGER;
 
       for (const corner of Object.values(this.volume.corners)) {
-        const positionAlongAxe = math.dot(corner, axe);
+        const positionAlongAxe = V(corner).dot(axe);
 
         if (positionAlongAxe > maxPositionOnAxe) {
           maxPoint = corner.slice();
@@ -91,10 +85,10 @@ export class Dataset extends Model implements CoordinateSpace {
       const lastFrame = this.frames[this.frames.length - 1];
 
       maxPoint = lastFrame.imagePosition;
-      maxPositionOnAxe = math.dot(maxPoint, axe);
+      maxPositionOnAxe = V(maxPoint).dot(axe);
 
       minPoint = firstFrame.imagePosition;
-      minPositionOnAxe = math.dot(minPoint, axe);
+      minPositionOnAxe =  V(minPoint).dot(axe);
     }
 
     return {

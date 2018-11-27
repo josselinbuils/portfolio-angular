@@ -1,4 +1,5 @@
 import { ViewType } from '../../constants';
+import { V } from '../../math';
 import { Camera, Viewport, Volume } from '../../models';
 import { math } from '../../utils/math';
 import { ToolMoveListener } from '../toolbox';
@@ -18,7 +19,7 @@ export function startRotate(viewport: Viewport, downEvent: MouseEvent,
   let previousVector = computeTrackball(trackballCenter, trackballRadius, cursorStartPosition);
 
   return (moveEvent: MouseEvent) => {
-    const cursorPosition = [moveEvent.clientX - left,  moveEvent.clientY - top];
+    const cursorPosition = [moveEvent.clientX - left, moveEvent.clientY - top];
     const currentVector = computeTrackball(trackballCenter, trackballRadius, cursorPosition);
     const { angle, axis } = computeRotation(previousVector, currentVector);
 
@@ -38,24 +39,23 @@ export function startRotate(viewport: Viewport, downEvent: MouseEvent,
 }
 
 function computeRotation(previous: number[], current: number[]): { angle: number; axis: number[] } {
-  const axis = math.chain(current).cross(previous).normalize().done();
-  const angle = math.angle(previous, current);
+  const axis = V(current).cross(previous).normalize();
+  const angle = V(previous).angle(current);
   return { axis, angle };
 }
 
 function computeTrackball(center: number[], radius: number, cursorPosition: number[]): number[] {
-  const radiusSquared = radius * radius;
-  let fromCenter = math.subtract(cursorPosition, center) as number[];
-  const fromCenterNorm = math.norm(fromCenter) as number;
+  const fromCenter = V([...cursorPosition, 0]).sub([...center, 0]);
+  const fromCenterNorm = V(fromCenter).norm();
 
   // fromCenter cannot be longer than the trackball radius
   if (fromCenterNorm > radius) {
-    fromCenter = math.multiply(fromCenter, radius / fromCenterNorm) as number[];
+    fromCenter.mul(radius / fromCenterNorm);
   }
 
-  const fromCenterNormSquared = math.dot(fromCenter, fromCenter);
-  const z = -Math.sqrt(radiusSquared - fromCenterNormSquared);
-  return [...fromCenter, z];
+  const fromCenterNormSquared = V(fromCenter).dot(fromCenter);
+  fromCenter[2] = -Math.sqrt(Math.pow(radius, 2) - fromCenterNormSquared);
+  return fromCenter;
 }
 
 function rotateCamera(camera: Camera, axis: number[], angle: number): void {
@@ -65,8 +65,8 @@ function rotateCamera(camera: Camera, axis: number[], angle: number): void {
     .transpose()
     .done();
 
-  camera.eyePoint = math.subtract(camera.lookPoint, math.normalize(newCameraBasis[2])) as number[];
-  camera.upVector = math.chain(newCameraBasis[1]).multiply(-1).normalize().done() as number[];
+  camera.eyePoint = V(camera.lookPoint).sub(V(newCameraBasis[2]).normalize());
+  camera.upVector = V(newCameraBasis[1]).neg().normalize();
 }
 
 function computeRotationMatrix(axis: number[], angle: number): number[][] {

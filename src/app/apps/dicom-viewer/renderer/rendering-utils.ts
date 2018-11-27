@@ -1,5 +1,5 @@
+import { V } from '../math';
 import { Camera, Frame } from '../models';
-import { math } from '../utils/math';
 
 import { RenderingParameters } from './rendering-parameters';
 import {
@@ -37,24 +37,20 @@ export function getRenderingProperties(renderingParameters: RenderingParameters,
 }
 
 export function validateCamera2D(frame: Frame, camera: Camera): void {
-  const isDirectionValid = math.chain(camera.getDirection()).angle(frame.imageNormal).equal(0).done();
+  const isDirectionValid = Math.abs(V(camera.getDirection()).angle(frame.imageNormal)) < Number.EPSILON;
 
   if (!isDirectionValid) {
     throw new Error('Camera direction is not collinear with the frame normal');
   }
 
   // Frame vertical axis is inverted compared to axial view
-  const isUpVectorValid = math.chain(camera.upVector).angle(frame.imageOrientation[1]).abs().equal(Math.PI).done();
+  const isUpVectorValid = (Math.abs(V(camera.upVector).angle(frame.imageOrientation[1])) - Math.PI) < Number.EPSILON;
 
   if (!isUpVectorValid) {
     throw new Error('Camera up vector does not match the frame orientation');
   }
 
-  const cameraFrameDistance = math.chain(camera.lookPoint)
-    .subtract(frame.imagePosition)
-    .dot(camera.getDirection())
-    .abs()
-    .done();
+  const cameraFrameDistance = Math.abs(V(camera.lookPoint).sub(frame.imagePosition).dot(camera.getDirection()));
 
   if (cameraFrameDistance > frame.spacingBetweenSlices) {
     throw new Error(`lookPoint shall be on the frame (${cameraFrameDistance}mm)`);
