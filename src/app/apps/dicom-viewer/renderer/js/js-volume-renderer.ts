@@ -137,11 +137,11 @@ export class JsVolumeRenderer implements Renderer {
     // convertImageToLPS
     const cameraBasis = camera.getWorldBasis();
     const voxelSpacing = (dataset.volume as Volume).voxelSpacing;
-    const right = V(cameraBasis[0]).mul(V(voxelSpacing).dot(cameraBasis[0]));
-    const up =  V(cameraBasis[1]).mul(V(voxelSpacing).dot(cameraBasis[1]));
+    const right = V(cameraBasis[0]).mul(Math.abs(V(voxelSpacing).dot(cameraBasis[0])));
+    const up = V(cameraBasis[1]).mul(Math.abs(V(voxelSpacing).dot(cameraBasis[1])));
     const pointBaseLPS = V(camera.lookPoint)
-      .add(V(right).mul(-(sliceWidth - 1) / 2))
-      .add(V(up).mul(-(sliceHeight - 1) / 2));
+      .add(right.clone().mul(-(sliceWidth - 1) / 2))
+      .add(up.clone().mul(-(sliceHeight - 1) / 2));
 
     for (let y = displayY0; y <= displayY1; y++) {
       for (let x = displayX0; x <= displayX1; x++) {
@@ -192,11 +192,11 @@ export class JsVolumeRenderer implements Renderer {
     // convertImageToLPS
     const cameraBasis = camera.getWorldBasis();
     const voxelSpacing = (dataset.volume as Volume).voxelSpacing;
-    const right = V(cameraBasis[0]).mul(V(voxelSpacing).dot(cameraBasis[0]));
-    const up =  V(cameraBasis[1]).mul(V(voxelSpacing).dot(cameraBasis[1]));
+    const right = V(cameraBasis[0]).mul(Math.abs(V(voxelSpacing).dot(cameraBasis[0])));
+    const up = V(cameraBasis[1]).mul(Math.abs(V(voxelSpacing).dot(cameraBasis[1])));
     const pointBaseLPS = V(camera.lookPoint)
-      .add(V(right).mul(-(sliceWidth - 1) / 2))
-      .add(V(up).mul(-(sliceHeight - 1) / 2));
+      .add(right.clone().mul(-(sliceWidth - 1) / 2))
+      .add(up.clone().mul(-(sliceHeight - 1) / 2));
 
     for (let y = imageY0; y <= imageY1; y++) {
       for (let x = imageX0; x <= imageX1; x++) {

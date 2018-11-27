@@ -70,8 +70,8 @@ export class Volume extends Model {
 
     Object.values(this.corners)
       .forEach(corner => {
-        const left = V(corner).dot(basis[0]) / V(this.voxelSpacing).dot(basis[0]);
-        const top = V(corner).dot(basis[1]) / V(this.voxelSpacing).dot(basis[1]);
+        const left = V(corner).dot(basis[0]) / Math.abs(V(this.voxelSpacing).dot(basis[0]));
+        const top = V(corner).dot(basis[1]) / Math.abs(V(this.voxelSpacing).dot(basis[1]));
         const cornerCamera = convert(corner, dataset, camera, dataset) as number[];
         const leftMm = cornerCamera[0];
         const topMm = cornerCamera[1];
