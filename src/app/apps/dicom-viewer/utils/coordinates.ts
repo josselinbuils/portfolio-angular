@@ -1,37 +1,32 @@
-import { Viewport } from '../models';
+import { CoordinateSpace } from '../models';
 
 import { math } from './math';
 
-export function convertDisplayToLPS(point: number[], viewport: Viewport): number[] {
+const cache = {};
 
-  const viewportBasis = viewport.getBasis();
-  const zoom = viewport.getImageZoom();
+export function convert(point: number[], originalSpace: CoordinateSpace, finalSpace: CoordinateSpace,
+                        world: CoordinateSpace): any {
 
-  const xStepVector = math.chain(viewportBasis[0])
-    .dotMultiply(viewport.dataset.voxelSpacing)
-    .divide(zoom);
-
-  const yStepVector = math.chain(viewportBasis[1])
-    .dotMultiply(viewport.dataset.voxelSpacing)
-    .divide(zoom);
-
-  return math.chain(viewport.getOrigin())
-    .add(xStepVector.multiply(point[0]).done())
-    .add(yStepVector.multiply(point[1]).done())
-    .done();
+  const worldPoint = math.multiply(originalSpace.toWorld(world), [...point, 1]);
+  return (math.multiply(finalSpace.fromWorld(world), worldPoint) as number[]).slice(0, 3);
 }
 
-export function convertLPSToDisplay(point: number[], viewport: Viewport): number[] {
-  const viewportBasis = viewport.getBasis();
-  const zoom = viewport.getImageZoom();
+export function getFromWorldTransformationMatrix(world: CoordinateSpace, space: CoordinateSpace): number[][] {
+  const basis = space.getWorldBasis();
+  const origin = space.getWorldOrigin();
+  const cacheKey = JSON.stringify([basis, origin]);
 
-  const viewportOriginToPointVoxels = math.chain(point)
-    .subtract(viewport.getOrigin())
-    .dotDivide(viewport.dataset.voxelSpacing)
-    .multiply(zoom);
+  if (cache[cacheKey] === undefined) {
+    // Translation
+    const translationVector = math.chain(basis).multiply(origin).multiply(-1).done();
 
-  return [
-    viewportOriginToPointVoxels.dot(viewportBasis[0]).done() as number,
-    viewportOriginToPointVoxels.dot(viewportBasis[1]).done() as number,
-  ];
+    cache[cacheKey] = [
+      [...basis[0], translationVector[0]],
+      [...basis[1], translationVector[1]],
+      [...basis[2], translationVector[2]],
+      [0, 0, 0, 1],
+    ];
+  }
+
+  return cache[cacheKey];
 }

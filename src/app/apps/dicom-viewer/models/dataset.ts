@@ -1,12 +1,13 @@
 import { math } from '../utils/math';
 
+import { CoordinateSpace } from './coordinate-space';
 import { Frame } from './frame';
 import { Model } from './model';
 import { Volume } from './volume';
 
 const MANDATORY_FIELDS = ['frames', 'voxelSpacing'];
 
-export class Dataset extends Model {
+export class Dataset extends Model implements CoordinateSpace {
   frames!: Frame[];
   is3D: boolean;
   volume?: Volume;
@@ -41,6 +42,19 @@ export class Dataset extends Model {
     }
 
     return this.frames[index];
+  }
+
+  fromWorld(): number[][] {
+    return [
+      [1, 0, 0, 0],
+      [0, 1, 0, 0],
+      [0, 0, 1, 0],
+      [0, 0, 0, 1],
+    ];
+  }
+
+  getWorldBasis(): number[][] {
+    return [...this.frames[0].imageOrientation, this.frames[0].imageNormal];
   }
 
   getLimitsAlongAxe(axe: number[]): {
@@ -93,5 +107,18 @@ export class Dataset extends Model {
         positionOnAxe: minPositionOnAxe,
       },
     };
+  }
+
+  getWorldOrigin(): number[] {
+    return this.frames[0].imagePosition;
+  }
+
+  toWorld(): number[][] {
+    return [
+      [1, 0, 0, 0],
+      [0, 1, 0, 0],
+      [0, 0, 1, 0],
+      [0, 0, 0, 1],
+    ];
   }
 }

@@ -32,10 +32,10 @@ export class JsVolumeRenderer implements Renderer {
     const { width, height } = this.canvas;
     const { camera } = renderingParameters;
 
-    this.context.fillStyle = 'black';
-    this.context.fillRect(0, 0, width, height);
+    // this.context.fillStyle = 'black';
+    // this.context.fillRect(0, 0, width, height);
 
-    const imageDimensions = dataset.volume.getImageDimensions(camera.getBasis());
+    const imageDimensions = dataset.volume.getImageDimensions(dataset, camera);
     const zoom = height / imageDimensions.height * imageDimensions.fieldOfView / camera.fieldOfView;
     const renderingProperties = getRenderingProperties(
       renderingParameters, zoom, imageDimensions.width, imageDimensions.widthRatio, imageDimensions.heightRatio,
@@ -135,10 +135,10 @@ export class JsVolumeRenderer implements Renderer {
     let dataIndex = 0;
 
     // convertImageToLPS
-    const cameraBasis = camera.getBasis();
+    const cameraBasis = camera.getWorldBasis();
     const voxelSpacing = (dataset.volume as Volume).voxelSpacing;
     const right = math.chain(cameraBasis[0]).dotMultiply(voxelSpacing).done();
-    const up = math.chain(cameraBasis[1]).dotMultiply(voxelSpacing).multiply(-1).done();
+    const up = math.chain(cameraBasis[1]).dotMultiply(voxelSpacing).done();
     const pointBaseLPS = math.chain(camera.lookPoint)
       .add(math.multiply(right, -(sliceWidth - 1) / 2))
       .add(math.multiply(up, -(sliceHeight - 1) / 2))
@@ -160,7 +160,7 @@ export class JsVolumeRenderer implements Renderer {
           intensity = table[rawValue - leftLimit];
         }
 
-        imageData32[dataIndex++] = intensity | intensity << 8 | intensity << 16 | 255 << 24;
+        imageData32[dataIndex++] = intensity | intensity << 8 | intensity << 16 | (intensity === 0 ? 0 : 255) << 24;
       }
     }
 
@@ -191,10 +191,10 @@ export class JsVolumeRenderer implements Renderer {
     let dataIndex = 0;
 
     // convertImageToLPS
-    const cameraBasis = camera.getBasis();
+    const cameraBasis = camera.getWorldBasis();
     const voxelSpacing = (dataset.volume as Volume).voxelSpacing;
     const right = math.chain(cameraBasis[0]).dotMultiply(voxelSpacing).done();
-    const up = math.chain(cameraBasis[1]).dotMultiply(voxelSpacing).multiply(-1).done();
+    const up = math.chain(cameraBasis[1]).dotMultiply(voxelSpacing).done();
     const pointBaseLPS = math.chain(camera.lookPoint)
       .add(math.multiply(right, -(sliceWidth - 1) / 2))
       .add(math.multiply(up, -(sliceHeight - 1) / 2))
@@ -218,13 +218,17 @@ export class JsVolumeRenderer implements Renderer {
           intensity = table[rawValue - leftLimit];
         }
 
-        imageData32[dataIndex++] = intensity | intensity << 8 | intensity << 16 | 255 << 24;
+        imageData32[dataIndex++] = intensity | intensity << 8 | intensity << 16 | (intensity === 0 ? 0 : 255) << 24;
       }
     }
 
     const imageData = new Uint8ClampedArray(imageData32.buffer);
     const imageDataInstance = new ImageData(imageData, imageWidth, imageHeight);
-    this.context.putImageData(imageDataInstance, imageX0, imageY0);
+
+    this.renderingContext.canvas.width = imageWidth;
+    this.renderingContext.canvas.height = imageHeight;
+    this.renderingContext.putImageData(imageDataInstance, 0, 0);
+    this.context.drawImage(this.renderingContext.canvas, imageX0, imageY0, imageWidth, imageHeight);
   }
 }
 

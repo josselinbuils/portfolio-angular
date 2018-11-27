@@ -17,6 +17,7 @@ export interface MathJsStaticExt extends MathJsStatic {
 interface MathJsChainExt extends MathJsChain {
   angle(vector2: MathArray): MathJsChainExt;
   cross(y: MathArray | Matrix): MathJsChainExt;
+  multiply(y: MathType): MathJsChainExt;
   normalize(): MathJsChainExt;
   subtract(y: MathType): MathJsChainExt;
 }

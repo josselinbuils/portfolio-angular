@@ -1,5 +1,5 @@
 import { ViewType } from '../../constants';
-import { Camera, Viewport } from '../../models';
+import { Camera, Viewport, Volume } from '../../models';
 import { math } from '../../utils/math';
 import { ToolMoveListener } from '../toolbox';
 
@@ -14,23 +14,24 @@ export function startRotate(viewport: Viewport, downEvent: MouseEvent,
   const { top, left } = viewportClientRect;
   const trackballCenter = [width / 2, height / 2];
   const trackballRadius = Math.min(width, height) / 2;
-  // Vertical position is inverted as display and camera y axis are inverted
-  const cursorStartPosition = [downEvent.clientX - left, height - downEvent.clientY + top];
+  const cursorStartPosition = [downEvent.clientX - left, downEvent.clientY - top];
   let previousVector = computeTrackball(trackballCenter, trackballRadius, cursorStartPosition);
 
   return (moveEvent: MouseEvent) => {
-    const cursorPosition = [moveEvent.clientX - left, height - moveEvent.clientY + top];
+    const cursorPosition = [moveEvent.clientX - left,  moveEvent.clientY - top];
     const currentVector = computeTrackball(trackballCenter, trackballRadius, cursorPosition);
     const { angle, axis } = computeRotation(previousVector, currentVector);
 
     if (Math.abs(angle) > 0) {
       const camera = viewport.camera;
       rotateCamera(camera, axis, angle);
+      camera.baseFieldOfView = (viewport.dataset.volume as Volume).getOrientedDimensionMm(camera.upVector);
+      viewport.updateAnnotations({ zoom: viewport.getImageZoom() });
       previousVector = currentVector;
 
       if (viewport.viewType !== ViewType.Oblique) {
         viewport.viewType = ViewType.Oblique;
-        viewport.updateAnnotations();
+        viewport.updateAnnotations({ viewType: viewport.viewType });
       }
     }
   };
@@ -58,14 +59,14 @@ function computeTrackball(center: number[], radius: number, cursorPosition: numb
 }
 
 function rotateCamera(camera: Camera, axis: number[], angle: number): void {
-  const newCameraBasis = math.chain(camera.getBasis())
+  const newCameraBasis = math.chain(camera.getWorldBasis())
     .transpose()
     .multiply(computeRotationMatrix(axis, angle))
     .transpose()
     .done();
 
   camera.eyePoint = math.subtract(camera.lookPoint, math.normalize(newCameraBasis[2])) as number[];
-  camera.upVector = math.normalize(newCameraBasis[1]) as number[];
+  camera.upVector = math.chain(newCameraBasis[1]).multiply(-1).normalize().done() as number[];
 }
 
 function computeRotationMatrix(axis: number[], angle: number): number[][] {

@@ -1,4 +1,5 @@
 import { ViewType } from '../constants';
+import { getFromWorldTransformationMatrix } from '../utils/coordinates';
 import { math } from '../utils/math';
 
 import { CoordinateSpace } from './coordinate-space';
@@ -9,6 +10,7 @@ import { Volume } from './volume';
 const MANDATORY_FIELDS = ['baseFieldOfView', 'eyePoint', 'fieldOfView', 'lookPoint', 'upVector'];
 
 export class Camera extends Renderable implements CoordinateSpace {
+  // Volume size along the vertical axis of the camera
   baseFieldOfView!: number;
   eyePoint!: number[];
   fieldOfView!: number;
@@ -25,7 +27,8 @@ export class Camera extends Renderable implements CoordinateSpace {
     const fieldOfView = baseFieldOfView;
     const lookPoint = imageCenter.slice();
     const eyePoint = math.subtract(lookPoint, imageNormal);
-    const upVector = imageOrientation[1];
+    // Frame vertical axis is inverted compared to axial view
+    const upVector = math.multiply(imageOrientation[1], -1);
 
     return new Camera({ baseFieldOfView, eyePoint, fieldOfView, lookPoint, upVector });
   }
@@ -77,6 +80,10 @@ export class Camera extends Renderable implements CoordinateSpace {
     });
   }
 
+  fromWorld(world: CoordinateSpace): number[][] {
+    return getFromWorldTransformationMatrix(world, this);
+  }
+
   /*
    * LPS
    *    ------> x
@@ -84,11 +91,11 @@ export class Camera extends Renderable implements CoordinateSpace {
    *  / |
    * z  y
    */
-  getBasis(): number[][] {
+  getWorldBasis(): number[][] {
     if (this.basis === undefined) {
-      const y = math.normalize(this.upVector);
+      const y = math.chain(this.upVector).normalize().multiply(-1).done();
       const z = this.getDirection();
-      const x = math.chain(z).cross(y).normalize().done();
+      const x = math.chain(y).cross(z).normalize().done();
       this.basis = [x, y, z];
     }
     return this.basis;
@@ -101,7 +108,11 @@ export class Camera extends Renderable implements CoordinateSpace {
     return this.direction;
   }
 
-  getOrigin(): number[] {
-    return this.lookPoint;
+  getWorldOrigin(): number[] {
+    return this.eyePoint;
+  }
+
+  toWorld(world: CoordinateSpace): number[][] {
+    return math.inv(this.fromWorld(world)) as number[][];
   }
 }

@@ -1,6 +1,8 @@
 export interface CoordinateSpace {
-  // Provides LPS basis vectors in mm
-  getBasis(): number[][];
+  fromWorld(world: CoordinateSpace): number[][];
+  // Provides LPS basis (unit vectors)
+  getWorldBasis(): number[][];
   // Provides LPS origin
-  getOrigin(): number[];
+  getWorldOrigin(): number[];
+  toWorld(world: CoordinateSpace): number[][];
 }

@@ -1,4 +1,5 @@
 import { ViewType } from '../constants';
+import { getFromWorldTransformationMatrix } from '../utils/coordinates';
 import { math } from '../utils/math';
 
 import { Annotations } from './annotations';
@@ -40,12 +41,14 @@ export class Viewport extends Renderable implements CoordinateSpace {
     this.dataset.destroy();
   }
 
-  getBasis(): number[][] {
+  getWorldBasis(): number[][] {
     if (this.basis === undefined) {
-      const cameraBasis = this.camera.getBasis();
+      const cameraBasis = this.camera.getWorldBasis();
+      const pixelHeightMm = this.camera.fieldOfView / this.height;
+
       this.basis = [
-        cameraBasis[0],
-        math.multiply(cameraBasis[1], -1) as number[],
+        math.chain(cameraBasis[0]).divide(pixelHeightMm).done(),
+        math.chain(cameraBasis[1]).divide(pixelHeightMm).done(),
         cameraBasis[2],
       ];
     }
@@ -53,38 +56,30 @@ export class Viewport extends Renderable implements CoordinateSpace {
   }
 
   getImageZoom(): number {
-    const sliceHeight = this.dataset.volume !== undefined
-      ? this.dataset.volume.getImageDimensions(this.camera.getBasis()).height
-      : this.dataset.findClosestFrame(this.camera.lookPoint).rows;
-
-    return this.height / sliceHeight * this.camera.baseFieldOfView / this.camera.fieldOfView;
+    return this.camera.baseFieldOfView / this.camera.fieldOfView;
   }
 
-  getOrigin(): number[] {
+  getWorldOrigin(): number[] {
     if (this.origin === undefined) {
 
       if (this.width === 0 || this.height === 0) {
         throw new Error(`Viewport has incorrect dimensions: ${this.width}x${this.height}`);
       }
 
-      const cameraBasis = this.camera.getBasis();
-      const zoom = this.getImageZoom();
+      const direction = this.camera.getDirection();
+      const cameraBasis = this.camera.getWorldBasis();
 
-      const xStepVector = math.chain(cameraBasis[0])
-        .dotMultiply(this.dataset.voxelSpacing)
-        .divide(zoom);
-
-      const yStepVector = math.chain(cameraBasis[1])
-        .dotMultiply(this.dataset.voxelSpacing)
-        .divide(zoom)
-        .multiply(-1);
-
-      this.origin = math.chain(this.camera.getOrigin())
-        .add(xStepVector.multiply(-this.width / 2).done())
-        .add(yStepVector.multiply(-this.height / 2).done())
+      this.origin = math.chain(this.camera.getWorldOrigin())
+        .add(math.multiply(cameraBasis[0], -this.camera.fieldOfView / this.height * this.width / 2))
+        .add(math.multiply(cameraBasis[1], -this.camera.fieldOfView / 2))
+        .add(direction)
         .done() as number[];
     }
     return this.origin;
+  }
+
+  fromWorld(world: CoordinateSpace): number[][] {
+    return getFromWorldTransformationMatrix(world, this);
   }
 
   updateAnnotations(updatedProperties?: any): void {
@@ -101,5 +96,9 @@ export class Viewport extends Renderable implements CoordinateSpace {
       error.message = `Unable to compute annotations: ${error.message}`;
       throw error;
     }
+  }
+
+  toWorld(world: CoordinateSpace): number[][] {
+    return math.inv(this.fromWorld(world)) as number[][];
   }
 }

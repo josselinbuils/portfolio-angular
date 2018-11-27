@@ -17,7 +17,7 @@ export function getRenderingProperties(renderingParameters: RenderingParameters,
   const rightLimit = Math.floor(windowCenter + windowWidth / 2);
 
   const viewportSpace = computeViewportSpaceCoordinates(
-    renderingParameters, zoom, imageWidth, imageHeight,  widthCorrectionRatio, heightCorrectionRatio, viewportWidth,
+    renderingParameters, zoom, imageWidth, imageHeight, widthCorrectionRatio, heightCorrectionRatio, viewportWidth,
     viewportHeight,
   );
 
@@ -37,10 +37,17 @@ export function getRenderingProperties(renderingParameters: RenderingParameters,
 }
 
 export function validateCamera2D(frame: Frame, camera: Camera): void {
-  const isDirectionValid = math.chain(camera.getDirection()).cross(frame.imageNormal).norm().done() < 1e-6;
+  const isDirectionValid = math.chain(camera.getDirection()).angle(frame.imageNormal).equal(0).done();
 
   if (!isDirectionValid) {
     throw new Error('Camera direction is not collinear with the frame normal');
+  }
+
+  // Frame vertical axis is inverted compared to axial view
+  const isUpVectorValid = math.chain(camera.upVector).angle(frame.imageOrientation[1]).abs().equal(Math.PI).done();
+
+  if (!isUpVectorValid) {
+    throw new Error('Camera up vector does not match the frame orientation');
   }
 
   const cameraFrameDistance = math.chain(camera.lookPoint)

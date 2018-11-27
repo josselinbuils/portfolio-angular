@@ -1,4 +1,5 @@
 export * from './camera';
+export * from './coordinate-space';
 export * from './dataset';
 export * from './dicom-frame';
 export * from './frame';

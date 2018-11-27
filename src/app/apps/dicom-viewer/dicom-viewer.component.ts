@@ -12,6 +12,7 @@ import { JsFrameRenderer } from './renderer/js/js-frame-renderer';
 import { JsVolumeRenderer } from './renderer/js/js-volume-renderer';
 import { Renderer } from './renderer/renderer';
 import { WebglRenderer } from './renderer/webgl/webgl-renderer';
+import { displayCube } from './toolbox/cube';
 import { Toolbox } from './toolbox/toolbox';
 
 const ANNOTATIONS_REFRESH_DELAY = 500;
@@ -104,16 +105,19 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
         return;
       }
 
-      const annotations = {
-        datasetName: config.dataset.name,
-        rendererType: config.rendererType,
-      };
       const frames = this.computer.computeFrames(dicomFrames);
       const sharedProperties = this.computer.computeSharedProperties(frames);
       const volume = this.computer.computeVolume(frames, sharedProperties);
       const dataset = new Dataset({ frames, ...sharedProperties, volume });
+
+      this.availableViewTypes = this.getAvailableViewTypes(dataset);
+
+      const annotations = {
+        datasetName: config.dataset.name,
+        rendererType: config.rendererType,
+      };
       const frame = frames[Math.floor(dataset.frames.length / 2)];
-      const viewType = dataset.is3D ? ViewType.Axial : ViewType.Native;
+      const viewType = this.availableViewTypes.includes(ViewType.Axial) ? ViewType.Axial : ViewType.Native;
       const camera = viewType === ViewType.Native
         ? Camera.fromFrame(frame)
         : Camera.fromVolume(volume as Volume, viewType);
@@ -128,8 +132,6 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
           this.viewport.destroy();
         }
       });
-
-      this.availableViewTypes = this.getAvailableViewTypes();
 
       this.toolbox = new Toolbox(this.viewport, this.viewportElementRef.nativeElement, this.viewRenderer);
       this.toolbox.selectActiveTool({
@@ -178,7 +180,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
 
     this.viewport.deltaX = 0;
     this.viewport.deltaY = 0;
-    this.viewport.camera = viewType === ViewType.Native
+    this.viewport.camera = [ViewType.Axial, ViewType.Native].includes(viewType)
       ? Camera.fromFrame(frame)
       : Camera.fromVolume(volume as Volume, viewType);
     this.viewport.viewType = viewType;
@@ -217,15 +219,19 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     });
   }
 
-  private getAvailableViewTypes(): ViewType[] {
+  private getAvailableViewTypes(dataset?: Dataset): ViewType[] {
 
-    if (this.viewport === undefined || this.config === undefined) {
+    if (this.config === undefined || (this.viewport === undefined && dataset === undefined)) {
       return [];
+    }
+
+    if (dataset === undefined) {
+      dataset = (this.viewport as Viewport).dataset;
     }
 
     const availableViewTypes = [ViewType.Native];
 
-    if (this.viewport.dataset.is3D && this.config.rendererType !== RendererType.WebGL) {
+    if (dataset.is3D && this.config.rendererType !== RendererType.WebGL) {
       availableViewTypes.push(...[ViewType.Axial, ViewType.Coronal, ViewType.Sagittal]);
     }
     return availableViewTypes;
@@ -279,12 +285,25 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
         const t = performance.now();
 
         try {
-          const { camera, deltaX, deltaY, windowCenter, windowWidth } = this.viewport;
-          this.renderer.render(this.viewport.dataset, { deltaX, deltaY, camera, windowCenter, windowWidth });
+          const viewport = this.viewport;
+          const renderer = this.renderer;
+          const { camera, deltaX, deltaY, windowCenter, windowWidth } = viewport;
+
+          const doIt = () => {
+            renderer.render(viewport.dataset, { deltaX, deltaY, camera, windowCenter, windowWidth });
+          };
+
+          if (renderer instanceof JsVolumeRenderer && viewport.viewType !== ViewType.Native) {
+            displayCube(viewport, this.canvas as HTMLCanvasElement, doIt);
+          } else {
+            doIt();
+          }
+
           this.viewport.makeClean();
           this.renderDurations.push(performance.now() - t);
           this.frameDurations.push(t - this.lastTime);
           this.lastTime = t;
+
         } catch (error) {
           error.message = `Unable to render viewport: ${error.message}`;
           throw this.handleError(error);

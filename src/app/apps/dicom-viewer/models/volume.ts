@@ -1,5 +1,8 @@
+import { convert } from '../utils/coordinates';
 import { math } from '../utils/math';
 
+import { Camera } from './camera';
+import { Dataset } from './dataset';
 import { Model } from './model';
 
 const MANDATORY_FIELDS = [
@@ -47,54 +50,66 @@ export class Volume extends Model {
   }
 
   // TODO Optimize this
-  getImageDimensions(basis: number[][]): {
+  getImageDimensions(dataset: Dataset, camera: Camera): {
     fieldOfView: number; height: number; heightRatio: number; width: number; widthRatio: number;
   } {
     // Compute volume limits in computer service
+    const basis = camera.getWorldBasis();
+    const halfHorizontalSpacing = math.chain(this.voxelSpacing).multiply(0.5).dot(basis[0]).abs().done() as number;
     const halfVerticalSpacing = math.chain(this.voxelSpacing).multiply(0.5).dot(basis[1]).abs().done() as number;
 
     let minHorizontal = Number.MAX_SAFE_INTEGER;
     let maxHorizontal = -Number.MAX_SAFE_INTEGER;
     let maxVertical = -Number.MAX_SAFE_INTEGER;
     let minVertical = Number.MAX_SAFE_INTEGER;
+    let maxHorizontalMm = -Number.MAX_SAFE_INTEGER;
+    let minHorizontalMm = Number.MAX_SAFE_INTEGER;
     let maxVerticalMm = -Number.MAX_SAFE_INTEGER;
     let minVerticalMm = Number.MAX_SAFE_INTEGER;
 
-    Object.values(this.corners).forEach(corner => {
-      const left = math.chain(corner).dotDivide(this.voxelSpacing).dot(basis[0]).done() as number;
-      const top = math.chain(corner).dotDivide(this.voxelSpacing).dot(basis[1]).done() as number;
-      const topMm = math.chain(corner).dot(basis[1]).done() as number;
+    Object.values(this.corners)
+      .forEach(corner => {
+        const left = math.chain(corner).dotDivide(this.voxelSpacing).dot(basis[0]).done() as number;
+        const top = math.chain(corner).dotDivide(this.voxelSpacing).dot(basis[1]).done() as number;
+        const cornerCamera = convert(corner, dataset, camera, dataset) as number[];
+        const leftMm = cornerCamera[0];
+        const topMm = cornerCamera[1];
 
-      if (left < minHorizontal) {
-        minHorizontal = left - 0.5;
-      }
-      if (left > maxHorizontal) {
-        maxHorizontal = left + 0.5;
-      }
-      if (top < minVertical) {
-        minVertical = top - 0.5;
-      }
-      if (top > maxVertical) {
-        maxVertical = top + 0.5;
-      }
-      if (topMm < minVerticalMm) {
-        minVerticalMm = topMm - halfVerticalSpacing;
-      }
-      if (topMm > maxVerticalMm) {
-        maxVerticalMm = topMm + halfVerticalSpacing;
-      }
-    });
+        if (left < minHorizontal) {
+          minHorizontal = left - 0.5;
+        }
+        if (left > maxHorizontal) {
+          maxHorizontal = left + 0.5;
+        }
+        if (top < minVertical) {
+          minVertical = top - 0.5;
+        }
+        if (top > maxVertical) {
+          maxVertical = top + 0.5;
+        }
+        if (leftMm < minHorizontalMm) {
+          minHorizontalMm = leftMm - halfHorizontalSpacing;
+        }
+        if (leftMm > maxHorizontalMm) {
+          maxHorizontalMm = leftMm + halfHorizontalSpacing;
+        }
+        if (topMm < minVerticalMm) {
+          minVerticalMm = topMm - halfVerticalSpacing;
+        }
+        if (topMm > maxVerticalMm) {
+          maxVerticalMm = topMm + halfVerticalSpacing;
+        }
+      });
 
     const width = Math.round(maxHorizontal - minHorizontal);
     const height = Math.round(maxVertical - minVertical);
-    const fieldOfView = Math.round(maxVerticalMm - minVerticalMm);
-
-    let heightRatio = math.chain(this.displayRatio).dot(basis[1].map(Math.abs)).done();
-    let widthRatio = math.chain(this.displayRatio).dot(basis[0].map(Math.abs)).done();
+    const widthMm = Math.round(maxHorizontalMm - minHorizontalMm);
+    const heightMm = Math.round(maxVerticalMm - minVerticalMm);
 
     // Height is the reference
-    widthRatio /= heightRatio;
-    heightRatio = 1;
+    const widthRatio = 1  / ((width / height) * (heightMm / widthMm));
+    const heightRatio = 1;
+    const fieldOfView = heightMm;
 
     return { fieldOfView, height, heightRatio, width, widthRatio };
   }
