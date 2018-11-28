@@ -97,17 +97,17 @@ export function displayCube(viewport: Viewport, canvas: HTMLCanvasElement, rende
     context.stroke();
   }
 
+  context.beginPath();
+  context.arc(cornersDisplay.x0y0z0[0], cornersDisplay.x0y0z0[1], 3, 0, Math.PI * 2);
+  context.fillStyle = STYLE_FRONT;
+  context.fill();
+
   for (const { pointInViewportDisplay } of cross) {
     context.beginPath();
     context.arc(pointInViewportDisplay[0], pointInViewportDisplay[1], 3, 0, Math.PI * 2);
     context.fillStyle = 'red';
     context.fill();
   }
-
-  context.beginPath();
-  context.arc(cornersDisplay.x0y0z0[0], cornersDisplay.x0y0z0[1], 2, 0, Math.PI * 2);
-  context.fillStyle = STYLE_FRONT;
-  context.fill();
 }
 
 function getLineInfo(a: number[], b: number[], viewport: Viewport): LineInfo {

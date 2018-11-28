@@ -6,7 +6,7 @@ import { math } from './math';
 const cache = {};
 
 export function convert(point: number[], originalSpace: CoordinateSpace, finalSpace: CoordinateSpace,
-                        world: CoordinateSpace): any {
+                        world: CoordinateSpace): number[] {
 
   const worldPoint = math.multiply(originalSpace.toWorld(world), [...point, 1]);
   return (math.multiply(finalSpace.fromWorld(world), worldPoint) as number[]).slice(0, 3);

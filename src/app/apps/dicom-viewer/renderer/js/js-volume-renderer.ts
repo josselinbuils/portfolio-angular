@@ -1,5 +1,6 @@
 import { V } from '../../math';
 import { Dataset, Viewport, Volume } from '../../models';
+import { convert } from '../../utils/coordinates';
 import { Renderer } from '../renderer';
 import { BoundedViewportSpaceCoordinates, ImageSpaceCoordinates, RenderingProperties } from '../rendering-properties';
 import { getRenderingProperties } from '../rendering-utils';
@@ -39,7 +40,11 @@ export class JsVolumeRenderer implements Renderer {
       this.lut = this.getVOILut(windowWidth);
     }
 
-    if (renderingProperties.zoom < 1) {
+    const { boundedViewportSpace, imageSpace } = renderingProperties;
+    const imagePixelsToRender = imageSpace.displayWidth * imageSpace.displayHeight;
+    const viewportPixelsToRender = boundedViewportSpace.imageWidth * boundedViewportSpace.imageHeight;
+
+    if (viewportPixelsToRender < imagePixelsToRender) {
       this.renderViewportPixels(viewport, renderingProperties);
     } else {
       this.renderImagePixels(viewport, renderingProperties);
@@ -104,38 +109,36 @@ export class JsVolumeRenderer implements Renderer {
   private renderImagePixels(viewport: Viewport, renderingProperties: RenderingProperties): void {
 
     const { camera, dataset } = viewport;
-    const { boundedViewportSpace, imageLookPoint, leftLimit, rightLimit, imageSpace } = renderingProperties;
+    const { boundedViewportSpace, imageSpace, leftLimit, rightLimit } = renderingProperties;
     const { imageX0, imageY0, imageWidth, imageHeight } = boundedViewportSpace as BoundedViewportSpaceCoordinates;
     const {
       displayHeight, displayWidth, displayX0, displayX1, displayY0, displayY1,
     } = imageSpace as ImageSpaceCoordinates;
 
-    const table = (this.lut as VOILut).table;
-    const imageData32 = new Uint32Array(displayWidth * displayHeight);
-
-    let dataIndex = 0;
-
-    // convertImageToLPS
     const cameraBasis = camera.getWorldBasis();
     const voxelSpacing = (dataset.volume as Volume).voxelSpacing;
-    const right = V(cameraBasis[0]).mul(Math.abs(V(voxelSpacing).dot(cameraBasis[0])));
-    const up = V(cameraBasis[1]).mul(Math.abs(V(voxelSpacing).dot(cameraBasis[1])));
-    const pointBaseLPS = V(imageLookPoint as number[])
-      .add(right.clone().mul(-(displayWidth - 1) / 2))
-      .add(up.clone().mul(-(displayHeight - 1) / 2));
+    const horizontalVoxelSpacing = Math.abs(V(voxelSpacing).dot(cameraBasis[0]));
+    const verticalVoxelSpacing = Math.abs(V(voxelSpacing).dot(cameraBasis[1]));
+    const xAxis = V(cameraBasis[0]).mul(horizontalVoxelSpacing);
+    const yAxis = V(cameraBasis[1]).mul(verticalVoxelSpacing);
+    const pointBaseLPS = convert([imageX0, imageY0, 0], viewport, dataset, dataset);
+
+    const table = (this.lut as VOILut).table;
+    const imageData32 = new Uint32Array(displayWidth * displayHeight);
+    let dataIndex = 0;
 
     for (let y = displayY0; y <= displayY1; y++) {
       for (let x = displayX0; x <= displayX1; x++) {
         const pointLPS = [
-          pointBaseLPS[0] + right[0] * x + up[0] * y,
-          pointBaseLPS[1] + right[1] * x + up[1] * y,
-          pointBaseLPS[2] + right[2] * x + up[2] * y,
+          pointBaseLPS[0] + xAxis[0] * x + yAxis[0] * y,
+          pointBaseLPS[1] + xAxis[1] * x + yAxis[1] * y,
+          pointBaseLPS[2] + xAxis[2] * x + yAxis[2] * y,
         ];
         const rawValue = this.getPixelValue(dataset, pointLPS);
-        let intensity = 255;
+        let intensity = 250;
 
         if (rawValue < leftLimit) {
-          intensity = 5;
+          intensity = 10;
         } else if (rawValue < rightLimit) {
           intensity = table[rawValue - leftLimit];
         }
@@ -159,10 +162,7 @@ export class JsVolumeRenderer implements Renderer {
   private renderViewportPixels(viewport: Viewport, renderingProperties: RenderingProperties): void {
 
     const { camera, dataset } = viewport;
-    const {
-      boundedViewportSpace, imageLookPoint, imageSpace, leftLimit, rightLimit, viewportSpace, widthCorrectionRatio,
-      zoom,
-    } = renderingProperties;
+    const { boundedViewportSpace, imageSpace, leftLimit, rightLimit, viewportSpace, zoom } = renderingProperties;
     const {
       imageHeight, imageWidth, imageX0, imageX1, imageY0, imageY1,
     } = boundedViewportSpace as BoundedViewportSpaceCoordinates;
@@ -170,34 +170,35 @@ export class JsVolumeRenderer implements Renderer {
 
     const viewportSpaceImageX0 = viewportSpace.imageX0;
     const viewportSpaceImageY0 = viewportSpace.imageY0;
-    const table = (this.lut as VOILut).table;
-    const imageData32 = new Uint32Array(imageWidth * imageHeight);
-
-    let dataIndex = 0;
-
-    // convertImageToLPS
     const cameraBasis = camera.getWorldBasis();
     const voxelSpacing = (dataset.volume as Volume).voxelSpacing;
-    const right = V(cameraBasis[0]).mul(Math.abs(V(voxelSpacing).dot(cameraBasis[0])));
-    const up = V(cameraBasis[1]).mul(Math.abs(V(voxelSpacing).dot(cameraBasis[1])));
-    const pointBaseLPS = V(imageLookPoint as number[])
-      .add(right.clone().mul(-(displayWidth - 1) / 2))
-      .add(up.clone().mul(-(displayHeight - 1) / 2));
+    const horizontalVoxelSpacing = Math.abs(V(voxelSpacing).dot(cameraBasis[0]));
+    const verticalVoxelSpacing = Math.abs(V(voxelSpacing).dot(cameraBasis[1]));
+    const xAxis = V(cameraBasis[0]).mul(horizontalVoxelSpacing);
+    const yAxis = V(cameraBasis[1]).mul(verticalVoxelSpacing);
+    const pointBaseLPS = convert([viewportSpaceImageX0, viewportSpaceImageY0, 0], viewport, dataset, dataset);
+
+    xAxis.mul(displayWidth / imageWidth);
+    yAxis.mul(displayHeight / imageHeight);
+
+    const table = (this.lut as VOILut).table;
+    const imageData32 = new Uint32Array(imageWidth * imageHeight);
+    let dataIndex = 0;
 
     for (let y = imageY0; y <= imageY1; y++) {
       for (let x = imageX0; x <= imageX1; x++) {
-        const pixX = (x - viewportSpaceImageX0) / zoom / widthCorrectionRatio | 0;
+        const pixX = (x - viewportSpaceImageX0) / zoom | 0;
         const pixY = (y - viewportSpaceImageY0) / zoom | 0;
         const pointLPS = [
-          pointBaseLPS[0] + right[0] * pixX + up[0] * pixY,
-          pointBaseLPS[1] + right[1] * pixX + up[1] * pixY,
-          pointBaseLPS[2] + right[2] * pixX + up[2] * pixY,
+          pointBaseLPS[0] + xAxis[0] * pixX + yAxis[0] * pixY,
+          pointBaseLPS[1] + xAxis[1] * pixX + yAxis[1] * pixY,
+          pointBaseLPS[2] + xAxis[2] * pixX + yAxis[2] * pixY,
         ];
         const rawValue = this.getPixelValue(dataset, pointLPS);
         let intensity = 255;
 
         if (rawValue < leftLimit) {
-          intensity = 5;
+          intensity = 10;
         } else if (rawValue < rightLimit) {
           intensity = table[rawValue - leftLimit];
         }
