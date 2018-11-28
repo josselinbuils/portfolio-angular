@@ -4,6 +4,8 @@ import { Renderer } from '../renderer';
 import { BoundedViewportSpaceCoordinates, ImageSpaceCoordinates, RenderingProperties } from '../rendering-properties';
 import { getRenderingProperties, validateCamera2D } from '../rendering-utils';
 
+import { drawImageData, getVOILut, VOILut } from './js-common';
+
 export class JsFrameRenderer implements Renderer {
 
   private readonly context: CanvasRenderingContext2D;
@@ -43,7 +45,7 @@ export class JsFrameRenderer implements Renderer {
     switch (imageFormat) {
       case NormalizedImageFormat.Int16:
         if (this.lut === undefined || this.lut.windowWidth !== windowWidth) {
-          this.lut = this.getVOILut(windowWidth);
+          this.lut = getVOILut(windowWidth);
         }
 
         if (zoom < 1) {
@@ -62,26 +64,26 @@ export class JsFrameRenderer implements Renderer {
     }
   }
 
-  private getVOILut(windowWidth: number): VOILut {
-    const table: number[] = [];
+  private getPixelValue(rawValue: number, leftLimit: number, rightLimit: number): number {
+    let intensity = 255;
 
-    for (let i = 0; i < windowWidth; i++) {
-      table[i] = Math.floor(i / windowWidth * 256);
+    if (rawValue < leftLimit) {
+      intensity = 0;
+    } else if (rawValue < rightLimit) {
+      intensity = (this.lut as VOILut).table[rawValue - leftLimit];
     }
 
-    return { table, windowWidth };
+    return intensity | intensity << 8 | intensity << 16 | 255 << 24;
   }
 
   private renderImagePixels(frame: Frame, renderingProperties: RenderingProperties): void {
 
     const { columns, pixelData, rescaleIntercept, rescaleSlope } = frame;
     const { boundedViewportSpace, leftLimit, rightLimit, imageSpace } = renderingProperties;
-    const { imageX0, imageY0, imageWidth, imageHeight } = boundedViewportSpace as BoundedViewportSpaceCoordinates;
     const {
       displayHeight, displayWidth, displayX0, displayX1, displayY0, displayY1,
     } = imageSpace as ImageSpaceCoordinates;
 
-    const table = (this.lut as VOILut).table;
     const imageData32 = new Uint32Array(displayWidth * displayHeight);
 
     let dataIndex = 0;
@@ -89,32 +91,17 @@ export class JsFrameRenderer implements Renderer {
     for (let y = displayY0; y <= displayY1; y++) {
       for (let x = displayX0; x <= displayX1; x++) {
         const rawValue = pixelData[y * columns + x] * rescaleSlope + rescaleIntercept | 0;
-        let intensity = 0;
-
-        if (rawValue >= rightLimit) {
-          intensity = 255;
-        } else if (rawValue > leftLimit) {
-          intensity = table[rawValue - leftLimit];
-        }
-
-        imageData32[dataIndex++] = intensity | intensity << 8 | intensity << 16 | 255 << 24;
+        imageData32[dataIndex++] = this.getPixelValue(rawValue, leftLimit, rightLimit);
       }
     }
 
-    const imageData = new Uint8ClampedArray(imageData32.buffer);
-    const imageDataInstance = new ImageData(imageData, displayWidth, displayHeight);
-
-    this.renderingContext.canvas.width = displayWidth;
-    this.renderingContext.canvas.height = displayHeight;
-
-    this.renderingContext.putImageData(imageDataInstance, 0, 0);
-    this.context.drawImage(this.renderingContext.canvas, imageX0, imageY0, imageWidth, imageHeight);
+    drawImageData(imageData32, this.context, this.renderingContext, displayWidth, displayHeight, boundedViewportSpace);
   }
 
   private renderRGB(frame: Frame, renderingProperties: RenderingProperties): void {
 
     const { columns, pixelData, rows } = frame;
-    const { imageHeight, imageWidth, imageX0, imageY0 } = renderingProperties.viewportSpace;
+    const { viewportSpace } = renderingProperties;
 
     const pixelDataLength = pixelData.length;
     const imageData32 = new Uint32Array(columns * rows);
@@ -125,14 +112,7 @@ export class JsFrameRenderer implements Renderer {
       imageData32[dataIndex++] = pixelData[i] | pixelData[i + 1] << 8 | pixelData[i + 2] << 16 | 255 << 24;
     }
 
-    const imageData = new Uint8ClampedArray(imageData32.buffer);
-    const imageDataInstance = new ImageData(imageData, columns, rows);
-
-    this.renderingContext.canvas.width = columns;
-    this.renderingContext.canvas.height = rows;
-
-    this.renderingContext.putImageData(imageDataInstance, 0, 0);
-    this.context.drawImage(this.renderingContext.canvas, imageX0, imageY0, imageWidth, imageHeight);
+    drawImageData(imageData32, this.context, this.renderingContext, columns, rows, viewportSpace);
   }
 
   private renderViewportPixels(frame: Frame, renderingProperties: RenderingProperties, zoom: number): void {
@@ -145,35 +125,19 @@ export class JsFrameRenderer implements Renderer {
 
     const viewportSpaceImageX0 = viewportSpace.imageX0;
     const viewportSpaceImageY0 = viewportSpace.imageY0;
-    const table = (this.lut as VOILut).table;
     const imageData32 = new Uint32Array(imageWidth * imageHeight);
 
     let dataIndex = 0;
 
     for (let y = imageY0; y <= imageY1; y++) {
       for (let x = imageX0; x <= imageX1; x++) {
-        const pixelDataIndex = ((y - viewportSpaceImageY0) / zoom | 0) * columns +
-          ((x - viewportSpaceImageX0) / zoom | 0);
-        const rawValue = pixelData[pixelDataIndex] * rescaleSlope + rescaleIntercept | 0;
-        let intensity = 255;
-
-        if (rawValue < leftLimit) {
-          intensity = 0;
-        } else if (rawValue < rightLimit) {
-          intensity = table[rawValue - leftLimit];
-        }
-
-        imageData32[dataIndex++] = intensity | intensity << 8 | intensity << 16 | 255 << 24;
+        const imageX = (x - viewportSpaceImageX0) / zoom | 0;
+        const imageY = (y - viewportSpaceImageY0) / zoom | 0;
+        const rawValue = pixelData[imageY * columns + imageX] * rescaleSlope + rescaleIntercept | 0;
+        imageData32[dataIndex++] = this.getPixelValue(rawValue, leftLimit, rightLimit);
       }
     }
 
-    const imageData = new Uint8ClampedArray(imageData32.buffer);
-    const imageDataInstance = new ImageData(imageData, imageWidth, imageHeight);
-    this.context.putImageData(imageDataInstance, imageX0, imageY0);
+    drawImageData(imageData32, this.context, this.renderingContext, imageWidth, imageHeight, boundedViewportSpace);
   }
-}
-
-interface VOILut {
-  table: number[];
-  windowWidth: number;
 }
