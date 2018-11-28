@@ -1,7 +1,5 @@
 import { ViewType } from '../constants';
 import { V } from '../math';
-import { getFromWorldTransformationMatrix } from '../utils/coordinates';
-import { math } from '../utils/math';
 
 import { CoordinateSpace } from './coordinate-space';
 import { Frame } from './frame';
@@ -80,10 +78,6 @@ export class Camera extends Renderable implements CoordinateSpace {
     });
   }
 
-  fromWorld(world: CoordinateSpace): number[][] {
-    return getFromWorldTransformationMatrix(world, this);
-  }
-
   /*
    * LPS
    *    ------> x
@@ -110,9 +104,5 @@ export class Camera extends Renderable implements CoordinateSpace {
 
   getWorldOrigin(): number[] {
     return this.eyePoint;
-  }
-
-  toWorld(world: CoordinateSpace): number[][] {
-    return math.inv(this.fromWorld(world)) as number[][];
   }
 }

@@ -38,17 +38,12 @@ export class Dataset extends Model implements CoordinateSpace {
     return this.frames[index];
   }
 
-  fromWorld(): number[][] {
-    return [
-      [1, 0, 0, 0],
-      [0, 1, 0, 0],
-      [0, 0, 1, 0],
-      [0, 0, 0, 1],
-    ];
-  }
-
   getWorldBasis(): number[][] {
-    return [...this.frames[0].imageOrientation, this.frames[0].imageNormal];
+    return [
+      [1, 0, 0],
+      [0, 1, 0],
+      [0, 0, 1],
+    ];
   }
 
   getLimitsAlongAxe(axe: number[]): {
@@ -88,7 +83,7 @@ export class Dataset extends Model implements CoordinateSpace {
       maxPositionOnAxe = V(maxPoint).dot(axe);
 
       minPoint = firstFrame.imagePosition;
-      minPositionOnAxe =  V(minPoint).dot(axe);
+      minPositionOnAxe = V(minPoint).dot(axe);
     }
 
     return {
@@ -104,15 +99,6 @@ export class Dataset extends Model implements CoordinateSpace {
   }
 
   getWorldOrigin(): number[] {
-    return this.frames[0].imagePosition;
-  }
-
-  toWorld(): number[][] {
-    return [
-      [1, 0, 0, 0],
-      [0, 1, 0, 0],
-      [0, 0, 1, 0],
-      [0, 0, 0, 1],
-    ];
+    return [0, 0, 0];
   }
 }

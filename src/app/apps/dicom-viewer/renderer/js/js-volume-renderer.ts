@@ -1,6 +1,6 @@
 import { V } from '../../math';
 import { Dataset, Viewport, Volume } from '../../models';
-import { convert } from '../../utils/coordinates';
+import { Coordinates } from '../../utils/coordinates';
 import { Renderer } from '../renderer';
 import {
   BoundedViewportSpaceCoordinates, ImageSpaceCoordinates, RenderingProperties, ViewportSpaceCoordinates,
@@ -69,7 +69,7 @@ export class JsVolumeRenderer implements Renderer {
 
   private getImageWorldOrigin(viewport: Viewport, viewportSpace: ViewportSpaceCoordinates): number[] {
     const { dataset } = viewport;
-    return convert([viewportSpace.imageX0, viewportSpace.imageY0, 0], viewport, dataset, dataset);
+    return Coordinates.convert([viewportSpace.imageX0, viewportSpace.imageY0, 0], viewport, dataset);
   }
 
   private getPixelValue(rawValue: number, leftLimit: number, rightLimit: number): number {

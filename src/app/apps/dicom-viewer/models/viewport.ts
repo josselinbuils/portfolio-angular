@@ -1,7 +1,5 @@
 import { ViewType } from '../constants';
 import { V } from '../math';
-import { getFromWorldTransformationMatrix } from '../utils/coordinates';
-import { math } from '../utils/math';
 
 import { Annotations } from './annotations';
 import { Camera } from './camera';
@@ -78,10 +76,6 @@ export class Viewport extends Renderable implements CoordinateSpace {
     return this.origin;
   }
 
-  fromWorld(world: CoordinateSpace): number[][] {
-    return getFromWorldTransformationMatrix(world, this);
-  }
-
   updateAnnotations(updatedProperties?: any): void {
     try {
       if (updatedProperties !== undefined) {
@@ -96,9 +90,5 @@ export class Viewport extends Renderable implements CoordinateSpace {
       error.message = `Unable to compute annotations: ${error.message}`;
       throw error;
     }
-  }
-
-  toWorld(world: CoordinateSpace): number[][] {
-    return math.inv(this.fromWorld(world)) as number[][];
   }
 }

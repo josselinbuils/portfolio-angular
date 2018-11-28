@@ -1,6 +1,6 @@
 import { getLinePlaneIntersection, V } from '../math';
 import { Viewport, Volume } from '../models';
-import { convert } from '../utils/coordinates';
+import { Coordinates } from '../utils/coordinates';
 
 const STYLE_FRONT = 'rgba(255, 255, 255, .7)';
 const STYLE_BEHIND = 'rgba(255, 255, 255, .2)';
@@ -28,7 +28,7 @@ export function displayCube(viewport: Viewport, canvas: HTMLCanvasElement, rende
   const cornersDisplay: typeof volume.corners = { ...volume.corners };
 
   for (const [name, corner] of Object.entries(volume.corners)) {
-    cornersDisplay[name] = convert(corner, viewport.dataset, viewport, viewport.dataset);
+    cornersDisplay[name] = Coordinates.convert(corner, viewport.dataset, viewport);
   }
 
   const front: any[] = [];
@@ -45,14 +45,14 @@ export function displayCube(viewport: Viewport, canvas: HTMLCanvasElement, rende
     const info = getLineInfo(aLPS, bLPS, viewport);
 
     if (info.crossesViewport) {
-      const pointBehindViewportDisplay = convert(
-        info.pointBehindViewport as number[], viewport.dataset, viewport, viewport.dataset,
+      const pointBehindViewportDisplay = Coordinates.convert(
+        info.pointBehindViewport as number[], viewport.dataset, viewport,
       );
-      const pointInFrontOfViewportDisplay = convert(
-        info.pointInFrontOfViewport as number[], viewport.dataset, viewport, viewport.dataset,
+      const pointInFrontOfViewportDisplay = Coordinates.convert(
+        info.pointInFrontOfViewport as number[], viewport.dataset, viewport,
       );
-      const pointInViewportDisplay = convert(
-        info.pointInViewport as number[], viewport.dataset, viewport, viewport.dataset,
+      const pointInViewportDisplay = Coordinates.convert(
+        info.pointInViewport as number[], viewport.dataset, viewport,
       );
 
       cross.push({

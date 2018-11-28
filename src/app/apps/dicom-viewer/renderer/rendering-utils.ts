@@ -1,6 +1,6 @@
 import { V } from '../math';
 import { Camera, Frame, Viewport, Volume } from '../models';
-import { convert } from '../utils/coordinates';
+import { Coordinates } from '../utils/coordinates';
 
 import {
   BoundedViewportSpaceCoordinates, ImageSpaceCoordinates, RenderingProperties, ViewportSpaceCoordinates,
@@ -162,7 +162,7 @@ function getImageDimensions(viewport: Viewport): {
     return undefined;
   }
 
-  const intersectionsCamera = intersections.map(i => convert(i, dataset, camera, dataset));
+  const intersectionsCamera = intersections.map(i => Coordinates.convert(i, dataset, camera));
   const intersectionsCameraHorizontal = intersectionsCamera.map(i => i[0]);
   const intersectionsCameraVertical = intersectionsCamera.map(i => i[1]);
   const halfSpacing = V(dataset.voxelSpacing).mul(0.5);
@@ -181,7 +181,7 @@ function getImageDimensions(viewport: Viewport): {
     return undefined;
   }
 
-  const intersectionsDisplay = intersections.map(i => convert(i, dataset, viewport, dataset));
+  const intersectionsDisplay = intersections.map(i => Coordinates.convert(i, dataset, viewport));
   const intersectionsDisplayHorizontal = intersectionsDisplay.map(i => i[0]);
   const intersectionsDisplayVertical = intersectionsDisplay.map(i => i[1]);
   const viewportSpaceImageX0 = Math.min(...intersectionsDisplayHorizontal);
