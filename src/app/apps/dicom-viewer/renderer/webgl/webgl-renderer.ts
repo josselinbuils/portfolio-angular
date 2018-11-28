@@ -1,7 +1,7 @@
 import { NormalizedImageFormat } from '../../constants';
 import { Frame, Viewport } from '../../models';
 import { Renderer } from '../renderer';
-import { validateCamera2D } from '../rendering-utils';
+import { getRenderingProperties, validateCamera2D } from '../rendering-utils';
 
 import { getFragmentShaderSrc, getTextureFormat } from './fragment-shader';
 import { VERTEX_SHADER_SRC } from './vertex-shader';
@@ -40,10 +40,9 @@ export class WebglRenderer implements Renderer {
 
   render(viewport: Viewport): void {
     const gl = this.gl;
-    const { dataset, deltaX, deltaY, camera, windowCenter, windowWidth } = viewport;
+    const { dataset, camera, height, width, windowCenter, windowWidth } = viewport;
     const frame = dataset.findClosestFrame(camera.lookPoint);
-    const { columns, id, imageFormat, rescaleIntercept, rescaleSlope, rows } = frame;
-    const { width, height } = this.canvas;
+    const { id, imageFormat, rescaleIntercept, rescaleSlope } = frame;
 
     validateCamera2D(frame, camera);
 
@@ -90,14 +89,20 @@ export class WebglRenderer implements Renderer {
 
     const matrixLocation = gl.getUniformLocation(this.program, 'u_matrix');
 
+    const renderingProperties = getRenderingProperties(viewport);
+
+    if (renderingProperties === undefined) {
+      return;
+    }
+
+    const { viewportSpace } = renderingProperties;
+    const { imageHeight, imageWidth, imageX0, imageY0 } = viewportSpace;
+
     // Convert dst pixel coordinates to clip space coordinates
-    const zoom = height / frame.rows * camera.baseFieldOfView / camera.fieldOfView;
-    const displayWidth = Math.round(columns * zoom);
-    const displayHeight = Math.round(rows * zoom);
-    const clipX = (0.5 - displayWidth / width / 2 + deltaX) * 2 - 1;
-    const clipY = (0.5 - displayHeight / height / 2 + deltaY) * -2 + 1;
-    const clipWidth = displayWidth / width * 2;
-    const clipHeight = displayHeight / height * -2;
+    const clipX = imageX0 / width * 2 - 1;
+    const clipY = imageY0 / height * -2 + 1;
+    const clipWidth = imageWidth / width * 2;
+    const clipHeight = imageHeight / height * -2;
 
     // Build a matrix that will stretch our unit quad to our desired size and location
     gl.uniformMatrix3fv(matrixLocation, false, [clipWidth, 0, 0, 0, clipHeight, 0, clipX, clipY, 1]);

@@ -40,6 +40,14 @@ export class Volume extends Model {
     super.checkMandatoryFieldsPresence(MANDATORY_FIELDS);
   }
 
+  getCenter(): number[] {
+    return V(this.firstVoxelCenter)
+      .add(V(this.orientedDimensionsMm[0]).mul(0.5))
+      .add(V(this.orientedDimensionsMm[1]).mul(0.5))
+      .add(V(this.orientedDimensionsMm[2]).mul(0.5))
+      .sub(V(this.voxelSpacing).mul(0.5));
+  }
+
   getOrientedDimensionMm(axe: number[]): number {
     return Math.max(
       ...this.orientedDimensionsMm.map(dimensionVector => Math.abs(V(dimensionVector).dot(axe))),

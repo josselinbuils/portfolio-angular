@@ -178,8 +178,6 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     const { frames, volume } = this.viewport.dataset;
     const frame = frames[Math.floor(frames.length / 2)];
 
-    this.viewport.deltaX = 0;
-    this.viewport.deltaY = 0;
     this.viewport.camera = [ViewType.Axial, ViewType.Native].includes(viewType)
       ? Camera.fromFrame(frame)
       : Camera.fromVolume(volume as Volume, viewType);
@@ -338,6 +336,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       }
 
       this.viewport.updateAnnotations({ fps, meanRenderDuration });
+      this.viewport.updateAnnotations();
 
     }, ANNOTATIONS_REFRESH_DELAY);
 

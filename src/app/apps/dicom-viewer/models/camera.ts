@@ -33,8 +33,6 @@ export class Camera extends Renderable implements CoordinateSpace {
   }
 
   static fromVolume(volume: Volume, viewType: ViewType): Camera {
-    const { firstVoxelCenter, orientedDimensionsMm, voxelSpacing } = volume;
-
     let direction: number[];
     let upVector: number[];
 
@@ -57,12 +55,8 @@ export class Camera extends Renderable implements CoordinateSpace {
 
     const baseFieldOfView = volume.getOrientedDimensionMm(upVector);
     const fieldOfView = baseFieldOfView;
-    const lookPoint = V(firstVoxelCenter)
-      .add(V(orientedDimensionsMm[0]).mul(0.5))
-      .add(V(orientedDimensionsMm[1]).mul(0.5))
-      .add(V(orientedDimensionsMm[2]).mul(0.5))
-      .sub(V(voxelSpacing).mul(0.5));
-    const eyePoint = lookPoint.clone().sub(direction);
+    const lookPoint = volume.getCenter();
+    const eyePoint = V(lookPoint).sub(direction);
 
     return new Camera({ baseFieldOfView, eyePoint, fieldOfView, lookPoint, upVector });
   }

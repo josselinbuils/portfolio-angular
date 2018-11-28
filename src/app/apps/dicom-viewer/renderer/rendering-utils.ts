@@ -8,7 +8,7 @@ import {
 
 export function getRenderingProperties(viewport: Viewport): RenderingProperties | undefined {
 
-  const { camera, dataset, height, windowCenter, windowWidth } = viewport;
+  const { camera, dataset, height, width, windowCenter, windowWidth } = viewport;
 
   const leftLimit = Math.floor(windowCenter - windowWidth / 2);
   const rightLimit = Math.floor(windowCenter + windowWidth / 2);
@@ -17,8 +17,8 @@ export function getRenderingProperties(viewport: Viewport): RenderingProperties 
   let imageHeight: number;
   let viewportSpaceImageWidth: number;
   let viewportSpaceImageHeight: number;
-  let viewportSpaceImageX0: number | undefined;
-  let viewportSpaceImageY0: number | undefined;
+  let viewportSpaceImageX0: number;
+  let viewportSpaceImageY0: number;
   let zoom: number;
 
   if (viewport.dataset.is3D) {
@@ -28,20 +28,25 @@ export function getRenderingProperties(viewport: Viewport): RenderingProperties 
       return undefined;
     }
 
-    viewportSpaceImageWidth = imageDimensions.viewportSpaceImageWidth;
-    viewportSpaceImageHeight = imageDimensions.viewportSpaceImageHeight;
     imageWidth = imageDimensions.width;
     imageHeight = imageDimensions.height;
     viewportSpaceImageX0 = imageDimensions.viewportSpaceImageX0;
     viewportSpaceImageY0 = imageDimensions.viewportSpaceImageY0;
+    viewportSpaceImageWidth = imageDimensions.viewportSpaceImageWidth;
+    viewportSpaceImageHeight = imageDimensions.viewportSpaceImageHeight;
     zoom = height / imageDimensions.viewportSpaceImageHeight * imageDimensions.heightMm / camera.fieldOfView;
 
   } else {
     const frame = dataset.findClosestFrame(camera.lookPoint);
-    const { columns, rows } = frame;
+    const { columns, imageCenter, rows } = frame;
+    const lookPointViewport = Coordinates.convert(camera.lookPoint, dataset, viewport);
+    const frameCenterViewport = Coordinates.convert(imageCenter, dataset, viewport);
+
     imageWidth = columns;
     imageHeight = rows;
     zoom = height / frame.rows * camera.baseFieldOfView / camera.fieldOfView;
+    viewportSpaceImageX0 = (width - imageWidth) / 2 + frameCenterViewport[0] - lookPointViewport[0];
+    viewportSpaceImageY0 = (height - imageHeight) / 2 + frameCenterViewport[1] - lookPointViewport[1];
     viewportSpaceImageWidth = Math.round(columns * zoom);
     viewportSpaceImageHeight = Math.round(rows * zoom);
   }
@@ -119,18 +124,13 @@ function computeImageSpace(zoom: number, imageWidth: number, imageHeight: number
 }
 
 function computeViewportSpaceCoordinates(viewport: Viewport, imageWidth: number, imageHeight: number,
-                                         viewportSpaceImageX0: number | undefined,
-                                         viewportSpaceImageY0: number | undefined): ViewportSpaceCoordinates {
+                                         viewportSpaceImageX0: number,
+                                         viewportSpaceImageY0: number): ViewportSpaceCoordinates {
 
-  const { deltaX, deltaY, height, width } = viewport;
+  const { height, width } = viewport;
 
-  const imageX0 = viewportSpaceImageX0 !== undefined
-    ? Math.round(viewportSpaceImageX0 + deltaX * width)
-    : Math.round(((width - imageWidth) / 2 + deltaX * width));
-
-  const imageY0 = viewportSpaceImageY0 !== undefined
-    ? Math.round(viewportSpaceImageY0 + deltaY * height)
-    : Math.round(((height - imageHeight) / 2 + deltaY * height));
+  const imageX0 = Math.round(viewportSpaceImageX0);
+  const imageY0 = Math.round(viewportSpaceImageY0);
 
   const imageX1 = imageX0 + imageWidth - 1;
   const imageY1 = imageY0 + imageHeight - 1;

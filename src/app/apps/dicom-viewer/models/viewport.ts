@@ -6,6 +6,7 @@ import { Camera } from './camera';
 import { CoordinateSpace } from './coordinate-space';
 import { Dataset } from './dataset';
 import { Renderable } from './renderable';
+import { Volume } from './volume';
 
 const MANDATORY_FIELDS = ['camera', 'dataset', 'viewType'];
 
@@ -13,8 +14,6 @@ export class Viewport extends Renderable implements CoordinateSpace {
   annotations: Annotations = {};
   camera!: Camera;
   dataset!: Dataset;
-  deltaX = 0;
-  deltaY = 0;
   height = 0;
   viewType!: ViewType;
   width = 0;
@@ -55,7 +54,11 @@ export class Viewport extends Renderable implements CoordinateSpace {
   }
 
   getImageZoom(): number {
-    return this.camera.baseFieldOfView / this.camera.fieldOfView;
+    const sliceHeight = this.dataset.is3D
+      ? Math.abs(V((this.dataset.volume as Volume).dimensionsVoxels).dot(this.camera.upVector))
+      : this.dataset.findClosestFrame(this.camera.lookPoint).rows;
+
+    return this.height / sliceHeight * this.camera.baseFieldOfView / this.camera.fieldOfView;
   }
 
   getWorldOrigin(): number[] {
