@@ -1,10 +1,12 @@
 export interface RenderingProperties {
-  boundedViewportSpace?: BoundedViewportSpaceCoordinates; // Present only if the image is inside the viewport
-  imageSpace?: ImageSpaceCoordinates; // Present only if the image is inside the viewport
-  isImageInViewport: boolean;
+  boundedViewportSpace: BoundedViewportSpaceCoordinates; // Present only if the image is inside the viewport
+  imageLookPoint?: number[];
+  imageSpace: ImageSpaceCoordinates; // Present only if the image is inside the viewport
   leftLimit: number;
   rightLimit: number;
   viewportSpace: ViewportSpaceCoordinates;
+  widthCorrectionRatio: number;
+  zoom: number;
 }
 
 /**

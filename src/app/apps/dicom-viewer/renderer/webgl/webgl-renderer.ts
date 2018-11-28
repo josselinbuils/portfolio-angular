@@ -1,7 +1,6 @@
 import { NormalizedImageFormat } from '../../constants';
-import { Dataset, Frame } from '../../models';
+import { Frame, Viewport } from '../../models';
 import { Renderer } from '../renderer';
-import { RenderingParameters } from '../rendering-parameters';
 import { validateCamera2D } from '../rendering-utils';
 
 import { getFragmentShaderSrc, getTextureFormat } from './fragment-shader';
@@ -39,9 +38,9 @@ export class WebglRenderer implements Renderer {
     delete this.texture;
   }
 
-  render(dataset: Dataset, renderingParameters: RenderingParameters): void {
+  render(viewport: Viewport): void {
     const gl = this.gl;
-    const { deltaX, deltaY, camera, windowCenter, windowWidth } = renderingParameters;
+    const { dataset, deltaX, deltaY, camera, windowCenter, windowWidth } = viewport;
     const frame = dataset.findClosestFrame(camera.lookPoint);
     const { columns, id, imageFormat, rescaleIntercept, rescaleSlope, rows } = frame;
     const { width, height } = this.canvas;

@@ -1,8 +1,6 @@
-import { Dataset } from '../models';
-
-import { RenderingParameters } from './rendering-parameters';
+import { Viewport } from '../models';
 
 export interface Renderer {
   destroy?(): void;
-  render(dataset: Dataset, renderingParameters: RenderingParameters): void;
+  render(viewport: Viewport): void;
 }

@@ -1,7 +1,6 @@
 import { NormalizedImageFormat } from '../../constants';
-import { Dataset, Frame } from '../../models';
+import { Frame, Viewport } from '../../models';
 import { Renderer } from '../renderer';
-import { RenderingParameters } from '../rendering-parameters';
 import { BoundedViewportSpaceCoordinates, ImageSpaceCoordinates, RenderingProperties } from '../rendering-properties';
 import { getRenderingProperties, validateCamera2D } from '../rendering-utils';
 
@@ -23,20 +22,19 @@ export class JsFrameRenderer implements Renderer {
     this.renderingContext = renderingContext;
   }
 
-  render(dataset: Dataset, renderingParameters: RenderingParameters): void {
-    const { width, height } = this.canvas;
-    const { camera } = renderingParameters;
+  render(viewport: Viewport): void {
+    const { camera, dataset, height, width, windowWidth } = viewport;
+    // TODO get it through rendering properties
     const frame = dataset.findClosestFrame(camera.lookPoint);
-    const { columns, imageFormat, rows } = frame;
+    const { imageFormat } = frame;
 
     this.context.fillStyle = 'black';
     this.context.fillRect(0, 0, width, height);
 
     const zoom = height / frame.rows * camera.baseFieldOfView / camera.fieldOfView;
-    // TODO put the real correction ratio
-    const renderingProperties = getRenderingProperties(renderingParameters, zoom, columns, 1, 1, rows, width, height);
+    const renderingProperties = getRenderingProperties(viewport);
 
-    if (!renderingProperties.isImageInViewport) {
+    if (renderingProperties === undefined) {
       return;
     }
 
@@ -44,8 +42,6 @@ export class JsFrameRenderer implements Renderer {
 
     switch (imageFormat) {
       case NormalizedImageFormat.Int16:
-        const { windowWidth } = renderingParameters;
-
         if (this.lut === undefined || this.lut.windowWidth !== windowWidth) {
           this.lut = this.getVOILut(windowWidth);
         }

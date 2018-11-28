@@ -1,8 +1,5 @@
-import { V } from '../math';
-import { convert } from '../utils/coordinates';
+import { getLinePlaneIntersection, V } from '../math';
 
-import { Camera } from './camera';
-import { Dataset } from './dataset';
 import { Model } from './model';
 
 const MANDATORY_FIELDS = [
@@ -49,69 +46,29 @@ export class Volume extends Model {
     );
   }
 
-  // TODO Optimize this
-  getImageDimensions(dataset: Dataset, camera: Camera): {
-    fieldOfView: number; height: number; heightRatio: number; width: number; widthRatio: number;
-  } {
-    // Compute volume limits in computer service
-    const basis = camera.getWorldBasis();
-    const halfSpacing = V(this.voxelSpacing).mul(0.5);
-    const halfHorizontalSpacing = Math.abs(halfSpacing.dot(basis[0]));
-    const halfVerticalSpacing = Math.abs(halfSpacing.dot(basis[1]));
+  /**
+   * @param plane 3 points representing the plane.
+   */
+  getIntersections(plane: number[][]): number[][] {
+    const lines = [
+      ['x0y0z0', 'x1y0z0'], ['x1y0z0', 'x1y1z0'], ['x1y1z0', 'x0y1z0'], ['x0y1z0', 'x0y0z0'],
+      ['x0y0z1', 'x1y0z1'], ['x1y0z1', 'x1y1z1'], ['x1y1z1', 'x0y1z1'], ['x0y1z1', 'x0y0z1'],
+      ['x0y0z0', 'x0y0z1'], ['x1y0z0', 'x1y0z1'], ['x1y1z0', 'x1y1z1'], ['x0y1z0', 'x0y1z1'],
+    ];
+    const planeNormal = V(plane[1]).sub(plane[0]).cross(V(plane[2]).sub(plane[0]));
+    const intersections: number[][] = [];
 
-    let minHorizontal = Number.MAX_SAFE_INTEGER;
-    let maxHorizontal = -Number.MAX_SAFE_INTEGER;
-    let maxVertical = -Number.MAX_SAFE_INTEGER;
-    let minVertical = Number.MAX_SAFE_INTEGER;
-    let maxHorizontalMm = -Number.MAX_SAFE_INTEGER;
-    let minHorizontalMm = Number.MAX_SAFE_INTEGER;
-    let maxVerticalMm = -Number.MAX_SAFE_INTEGER;
-    let minVerticalMm = Number.MAX_SAFE_INTEGER;
+    for (const [keyA, keyB] of lines) {
+      const a = this.corners[keyA];
+      const b = this.corners[keyB];
+      const viewportToADistance = V(a).sub(plane[0]).dot(planeNormal);
+      const viewportToBDistance = V(b).sub(plane[0]).dot(planeNormal);
+      const crossesViewport = Math.sign(viewportToADistance) !== Math.sign(viewportToBDistance);
 
-    Object.values(this.corners)
-      .forEach(corner => {
-        const left = V(corner).dot(basis[0]) / Math.abs(V(this.voxelSpacing).dot(basis[0]));
-        const top = V(corner).dot(basis[1]) / Math.abs(V(this.voxelSpacing).dot(basis[1]));
-        const cornerCamera = convert(corner, dataset, camera, dataset) as number[];
-        const leftMm = cornerCamera[0];
-        const topMm = cornerCamera[1];
-
-        if (left < minHorizontal) {
-          minHorizontal = left - 0.5;
-        }
-        if (left > maxHorizontal) {
-          maxHorizontal = left + 0.5;
-        }
-        if (top < minVertical) {
-          minVertical = top - 0.5;
-        }
-        if (top > maxVertical) {
-          maxVertical = top + 0.5;
-        }
-        if (leftMm < minHorizontalMm) {
-          minHorizontalMm = leftMm - halfHorizontalSpacing;
-        }
-        if (leftMm > maxHorizontalMm) {
-          maxHorizontalMm = leftMm + halfHorizontalSpacing;
-        }
-        if (topMm < minVerticalMm) {
-          minVerticalMm = topMm - halfVerticalSpacing;
-        }
-        if (topMm > maxVerticalMm) {
-          maxVerticalMm = topMm + halfVerticalSpacing;
-        }
-      });
-
-    const width = Math.round(maxHorizontal - minHorizontal);
-    const height = Math.round(maxVertical - minVertical);
-    const widthMm = Math.round(maxHorizontalMm - minHorizontalMm);
-    const heightMm = Math.round(maxVerticalMm - minVerticalMm);
-
-    // Height is the reference
-    const widthRatio = 1 / ((width / height) * (heightMm / widthMm));
-    const heightRatio = 1;
-    const fieldOfView = heightMm;
-
-    return { fieldOfView, height, heightRatio, width, widthRatio };
+      if (crossesViewport) {
+        intersections.push(getLinePlaneIntersection([a, b], plane));
+      }
+    }
+    return intersections;
   }
 }

@@ -287,11 +287,8 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
         try {
           const viewport = this.viewport;
           const renderer = this.renderer;
-          const { camera, deltaX, deltaY, windowCenter, windowWidth } = viewport;
 
-          const doIt = () => {
-            renderer.render(viewport.dataset, { deltaX, deltaY, camera, windowCenter, windowWidth });
-          };
+          const doIt = () => renderer.render(viewport);
 
           if (renderer instanceof JsVolumeRenderer) {
             displayCube(viewport, this.canvas as HTMLCanvasElement, doIt);

@@ -1,7 +1,6 @@
 import { V } from '../../math';
-import { Dataset, Volume } from '../../models';
+import { Dataset, Viewport, Volume } from '../../models';
 import { Renderer } from '../renderer';
-import { RenderingParameters } from '../rendering-parameters';
 import { BoundedViewportSpaceCoordinates, ImageSpaceCoordinates, RenderingProperties } from '../rendering-properties';
 import { getRenderingProperties } from '../rendering-utils';
 
@@ -23,44 +22,27 @@ export class JsVolumeRenderer implements Renderer {
     this.renderingContext = renderingContext;
   }
 
-  render(dataset: Dataset, renderingParameters: RenderingParameters): void {
+  render(viewport: Viewport): void {
+    const { dataset, windowWidth } = viewport;
 
     if (dataset.volume === undefined) {
       throw new Error('Volume undefined');
     }
 
-    const { width, height } = this.canvas;
-    const { camera } = renderingParameters;
+    const renderingProperties = getRenderingProperties(viewport);
 
-    // this.context.fillStyle = 'black';
-    // this.context.fillRect(0, 0, width, height);
-
-    const imageDimensions = dataset.volume.getImageDimensions(dataset, camera);
-    const zoom = height / imageDimensions.height * imageDimensions.fieldOfView / camera.fieldOfView;
-    const renderingProperties = getRenderingProperties(
-      renderingParameters, zoom, imageDimensions.width, imageDimensions.widthRatio, imageDimensions.heightRatio,
-      imageDimensions.height, width, height,
-    );
-
-    if (!renderingProperties.isImageInViewport) {
+    if (renderingProperties === undefined) {
       return;
     }
-
-    const { windowWidth } = renderingParameters;
 
     if (this.lut === undefined || this.lut.windowWidth !== windowWidth) {
       this.lut = this.getVOILut(windowWidth);
     }
 
-    if (zoom < 1) {
-      this.renderViewportPixels(
-        dataset, renderingParameters, renderingProperties, zoom, imageDimensions.width, imageDimensions.height,
-        imageDimensions.widthRatio, imageDimensions.heightRatio,
-      );
+    if (renderingProperties.zoom < 1) {
+      this.renderViewportPixels(viewport, renderingProperties);
     } else {
-      this.renderImagePixels(
-        dataset, renderingParameters, renderingProperties, imageDimensions.width, imageDimensions.height,
-      );
+      this.renderImagePixels(viewport, renderingProperties);
     }
   }
 
@@ -119,11 +101,10 @@ export class JsVolumeRenderer implements Renderer {
       : -Number.MAX_SAFE_INTEGER;
   }
 
-  private renderImagePixels(dataset: Dataset, renderingParameters: RenderingParameters,
-                            renderingProperties: RenderingProperties, sliceWidth: number, sliceHeight: number): void {
+  private renderImagePixels(viewport: Viewport, renderingProperties: RenderingProperties): void {
 
-    const { camera } = renderingParameters;
-    const { boundedViewportSpace, leftLimit, rightLimit, imageSpace } = renderingProperties;
+    const { camera, dataset } = viewport;
+    const { boundedViewportSpace, imageLookPoint, leftLimit, rightLimit, imageSpace } = renderingProperties;
     const { imageX0, imageY0, imageWidth, imageHeight } = boundedViewportSpace as BoundedViewportSpaceCoordinates;
     const {
       displayHeight, displayWidth, displayX0, displayX1, displayY0, displayY1,
@@ -139,9 +120,9 @@ export class JsVolumeRenderer implements Renderer {
     const voxelSpacing = (dataset.volume as Volume).voxelSpacing;
     const right = V(cameraBasis[0]).mul(Math.abs(V(voxelSpacing).dot(cameraBasis[0])));
     const up = V(cameraBasis[1]).mul(Math.abs(V(voxelSpacing).dot(cameraBasis[1])));
-    const pointBaseLPS = V(camera.lookPoint)
-      .add(right.clone().mul(-(sliceWidth - 1) / 2))
-      .add(up.clone().mul(-(sliceHeight - 1) / 2));
+    const pointBaseLPS = V(imageLookPoint as number[])
+      .add(right.clone().mul(-(displayWidth - 1) / 2))
+      .add(up.clone().mul(-(displayHeight - 1) / 2));
 
     for (let y = displayY0; y <= displayY1; y++) {
       for (let x = displayX0; x <= displayX1; x++) {
@@ -151,15 +132,18 @@ export class JsVolumeRenderer implements Renderer {
           pointBaseLPS[2] + right[2] * x + up[2] * y,
         ];
         const rawValue = this.getPixelValue(dataset, pointLPS);
-        let intensity = 0;
+        let intensity = 255;
 
-        if (rawValue >= rightLimit) {
-          intensity = 255;
-        } else if (rawValue > leftLimit) {
+        if (rawValue < leftLimit) {
+          intensity = 5;
+        } else if (rawValue < rightLimit) {
           intensity = table[rawValue - leftLimit];
         }
 
-        imageData32[dataIndex++] = intensity | intensity << 8 | intensity << 16 | (intensity === 0 ? 0 : 255) << 24;
+        imageData32[dataIndex++] = intensity |
+          intensity << 8 |
+          intensity << 16 |
+          (rawValue < -(Number.MAX_SAFE_INTEGER - 1) ? 0 : 255) << 24;
       }
     }
 
@@ -172,15 +156,17 @@ export class JsVolumeRenderer implements Renderer {
     this.context.drawImage(this.renderingContext.canvas, imageX0, imageY0, imageWidth, imageHeight);
   }
 
-  private renderViewportPixels(dataset: Dataset, renderingParameters: RenderingParameters,
-                               renderingProperties: RenderingProperties, zoom: number, sliceWidth: number,
-                               sliceHeight: number, widthCorrectionRatio: number, heightCorrectionRatio: number): void {
+  private renderViewportPixels(viewport: Viewport, renderingProperties: RenderingProperties): void {
 
-    const { camera } = renderingParameters;
-    const { boundedViewportSpace, leftLimit, rightLimit, viewportSpace } = renderingProperties;
+    const { camera, dataset } = viewport;
+    const {
+      boundedViewportSpace, imageLookPoint, imageSpace, leftLimit, rightLimit, viewportSpace, widthCorrectionRatio,
+      zoom,
+    } = renderingProperties;
     const {
       imageHeight, imageWidth, imageX0, imageX1, imageY0, imageY1,
     } = boundedViewportSpace as BoundedViewportSpaceCoordinates;
+    const { displayWidth, displayHeight } = imageSpace as ImageSpaceCoordinates;
 
     const viewportSpaceImageX0 = viewportSpace.imageX0;
     const viewportSpaceImageY0 = viewportSpace.imageY0;
@@ -194,14 +180,14 @@ export class JsVolumeRenderer implements Renderer {
     const voxelSpacing = (dataset.volume as Volume).voxelSpacing;
     const right = V(cameraBasis[0]).mul(Math.abs(V(voxelSpacing).dot(cameraBasis[0])));
     const up = V(cameraBasis[1]).mul(Math.abs(V(voxelSpacing).dot(cameraBasis[1])));
-    const pointBaseLPS = V(camera.lookPoint)
-      .add(right.clone().mul(-(sliceWidth - 1) / 2))
-      .add(up.clone().mul(-(sliceHeight - 1) / 2));
+    const pointBaseLPS = V(imageLookPoint as number[])
+      .add(right.clone().mul(-(displayWidth - 1) / 2))
+      .add(up.clone().mul(-(displayHeight - 1) / 2));
 
     for (let y = imageY0; y <= imageY1; y++) {
       for (let x = imageX0; x <= imageX1; x++) {
         const pixX = (x - viewportSpaceImageX0) / zoom / widthCorrectionRatio | 0;
-        const pixY = (y - viewportSpaceImageY0) / zoom / heightCorrectionRatio | 0;
+        const pixY = (y - viewportSpaceImageY0) / zoom | 0;
         const pointLPS = [
           pointBaseLPS[0] + right[0] * pixX + up[0] * pixY,
           pointBaseLPS[1] + right[1] * pixX + up[1] * pixY,
@@ -211,12 +197,15 @@ export class JsVolumeRenderer implements Renderer {
         let intensity = 255;
 
         if (rawValue < leftLimit) {
-          intensity = 0;
+          intensity = 5;
         } else if (rawValue < rightLimit) {
           intensity = table[rawValue - leftLimit];
         }
 
-        imageData32[dataIndex++] = intensity | intensity << 8 | intensity << 16 | (intensity === 0 ? 0 : 255) << 24;
+        imageData32[dataIndex++] = intensity |
+          intensity << 8 |
+          intensity << 16 |
+          (rawValue < -(Number.MAX_SAFE_INTEGER - 1) ? 0 : 255) << 24;
       }
     }
 
