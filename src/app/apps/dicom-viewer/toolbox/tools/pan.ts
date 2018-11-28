@@ -12,7 +12,7 @@ export function startPan(viewport: Viewport, downEvent: MouseEvent): ToolMoveLis
   const startLookPoint = camera.lookPoint;
 
   return (moveEvent: MouseEvent) => {
-    const baseCenter = dataset.is3D ? (dataset.volume as Volume).getCenter() : dataset.frames[0].imageCenter;
+    const baseCenter = dataset.is3D ? (dataset.volume as Volume).center : dataset.frames[0].imageCenter;
     const baseCenterViewport = [...Coordinates.convert(baseCenter, dataset, viewport).slice(0, 2), 0];
     const startLookPointViewport = Coordinates.convert(startLookPoint, dataset, viewport);
 
@@ -34,7 +34,7 @@ export function isCentered(viewport: Viewport, baseCenterViewport?: number[], lo
   const { camera, dataset } = viewport;
 
   if (baseCenterViewport === undefined) {
-    const baseCenter = dataset.is3D ? (dataset.volume as Volume).getCenter() : dataset.frames[0].imageCenter;
+    const baseCenter = dataset.is3D ? (dataset.volume as Volume).center : dataset.frames[0].imageCenter;
     baseCenterViewport = Coordinates.convert(baseCenter, dataset, viewport);
   }
 

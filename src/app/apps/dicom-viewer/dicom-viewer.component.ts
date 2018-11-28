@@ -171,10 +171,6 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       throw new Error('Viewport undefined');
     }
 
-    if (viewType !== ViewType.Native && !this.viewport.dataset.is3D) {
-      throw new Error(`Unable to switch to view type ${viewType} on a 2D dataset`);
-    }
-
     const { frames, volume } = this.viewport.dataset;
     const frame = frames[Math.floor(frames.length / 2)];
 

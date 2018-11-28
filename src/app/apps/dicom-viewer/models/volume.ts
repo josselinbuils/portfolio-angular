@@ -3,12 +3,13 @@ import { getLinePlaneIntersection, V } from '../math';
 import { Model } from './model';
 
 const MANDATORY_FIELDS = [
-  'corners', 'dimensionsMm', 'dimensionsVoxels', 'displayRatio', 'firstVoxelCenter', 'orientation',
+  'center', 'corners', 'dimensionsMm', 'dimensionsVoxels', 'displayRatio', 'firstVoxelCenter', 'orientation',
   'orientedDimensionsMm', 'orientedDimensionsVoxels', 'voxelSpacing',
 ];
 
 // All vectors are in LPS space
 export class Volume extends Model {
+  center!: number[];
   corners!: {
     x0y0z0: number[];
     x1y0z0: number[];
@@ -38,14 +39,6 @@ export class Volume extends Model {
     super();
     super.fillProperties(config);
     super.checkMandatoryFieldsPresence(MANDATORY_FIELDS);
-  }
-
-  getCenter(): number[] {
-    return V(this.firstVoxelCenter)
-      .add(V(this.orientedDimensionsMm[0]).mul(0.5))
-      .add(V(this.orientedDimensionsMm[1]).mul(0.5))
-      .add(V(this.orientedDimensionsMm[2]).mul(0.5))
-      .sub(V(this.voxelSpacing).mul(0.5));
   }
 
   getOrientedDimensionMm(axe: number[]): number {

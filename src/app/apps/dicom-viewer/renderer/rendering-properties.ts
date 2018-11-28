@@ -4,7 +4,6 @@ export interface RenderingProperties {
   leftLimit: number;
   rightLimit: number;
   viewportSpace: ViewportSpaceCoordinates;
-  zoom: number;
 }
 
 /**

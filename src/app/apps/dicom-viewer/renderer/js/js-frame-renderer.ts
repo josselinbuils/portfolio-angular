@@ -33,7 +33,6 @@ export class JsFrameRenderer implements Renderer {
     this.context.fillStyle = 'black';
     this.context.fillRect(0, 0, width, height);
 
-    const zoom = height / frame.rows * camera.baseFieldOfView / camera.fieldOfView;
     const renderingProperties = getRenderingProperties(viewport);
 
     if (renderingProperties === undefined) {
@@ -48,8 +47,12 @@ export class JsFrameRenderer implements Renderer {
           this.lut = getVOILut(windowWidth);
         }
 
-        if (zoom < 1) {
-          this.renderViewportPixels(frame, renderingProperties, zoom);
+        const { boundedViewportSpace, imageSpace } = renderingProperties;
+        const imagePixelsToRender = imageSpace.displayWidth * imageSpace.displayHeight;
+        const viewportPixelsToRender = boundedViewportSpace.imageWidth * boundedViewportSpace.imageHeight;
+
+        if (viewportPixelsToRender < imagePixelsToRender) {
+          this.renderViewportPixels(frame, renderingProperties, viewport.getImageZoom());
         } else {
           this.renderImagePixels(frame, renderingProperties);
         }

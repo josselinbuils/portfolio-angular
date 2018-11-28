@@ -55,7 +55,7 @@ export class Camera extends Renderable implements CoordinateSpace {
 
     const baseFieldOfView = volume.getOrientedDimensionMm(upVector);
     const fieldOfView = baseFieldOfView;
-    const lookPoint = volume.getCenter();
+    const lookPoint = volume.center;
     const eyePoint = V(lookPoint).sub(direction);
 
     return new Camera({ baseFieldOfView, eyePoint, fieldOfView, lookPoint, upVector });

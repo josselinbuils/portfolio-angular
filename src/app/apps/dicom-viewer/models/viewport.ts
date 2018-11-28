@@ -21,6 +21,7 @@ export class Viewport extends Renderable implements CoordinateSpace {
   windowWidth = 400;
 
   private basis?: number[][];
+  private imageZoom?: number;
   private origin?: number[];
 
   constructor(config: object) {
@@ -32,6 +33,7 @@ export class Viewport extends Renderable implements CoordinateSpace {
     this.onUpdate.subscribe(() => {
       delete this.basis;
       delete this.origin;
+      delete this.imageZoom;
     });
   }
 
@@ -54,11 +56,14 @@ export class Viewport extends Renderable implements CoordinateSpace {
   }
 
   getImageZoom(): number {
-    const sliceHeight = this.dataset.is3D
-      ? Math.abs(V((this.dataset.volume as Volume).dimensionsVoxels).dot(this.camera.upVector))
-      : this.dataset.findClosestFrame(this.camera.lookPoint).rows;
+    if (this.imageZoom === undefined) {
+      const sliceHeight = this.viewType === ViewType.Native
+        ? this.dataset.findClosestFrame(this.camera.lookPoint).rows
+        : Math.abs(V((this.dataset.volume as Volume).dimensionsVoxels).dot(this.camera.upVector));
 
-    return this.height / sliceHeight * this.camera.baseFieldOfView / this.camera.fieldOfView;
+      this.imageZoom = this.height / sliceHeight * this.camera.baseFieldOfView / this.camera.fieldOfView;
+    }
+    return this.imageZoom;
   }
 
   getWorldOrigin(): number[] {

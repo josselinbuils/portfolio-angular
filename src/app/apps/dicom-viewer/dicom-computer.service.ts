@@ -98,9 +98,15 @@ export class DicomComputerService {
       x0y1z1: getCorner(0, 1, 1),
     };
 
+   const center = V(firstVoxelCenter)
+      .add(V(orientedDimensionsMm[0]).mul(0.5))
+      .add(V(orientedDimensionsMm[1]).mul(0.5))
+      .add(V(orientedDimensionsMm[2]).mul(0.5))
+      .sub(V(voxelSpacing).mul(0.5));
+
     return new Volume({
-      dimensionsMm, dimensionsVoxels, displayRatio, corners, firstVoxelCenter, orientation, orientedDimensionsMm,
-      orientedDimensionsVoxels, pixelData, voxelSpacing,
+      center, dimensionsMm, dimensionsVoxels, displayRatio, corners, firstVoxelCenter, orientation,
+      orientedDimensionsMm, orientedDimensionsVoxels, pixelData, voxelSpacing,
     });
   }
 

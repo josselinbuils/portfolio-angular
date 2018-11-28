@@ -161,7 +161,7 @@ export class JsVolumeRenderer implements Renderer {
   private renderViewportPixels(viewport: Viewport, renderingProperties: RenderingProperties): void {
 
     const { dataset } = viewport;
-    const { boundedViewportSpace, imageSpace, leftLimit, rightLimit, viewportSpace, zoom } = renderingProperties;
+    const { boundedViewportSpace, imageSpace, leftLimit, rightLimit, viewportSpace } = renderingProperties;
     const {
       imageHeight, imageWidth, imageX0, imageX1, imageY0, imageY1,
     } = boundedViewportSpace as BoundedViewportSpaceCoordinates;
@@ -180,8 +180,8 @@ export class JsVolumeRenderer implements Renderer {
 
     for (let y = imageY0; y <= imageY1; y++) {
       for (let x = imageX0; x <= imageX1; x++) {
-        const pixX = (x - viewportSpaceImageX0) / zoom | 0;
-        const pixY = (y - viewportSpaceImageY0) / zoom | 0;
+        const pixX = x - viewportSpaceImageX0;
+        const pixY = y - viewportSpaceImageY0;
         const pointLPS = [
           imageWorldOrigin[0] + xAxis[0] * pixX + yAxis[0] * pixY,
           imageWorldOrigin[1] + xAxis[1] * pixX + yAxis[1] * pixY,
