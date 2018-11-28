@@ -232,15 +232,6 @@ function getImageDimensions(viewport: Viewport): {
   ];
   const imageLookPoint = convert(imageLookPointViewport, viewport, dataset, dataset);
 
-  // V(viewport.getWorldOrigin())
-  // .add(V(viewportBasis[0]).mul(imageLookPointViewport[0]))
-  // .add(V(viewportBasis[1]).mul(imageLookPointViewport[1]));
-
-  console.log('viewportSpaceImageX0', viewportSpaceImageX0, width);
-
-  console.log('imageLookPointViewport', imageLookPointViewport, 'lookPoint', viewport.camera.lookPoint,
-    'imageLookPoint', imageLookPoint);
-
   // Height is the reference
   const widthRatio = 1 / ((width / height) * (heightMm / widthMm));
   const fieldOfView = heightMm;
