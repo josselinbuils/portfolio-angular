@@ -56,7 +56,7 @@ export class JsVolumeRenderer implements Renderer {
       : () => this.renderImagePixels(viewport, renderingProperties);
 
     if (viewport.viewType === ViewType.Oblique) {
-      this.background = 5;
+      this.background = 10;
       displayCube(viewport, this.canvas, renderPixels);
     } else {
       this.background = 0;
