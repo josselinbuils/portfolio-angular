@@ -63,13 +63,6 @@ export class DicomComputerService {
     const dimensionsVoxels = [columns, rows, frames.length];
     const firstVoxelCenter = frames[0].imagePosition;
     const orientation = [...imageOrientation, imageNormal];
-
-    const pixelData: Int16Array[] = [];
-
-    frames.forEach(frame => {
-      pixelData.push(frame.pixelData as Int16Array);
-    });
-
     const displayRatio = voxelSpacing.map(v => v / voxelSpacing[1]);
     const dimensionsMm = dimensionsVoxels.map((dim, i) => dim * voxelSpacing[i]);
     const orientedDimensionsMm = orientation.map((orient, index) => V(orient).mul(dimensionsMm[index]));
@@ -106,7 +99,7 @@ export class DicomComputerService {
 
     return new Volume({
       center, dimensionsMm, dimensionsVoxels, displayRatio, corners, firstVoxelCenter, orientation,
-      orientedDimensionsMm, orientedDimensionsVoxels, pixelData, voxelSpacing,
+      orientedDimensionsMm, orientedDimensionsVoxels, voxelSpacing,
     });
   }
 
