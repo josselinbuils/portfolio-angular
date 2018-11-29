@@ -1,3 +1,4 @@
+import { ViewType } from '../../constants';
 import { V } from '../../math';
 import { Dataset, Viewport, Volume } from '../../models';
 import { Coordinates } from '../../utils/coordinates';
@@ -7,10 +8,12 @@ import {
 } from '../rendering-properties';
 import { getRenderingProperties } from '../rendering-utils';
 
+import { displayCube } from './cube';
 import { drawImageData, getVOILut, VOILut } from './js-common';
 
 export class JsVolumeRenderer implements Renderer {
 
+  private background = 0;
   private readonly context: CanvasRenderingContext2D;
   private lut?: { table: number[]; windowWidth: number };
   private readonly renderingContext: CanvasRenderingContext2D;
@@ -48,10 +51,18 @@ export class JsVolumeRenderer implements Renderer {
     const imagePixelsToRender = imageSpace.displayWidth * imageSpace.displayHeight;
     const viewportPixelsToRender = boundedViewportSpace.imageWidth * boundedViewportSpace.imageHeight;
 
-    if (viewportPixelsToRender < imagePixelsToRender) {
-      this.renderViewportPixels(viewport, renderingProperties);
+    const renderPixels = viewportPixelsToRender < imagePixelsToRender
+      ? () => this.renderViewportPixels(viewport, renderingProperties)
+      : () => this.renderImagePixels(viewport, renderingProperties);
+
+    if (viewport.viewType === ViewType.Oblique) {
+      this.background = 5;
+      displayCube(viewport, this.canvas, renderPixels);
     } else {
-      this.renderImagePixels(viewport, renderingProperties);
+      this.background = 0;
+      this.context.fillStyle = 'black';
+      this.context.fillRect(0, 0, viewport.width, viewport.height);
+      renderPixels();
     }
   }
 
@@ -76,7 +87,7 @@ export class JsVolumeRenderer implements Renderer {
     let intensity = 250;
 
     if (rawValue < leftLimit) {
-      intensity = 10;
+      intensity = this.background;
     } else if (rawValue < rightLimit) {
       intensity = (this.lut as VOILut).table[rawValue - leftLimit];
     }

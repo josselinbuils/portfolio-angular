@@ -12,7 +12,6 @@ import { JsFrameRenderer } from './renderer/js/js-frame-renderer';
 import { JsVolumeRenderer } from './renderer/js/js-volume-renderer';
 import { Renderer } from './renderer/renderer';
 import { WebglRenderer } from './renderer/webgl/webgl-renderer';
-import { displayCube } from './toolbox/cube';
 import { Toolbox } from './toolbox/toolbox';
 
 const ANNOTATIONS_REFRESH_DELAY = 500;
@@ -271,7 +270,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
   private startRender(): void {
     const render = () => {
 
-      if (this.renderer === undefined || this.viewport === undefined) {
+      if (this.canvas === undefined || this.renderer === undefined || this.viewport === undefined) {
         return;
       }
 
@@ -279,22 +278,11 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
         const t = performance.now();
 
         try {
-          const viewport = this.viewport;
-          const renderer = this.renderer;
-
-          const doIt = () => renderer.render(viewport);
-
-          if (renderer instanceof JsVolumeRenderer) {
-            displayCube(viewport, this.canvas as HTMLCanvasElement, doIt);
-          } else {
-            doIt();
-          }
-
+          this.renderer.render(this.viewport);
           this.viewport.makeClean();
           this.renderDurations.push(performance.now() - t);
           this.frameDurations.push(t - this.lastTime);
           this.lastTime = t;
-
         } catch (error) {
           error.message = `Unable to render viewport: ${error.message}`;
           throw this.handleError(error);

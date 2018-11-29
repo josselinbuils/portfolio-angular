@@ -1,7 +1,6 @@
 import { ViewType } from '../../constants';
-import { V } from '../../math';
+import { M3, V } from '../../math';
 import { Camera, Viewport, Volume } from '../../models';
-import { math } from '../../utils/math';
 import { ToolMoveListener } from '../toolbox';
 
 export function startRotate(viewport: Viewport, downEvent: MouseEvent,
@@ -59,11 +58,10 @@ function computeTrackball(center: number[], radius: number, cursorPosition: numb
 }
 
 function rotateCamera(camera: Camera, axis: number[], angle: number): void {
-  const newCameraBasis = math.chain(camera.getWorldBasis())
+  const newCameraBasis = M3(camera.getWorldBasis())
     .transpose()
-    .multiply(computeRotationMatrix(axis, angle))
-    .transpose()
-    .done();
+    .mulMat(computeRotationMatrix(axis, angle))
+    .transpose();
 
   camera.eyePoint = V(camera.lookPoint).sub(V(newCameraBasis[2]).normalize());
   camera.upVector = V(newCameraBasis[1]).neg().normalize();

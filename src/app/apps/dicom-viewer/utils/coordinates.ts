@@ -1,15 +1,16 @@
-import { CoordinateSpace } from '../models';
+import * as math from 'mathjs';
 
-import { math } from './math';
+import { M3, M4, V } from '../math';
+import { CoordinateSpace } from '../models';
 
 export class Coordinates {
   private static cache: { [key: string]: { from: number[][]; to: number[][] } } = {};
 
   static convert(point: number[], originalSpace: CoordinateSpace, finalSpace: CoordinateSpace): number[] {
     const originalSpaceToWorldMatrix = this.getWorldTransformationMatrix(originalSpace).to;
-    const worldPoint = math.multiply(originalSpaceToWorldMatrix, [...point, 1]) as number[];
+    const worldPoint = M4(originalSpaceToWorldMatrix).mulVec([...point, 1]);
     const worldToFinalSpaceMatrix = this.getWorldTransformationMatrix(finalSpace).from;
-    return (math.multiply(worldToFinalSpaceMatrix, worldPoint) as number[]).slice(0, 3);
+    return (M4(worldToFinalSpaceMatrix).mulVec(worldPoint)).slice(0, 3);
   }
 
   private static getWorldTransformationMatrix(space: CoordinateSpace): { from: number[][]; to: number[][] } {
@@ -19,7 +20,7 @@ export class Coordinates {
 
     if (this.cache[cacheKey] === undefined) {
       // Translation
-      const translationVector = math.chain(basis).multiply(origin).multiply(-1).done();
+      const translationVector = V(M3(basis).mulVec(origin)).neg();
 
       const from = [
         [...basis[0], translationVector[0]],
