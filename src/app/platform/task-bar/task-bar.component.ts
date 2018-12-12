@@ -1,5 +1,6 @@
 import { Component, Type, ViewContainerRef } from '@angular/core';
 
+import { DicomViewerComponent } from 'app/apps/dicom-viewer/dicom-viewer.component';
 import { Mp3PlayerComponent } from 'app/apps/mp3-player/mp3-player.component';
 import { NotesComponent } from 'app/apps/notes/notes.component';
 import { RedditComponent } from 'app/apps/reddit/reddit.component';
@@ -22,8 +23,8 @@ import { Task } from './task';
 export class TaskBarComponent {
 
   tasks: Task[] = [
-    new Task(TerminalComponent, true), new Task(Mp3PlayerComponent, true), new Task(TeraviaComponent, true),
-    new Task(RedditComponent, true), new Task(NotesComponent, true),
+    new Task(TerminalComponent, true), new Task(DicomViewerComponent, true), new Task(Mp3PlayerComponent, true),
+    new Task(TeraviaComponent, true), new Task(RedditComponent, true), new Task(NotesComponent, true),
   ];
 
   constructor(private readonly contextMenuService: ContextMenuService,
