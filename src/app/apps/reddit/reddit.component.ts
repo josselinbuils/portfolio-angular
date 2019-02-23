@@ -1,12 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { get } from 'lodash';
-import * as moment from 'moment';
-import { first } from 'rxjs/operators';
-
 import { HTTP_PREFIX } from 'app/env';
 import { WindowInstance } from 'app/platform/window/window-instance';
 import { WindowComponent } from 'app/platform/window/window.component';
+import { get } from 'lodash';
+import * as moment from 'moment';
+import { first } from 'rxjs/operators';
 
 @Component({
   selector: 'app-reddit',

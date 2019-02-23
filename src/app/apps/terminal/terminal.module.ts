@@ -1,7 +1,6 @@
 import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-
 import { WindowModule } from 'app/platform/window/window.module';
 
 import { AboutComponent } from './executors/about/about.component';

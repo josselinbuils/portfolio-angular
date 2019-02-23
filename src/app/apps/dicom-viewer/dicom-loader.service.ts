@@ -1,9 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { DEV_SERVER_URL } from 'app/constants';
 import untar from 'js-untar';
 import { cloneDeep } from 'lodash';
-
-import { DEV_SERVER_URL } from 'app/constants';
 
 import { DatasetDescriptor } from './config/dataset-descriptor';
 import { DATASETS_PATH, PhotometricInterpretation } from './constants';

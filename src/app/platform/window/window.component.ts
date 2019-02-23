@@ -2,7 +2,6 @@ import {
   AfterContentInit, Component, ComponentRef, ElementRef, EventEmitter, HostListener, Input, Output, Renderer2,
   ViewChild,
 } from '@angular/core';
-
 import { MouseButton } from 'app/constants';
 
 import { DeviceManagerService } from '../device-manager.service';

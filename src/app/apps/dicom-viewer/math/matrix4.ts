@@ -1,4 +1,4 @@
-import { M3 } from 'app/apps/dicom-viewer/math/matrix3';
+import { M3 } from './matrix3';
 
 export function M4(...args: number[][][]): Matrix4 {
   return new Matrix4(...args);

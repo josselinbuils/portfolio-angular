@@ -1,5 +1,4 @@
 import { Component, ViewChild } from '@angular/core';
-
 import { WindowInstance } from 'app/platform/window/window-instance';
 import { WindowComponent } from 'app/platform/window/window.component';
 

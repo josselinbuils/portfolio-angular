@@ -1,5 +1,4 @@
 import { Component, Type, ViewContainerRef } from '@angular/core';
-
 import { DicomViewerComponent } from 'app/apps/dicom-viewer/dicom-viewer.component';
 import { Mp3PlayerComponent } from 'app/apps/mp3-player/mp3-player.component';
 import { NotesComponent } from 'app/apps/notes/notes.component';

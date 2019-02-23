@@ -1,5 +1,4 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-
 import { MouseButton } from 'app/constants';
 
 import { MouseTool, ViewType } from '../constants';

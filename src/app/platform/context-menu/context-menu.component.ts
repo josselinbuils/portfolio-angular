@@ -1,5 +1,4 @@
 import { Component, Renderer2 } from '@angular/core';
-
 import { MouseButton } from 'app/constants';
 
 import { DOMUtils } from '../dom-utils';

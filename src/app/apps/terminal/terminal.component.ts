@@ -2,7 +2,6 @@ import {
   AfterContentInit, Component, ComponentFactoryResolver, ComponentRef, ElementRef, HostListener, OnInit, Type,
   ViewChild, ViewContainerRef,
 } from '@angular/core';
-
 import { WindowInstance } from 'app/platform/window/window-instance';
 import { WindowComponent } from 'app/platform/window/window.component';
 

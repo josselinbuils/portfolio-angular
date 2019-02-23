@@ -1,11 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { AfterContentInit, Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
-import * as moment from 'moment';
-import { first } from 'rxjs/operators';
-
 import { HTTP_PREFIX } from 'app/env';
 import { WindowInstance } from 'app/platform/window/window-instance';
 import { WindowComponent } from 'app/platform/window/window.component';
+import * as moment from 'moment';
+import { first } from 'rxjs/operators';
 
 const size = {
   min: {
@@ -139,7 +138,7 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
 
     let lastCurrentTimeSeconds = 0;
 
-    this.currentTimeInterval = setInterval(() => {
+    this.currentTimeInterval = window.setInterval(() => {
       const currentTimeSeconds = Math.round(this.audioElement.currentTime);
 
       if (lastCurrentTimeSeconds !== currentTimeSeconds) {
