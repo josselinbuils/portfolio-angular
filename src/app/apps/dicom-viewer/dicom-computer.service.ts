@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { cloneDeep } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 
 import { NormalizedImageFormat, PhotometricInterpretation, PixelRepresentation } from './constants';
 import { V } from './math';

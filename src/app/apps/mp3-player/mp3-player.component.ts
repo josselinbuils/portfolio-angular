@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { AfterContentInit, Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { HTTP_PREFIX } from '@portfolio/env';
 import { WindowComponent, WindowInstance } from '@portfolio/platform/window';
-import * as moment from 'moment';
+import dayjs from 'dayjs';
 import { first } from 'rxjs/operators';
 
 const size = {
@@ -92,7 +92,7 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
       .toPromise() as Music[];
 
     this.musicList.forEach(music => {
-      music.readableDuration = moment.utc(music.duration * 1000).format('mm:ss');
+      music.readableDuration = dayjs(music.duration * 1000).format('mm:ss');
     });
   }
 
@@ -142,7 +142,7 @@ export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, 
 
       if (lastCurrentTimeSeconds !== currentTimeSeconds) {
         const currentTimeElem = this.currentTimeElementRef.nativeElement;
-        currentTimeElem.innerText = moment.utc(currentTimeSeconds * 1000).format('mm:ss');
+        currentTimeElem.innerText = dayjs(currentTimeSeconds * 1000).format('mm:ss');
         lastCurrentTimeSeconds = currentTimeSeconds;
       }
     }, 100);

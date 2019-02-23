@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
-import * as moment from 'moment';
+import dayjs from 'dayjs';
 import { first } from 'rxjs/operators';
 
 const projects = [
@@ -37,7 +37,7 @@ export class ProjectsComponent implements OnInit {
           description: repos.description,
           language: repos.language,
           name: repos.name,
-          updated: moment(repos.pushed_at).fromNow(),
+          updated: dayjs(repos.pushed_at).fromNow(),
           url: repos.html_url,
         };
 

@@ -1,5 +1,3 @@
-import * as math from 'mathjs';
-
 import { M3, M4, V } from '../math';
 import { CoordinateSpace } from '../models';
 
@@ -28,7 +26,7 @@ export class Coordinates {
         [...basis[2], translationVector[2]],
         [0, 0, 0, 1],
       ];
-      const to = math.inv(from) as number[][];
+      const to = M4(from).inv();
 
       if (Object.values(this.cache).length > 10) {
         this.cache = {};

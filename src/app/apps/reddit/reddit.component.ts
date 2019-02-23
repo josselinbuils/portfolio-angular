@@ -2,8 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { HTTP_PREFIX } from '@portfolio/env';
 import { WindowComponent, WindowInstance } from '@portfolio/platform/window';
-import { get } from 'lodash';
-import * as moment from 'moment';
+import dayjs from 'dayjs';
+import get from 'lodash/get';
 import { first } from 'rxjs/operators';
 
 @Component({
@@ -35,7 +35,7 @@ export class RedditComponent implements OnInit, WindowInstance {
       .toPromise();
 
     this.data.forEach(link => {
-      link.since = moment(link.created_utc * 1000).fromNow();
+      link.since = dayjs(link.created_utc * 1000).fromNow();
       link.showSubreddit = path.indexOf('/r/') !== 0 || path.split('/')[2] === 'popular';
       link.previewUrl = get(link, 'preview.images[0].resolutions[1].url');
     });
