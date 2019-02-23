@@ -1,6 +1,6 @@
 import { Type } from '@angular/core';
 
-import { WindowInstance } from '../window/window-instance';
+import { WindowInstance } from '../window';
 
 export class Task {
   private static id = -1;

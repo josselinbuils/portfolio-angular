@@ -1,6 +1,6 @@
 import { Component, OnInit, Type } from '@angular/core';
-import { DicomViewerComponent } from 'app/apps/dicom-viewer/dicom-viewer.component';
-import { WindowManagerService } from 'app/platform/window/window-manager.service';
+import { DicomViewerComponent } from '@portfolio/apps/dicom-viewer';
+import { WindowManagerService } from '@portfolio/platform/window';
 
 import { Executor } from '../executor';
 

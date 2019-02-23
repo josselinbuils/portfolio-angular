@@ -4,17 +4,16 @@ import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AppComponent } from './app.component';
-import { DicomViewerModule } from './apps/dicom-viewer/dicom-viewer.module';
-import { Mp3PlayerComponent } from './apps/mp3-player/mp3-player.component';
-import { NotesComponent } from './apps/notes/notes.component';
-import { RedditComponent } from './apps/reddit/reddit.component';
-import { TeraviaComponent } from './apps/teravia/teravia.component';
-import { TerminalModule } from './apps/terminal/terminal.module';
-import { ContextMenuComponent } from './platform/context-menu/context-menu.component';
-import { ContextMenuService } from './platform/context-menu/context-menu.service';
+import { DicomViewerModule } from './apps/dicom-viewer';
+import { Mp3PlayerComponent } from './apps/mp3-player';
+import { NotesComponent } from './apps/notes';
+import { RedditComponent } from './apps/reddit';
+import { TeraviaComponent } from './apps/teravia';
+import { TerminalModule } from './apps/terminal';
+import { ContextMenuComponent, ContextMenuService } from './platform/context-menu';
 import { DeviceManagerService } from './platform/device-manager.service';
-import { TaskBarComponent } from './platform/task-bar/task-bar.component';
-import { WindowModule } from './platform/window/window.module';
+import { TaskBarComponent } from './platform/task-bar';
+import { WindowModule } from './platform/window';
 
 @NgModule({
   declarations: [

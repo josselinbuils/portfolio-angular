@@ -1,7 +1,6 @@
-import { DicomFrame } from 'app/apps/dicom-viewer/models/dicom-frame';
-
 import { NormalizedImageFormat, PhotometricInterpretation, PixelRepresentation } from '../constants';
 
+import { DicomFrame } from './dicom-frame';
 import { Model } from './model';
 
 const MANDATORY_FIELDS = [

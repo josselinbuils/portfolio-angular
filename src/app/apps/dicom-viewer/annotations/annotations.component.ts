@@ -1,6 +1,5 @@
 import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
-import { ContextMenuItem } from 'app/platform/context-menu/context-menu-item';
-import { ContextMenuService } from 'app/platform/context-menu/context-menu.service';
+import { ContextMenuItem, ContextMenuService } from '@portfolio/platform/context-menu';
 
 import { ViewType } from '../constants';
 import { Annotations } from '../models/annotations';

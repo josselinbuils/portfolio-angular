@@ -1,5 +1,5 @@
 import { Renderer2 } from '@angular/core';
-import { MouseButton } from 'app/constants';
+import { MouseButton } from '@portfolio/constants';
 
 import { MouseTool } from '../constants';
 import { Viewport } from '../models';

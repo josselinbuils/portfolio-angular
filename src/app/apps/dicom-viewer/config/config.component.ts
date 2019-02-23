@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import { DEV_SERVER_URL } from 'app/constants';
-import { HTTP_PREFIX } from 'app/env';
+import { DEV_SERVER_URL } from '@portfolio/constants';
+import { HTTP_PREFIX } from '@portfolio/env';
 
 import { PREVIEWS_PATH, RendererType } from '../constants';
 

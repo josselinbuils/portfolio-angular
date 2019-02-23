@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
-import { WindowModule } from 'app/platform/window/window.module';
+import { WindowModule } from '@portfolio/platform/window';
 
 import { AnnotationsComponent } from './annotations/annotations.component';
 import { ConfigComponent } from './config/config.component';

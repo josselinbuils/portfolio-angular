@@ -1,16 +1,14 @@
 import { Component, Type, ViewContainerRef } from '@angular/core';
-import { DicomViewerComponent } from 'app/apps/dicom-viewer/dicom-viewer.component';
-import { Mp3PlayerComponent } from 'app/apps/mp3-player/mp3-player.component';
-import { NotesComponent } from 'app/apps/notes/notes.component';
-import { RedditComponent } from 'app/apps/reddit/reddit.component';
-import { TeraviaComponent } from 'app/apps/teravia/teravia.component';
-import { TerminalComponent } from 'app/apps/terminal/terminal.component';
+import { DicomViewerComponent } from '@portfolio/apps/dicom-viewer';
+import { Mp3PlayerComponent } from '@portfolio/apps/mp3-player';
+import { NotesComponent } from '@portfolio/apps/notes';
+import { RedditComponent } from '@portfolio/apps/reddit';
+import { TeraviaComponent } from '@portfolio/apps/teravia';
+import { TerminalComponent } from '@portfolio/apps/terminal';
 
-import { ContextMenuItem } from '../context-menu/context-menu-item';
-import { ContextMenuService } from '../context-menu/context-menu.service';
+import { ContextMenuItem, ContextMenuService } from '../context-menu';
 import { DOMUtils } from '../dom-utils';
-import { WindowInstance } from '../window/window-instance';
-import { WindowManagerService } from '../window/window-manager.service';
+import { WindowInstance, WindowManagerService } from '../window';
 
 import { Task } from './task';
 

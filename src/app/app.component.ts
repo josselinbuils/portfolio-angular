@@ -2,10 +2,10 @@ import {
   AfterContentInit, Component, HostListener, Renderer2, ViewChild, ViewContainerRef,
 } from '@angular/core';
 
-import { TerminalComponent } from './apps/terminal/terminal.component';
+import { TerminalComponent } from './apps/terminal';
 import { MouseButton } from './constants';
 import { DeviceManagerService } from './platform/device-manager.service';
-import { WindowManagerService } from './platform/window/window-manager.service';
+import { WindowManagerService } from './platform/window';
 
 @Component({
   selector: 'app-root',

@@ -1,8 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { HTTP_PREFIX } from 'app/env';
-import { WindowInstance } from 'app/platform/window/window-instance';
-import { WindowComponent } from 'app/platform/window/window.component';
+import { HTTP_PREFIX } from '@portfolio/env';
+import { WindowComponent, WindowInstance } from '@portfolio/platform/window';
 import { get } from 'lodash';
 import * as moment from 'moment';
 import { first } from 'rxjs/operators';

@@ -1,7 +1,6 @@
 import { Component, ElementRef, OnDestroy, Renderer2, ViewChild } from '@angular/core';
-import { MouseButton } from 'app/constants';
-import { WindowInstance } from 'app/platform/window/window-instance';
-import { WindowComponent } from 'app/platform/window/window.component';
+import { MouseButton } from '@portfolio/constants';
+import { WindowComponent, WindowInstance } from '@portfolio/platform/window';
 
 import { Config } from './config/config';
 import { MouseTool, RendererType, ViewType } from './constants';
