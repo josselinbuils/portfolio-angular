@@ -103,17 +103,18 @@ export class Matrix4 extends Array<number[]> {
   }
 
   private getSubMatrix(matrix: number[][], index: number): number[][] {
-    const m: number[][] = [];
+    const m: number[][] = [[], [], []];
+    let mc = -1;
 
-    for (let r = 1; r < 4; r++) {
-      m.push([]);
-      for (let c = 0; c < 4; c++) {
-        if (c === index) {
-          continue;
-        }
-        m[m.length - 1].push(matrix[r][c]);
+    for (let c = 0; c < 4; c++) {
+      if (c !== index) {
+        mc++;
+        m[0][mc] = matrix[1][c];
+        m[1][mc] = matrix[2][c];
+        m[2][mc] = matrix[3][c];
       }
     }
+
     return m;
   }
 }
