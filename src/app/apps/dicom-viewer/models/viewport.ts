@@ -95,8 +95,7 @@ export class Viewport extends Renderable implements CoordinateSpace {
         this.annotations.zoom = this.getImageZoom();
       }
     } catch (error) {
-      error.message = `Unable to compute annotations: ${error.message}`;
-      throw error;
+      throw new Error(`Unable to compute annotations: ${error.stack}`);
     }
   }
 }

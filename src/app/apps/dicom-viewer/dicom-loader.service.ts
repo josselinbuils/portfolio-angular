@@ -104,8 +104,7 @@ export class DicomLoaderService {
         .toPromise();
 
     } catch (error) {
-      error.message = `Unable to retrieve DICOM file: ${error.message}`;
-      throw error;
+      throw new Error(`Unable to retrieve DICOM file: ${error.stack}`);
     }
   }
 
@@ -182,8 +181,7 @@ export class DicomLoaderService {
       return frames;
 
     } catch (error) {
-      error.message = `Unable to load DICOM instance: ${error.message || error}`;
-      throw error;
+      throw new Error(`Unable to load DICOM instance: ${error.stack}`);
     }
   }
 

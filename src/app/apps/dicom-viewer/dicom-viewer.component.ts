@@ -261,8 +261,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
           });
       }
     } catch (error) {
-      error.message = `Unable to instantiate ${config.rendererType} renderer: ${error.message}`;
-      throw this.handleError(error);
+      throw this.handleError(new Error(`Unable to instantiate ${config.rendererType} renderer: ${error.stack}`));
     }
   }
 
@@ -283,8 +282,7 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
           this.frameDurations.push(t - this.lastTime);
           this.lastTime = t;
         } catch (error) {
-          error.message = `Unable to render viewport: ${error.message}`;
-          throw this.handleError(error);
+          throw this.handleError(new Error(`Unable to render viewport: ${error.stack}`));
         }
       }
 
