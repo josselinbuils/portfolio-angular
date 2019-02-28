@@ -159,7 +159,8 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
       this.startRender();
 
     } catch (error) {
-      throw this.handleError(error);
+      this.handleError(error.message);
+      throw error;
     }
   }
 
@@ -229,13 +230,12 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
     return availableViewTypes;
   }
 
-  private handleError(error: Error): Error {
-    this.errorMessage = error.message;
+  private handleError(errorMessage: string): void {
+    this.errorMessage = errorMessage;
 
     if (this.loading) {
       this.loading = false;
     }
-    return error;
   }
 
   private instantiateRenderer(): void {
@@ -261,7 +261,8 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
           });
       }
     } catch (error) {
-      throw this.handleError(new Error(`Unable to instantiate ${config.rendererType} renderer: ${error.stack}`));
+      this.handleError(`Unable to instantiate ${config.rendererType} renderer`);
+      throw error;
     }
   }
 
@@ -282,7 +283,8 @@ export class DicomViewerComponent implements OnDestroy, WindowInstance {
           this.frameDurations.push(t - this.lastTime);
           this.lastTime = t;
         } catch (error) {
-          throw this.handleError(new Error(`Unable to render viewport: ${error.stack}`));
+          this.handleError('Unable to render viewport');
+          throw error;
         }
       }
 
