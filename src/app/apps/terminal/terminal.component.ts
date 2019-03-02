@@ -63,7 +63,7 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
   @HostListener('window:keydown', ['$event'])
   async keyboardListener(event: KeyboardEvent): Promise<void> {
 
-    if (!this.windowComponent.active) {
+    if (!this.windowComponent.active || this.waiting) {
       return;
     }
 

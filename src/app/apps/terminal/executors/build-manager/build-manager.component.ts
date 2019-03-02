@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
 import { Executor } from '../executor';
 
@@ -7,21 +7,31 @@ import { Executor } from '../executor';
   templateUrl: './build-manager.component.html',
   styleUrls: ['./build-manager.component.scss'],
 })
-export class BuildManagerComponent implements Executor {
+export class BuildManagerComponent implements Executor, OnInit {
   args!: string[];
-  endPromise: Promise<void>;
+  endPromise = new Promise<void>(resolve => this.unfreeze = resolve);
   error?: string;
   logs: Log[] = [];
 
-  constructor() {
-    this.endPromise = new Promise<void>(resolve => {
-      const ws = new WebSocket(`wss://${location.hostname}/build-manager`);
-      ws.onmessage = event => this.logs.push(JSON.parse(event.data));
-      ws.onerror = () => {
-        this.error = '-buildmanager: an error occurred';
-        resolve();
-      };
-    });
+  private unfreeze!: () => void;
+
+  ngOnInit(): void {
+    const ws = new WebSocket(`wss://${location.hostname}/build-manager`);
+
+    ws.onmessage = event => {
+      try {
+        this.logs.push(...JSON.parse(event.data));
+      } catch (error) {
+        this.stop();
+      }
+    };
+
+    ws.onerror = () => this.stop();
+  }
+
+  private stop(): void {
+    this.error = '-buildmanager: an error occurred';
+    this.unfreeze();
   }
 }
 
