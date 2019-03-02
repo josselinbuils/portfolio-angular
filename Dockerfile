@@ -1,6 +1,6 @@
-FROM node:8
+FROM node:10
 COPY . portfolio
 WORKDIR portfolio
-RUN npm install --production && \
-    npm run build
-CMD ["npm", "start"]
+RUN yarn install --production && \
+    yarn build
+CMD ["yarn", "start"]
