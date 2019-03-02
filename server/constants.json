@@ -2,7 +2,6 @@
   "ASSETS_DIR": "/assets",
   "ASSETS_DIR_DEV": "/src/assets",
   "ENV_DEV": "development",
-  "ENV_PROD": "production",
   "HTTP_DEFAULT_PREFIX": "/",
   "HTTP_INTERNAL_ERROR": 500,
   "HTTP_NOT_FOUND": 404,

@@ -5,7 +5,7 @@ const { join } = require('path');
 const serveStatic = require('serve-static');
 
 const {
-  ASSETS_DIR, ASSETS_DIR_DEV, ENV_DEV, ENV_PROD, HTTP_DEFAULT_PREFIX, HTTP_INTERNAL_ERROR, HTTP_NOT_FOUND, MAX_AGE_DAYS,
+  ASSETS_DIR, ASSETS_DIR_DEV, ENV_DEV, HTTP_DEFAULT_PREFIX, HTTP_INTERNAL_ERROR, HTTP_NOT_FOUND, MAX_AGE_DAYS,
   PUBLIC_DIR
 } = require('./constants.json');
 const DependenciesRoutes = require('./api/dependencies/dependencies.routes');
@@ -58,6 +58,7 @@ module.exports = class Router {
     router.get('*', (req, res) => res.status(HTTP_NOT_FOUND).end());
 
     // next is required even if not used
+    // noinspection JSUnusedLocalSymbols
     router.use((error, req, res, next) => {
       Logger.error(error.stack);
       res.status(HTTP_INTERNAL_ERROR).end();
