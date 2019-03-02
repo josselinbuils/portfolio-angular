@@ -5,6 +5,7 @@ import { WindowModule } from '@portfolio/platform/window';
 
 import { AboutComponent } from './executors/about/about.component';
 import { BashErrorComponent } from './executors/bash-error/bash-error.component';
+import { BuildManagerComponent } from './executors/build-manager/build-manager.component';
 import { CommandComponent } from './executors/command/command.component';
 import { HelpComponent } from './executors/help/help.component';
 import { OpenComponent } from './executors/open/open.component';
@@ -17,6 +18,7 @@ import { TerminalComponent } from './terminal.component';
   declarations: [
     AboutComponent,
     BashErrorComponent,
+    BuildManagerComponent,
     CommandComponent,
     HelpComponent,
     OpenComponent,
@@ -28,6 +30,7 @@ import { TerminalComponent } from './terminal.component';
   entryComponents: [
     AboutComponent,
     BashErrorComponent,
+    BuildManagerComponent,
     CommandComponent,
     HelpComponent,
     OpenComponent,

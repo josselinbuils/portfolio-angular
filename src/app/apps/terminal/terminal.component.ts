@@ -6,6 +6,7 @@ import { WindowComponent, WindowInstance } from '@portfolio/platform/window';
 
 import { AboutComponent } from './executors/about/about.component';
 import { BashErrorComponent } from './executors/bash-error/bash-error.component';
+import { BuildManagerComponent } from './executors/build-manager/build-manager.component';
 import { CommandComponent } from './executors/command/command.component';
 import { Executor } from './executors/executor';
 import { HelpComponent } from './executors/help/help.component';
@@ -26,6 +27,7 @@ enum KEY_CODE {
 
 const executors = {
   about: AboutComponent,
+  buildmanager: BuildManagerComponent,
   help: HelpComponent,
   open: OpenComponent,
   projects: ProjectsComponent,
@@ -50,6 +52,7 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
   prefix = 'user$';
   userInput = '';
   title = TerminalComponent.appName;
+  waiting = false;
 
   private commandIndex = 0;
   private readonly commands: string[] = [];
@@ -58,7 +61,7 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
   constructor(private readonly componentFactoryResolver: ComponentFactoryResolver) {}
 
   @HostListener('window:keydown', ['$event'])
-  keyboardListener(event: KeyboardEvent): void {
+  async keyboardListener(event: KeyboardEvent): Promise<void> {
 
     if (!this.windowComponent.active) {
       return;
@@ -79,12 +82,12 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
       this.caretIndex++;
 
     } else if (!event.altKey && !event.ctrlKey && !event.metaKey) {
-      this.navigate(event);
+      await this.navigate(event);
     }
   }
 
-  ngOnInit(): void {
-    this.exec('about');
+  async ngOnInit(): Promise<void> {
+    await this.exec('about');
   }
 
   ngAfterContentInit(): void {
@@ -101,10 +104,10 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
     this.components = [];
   }
 
-  private exec(str: string): void {
+  private async exec(str: string): Promise<void> {
     const command = str.trim().split(' ')[0];
 
-    this.loadComponent(CommandComponent, [this.prefix, str]);
+    await this.loadComponent(CommandComponent, [this.prefix, str]);
 
     if (command.length > 0) {
       this.commands.push(str);
@@ -119,22 +122,29 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
 
         default:
           if (executors[command]) {
-            this.loadComponent(executors[command], str.split(' ').slice(1));
+            await this.loadComponent(executors[command], str.split(' ').slice(1));
           } else {
-            this.loadComponent(BashErrorComponent, [command]);
+            await this.loadComponent(BashErrorComponent, [command]);
           }
       }
     }
   }
 
-  private loadComponent(component: Type<{}>, args: any[]): void {
+  private async loadComponent(component: Type<{}>, args: any[]): Promise<void> {
     const componentFactory = this.componentFactoryResolver.resolveComponentFactory(component);
     const componentRef = this.commandsViewContainerRef.createComponent(componentFactory);
-    (componentRef.instance as Executor).args = args;
+    const instance = componentRef.instance as Executor;
+    instance.args = args;
     this.components.push(componentRef);
+
+    if (instance.endPromise !== undefined) {
+      this.waiting = true;
+      await instance.endPromise;
+      this.waiting = false;
+    }
   }
 
-  private navigate(event: KeyboardEvent): void {
+  private async navigate(event: KeyboardEvent): Promise<void> {
     switch (event.keyCode) {
 
       case KEY_CODE.BACK_SPACE:
@@ -147,8 +157,9 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
 
       case KEY_CODE.ENTER:
         event.preventDefault();
-        this.exec(this.userInput);
+        const userInput = this.userInput;
         this.userInput = '';
+        await this.exec(userInput);
         break;
 
       case KEY_CODE.DOWN:

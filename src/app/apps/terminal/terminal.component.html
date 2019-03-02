@@ -3,8 +3,8 @@
   <div #terminal class="terminal">
     <div #commands></div>
     <p class="user-input">
-      <span class="prefix" [innerHTML]="prefix"></span><span class="input" [innerHTML]="userInput"></span>
-      <span class="caret" [ngStyle]="{'left.ch': prefix.length + caretIndex + 1}">
+      <span *ngIf="!waiting" class="prefix" [innerHTML]="prefix"></span><span class="input" [innerHTML]="userInput"></span>
+      <span class="caret" [ngStyle]="{'left.ch': !waiting ? prefix.length + caretIndex + 1 : 0}">
         {{userInput.substr(caretIndex, 1)}}
       </span>
     </p>
