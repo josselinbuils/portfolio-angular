@@ -1,2 +1,2 @@
-<p *ngFor="let log of logs">[{{log.level}}] {{log.data}}</p>
+<p *ngFor="let log of logs" [innerText]="log.data"></p>
 <p *ngIf="error" [innerHTML]="error"></p>
