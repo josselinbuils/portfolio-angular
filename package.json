@@ -24,6 +24,7 @@
     "@angular/platform-browser": "^7.2.6",
     "@angular/platform-browser-dynamic": "^7.2.6",
     "@angular/router": "^7.2.6",
+    "ansi-to-html": "^0.6.10",
     "body-parser": "^1.18.3",
     "core-js": "^2.6.5",
     "cpx": "^1.5.0",
