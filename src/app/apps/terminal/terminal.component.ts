@@ -23,6 +23,7 @@ enum KEY_CODE {
   K = 75,
   LEFT = 37,
   RIGHT = 39,
+  TAB = 9,
   UP = 38,
 }
 
@@ -176,8 +177,9 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
   }
 
   private async navigate(event: KeyboardEvent): Promise<void> {
-    switch (event.keyCode) {
+    const userInput = this.userInput;
 
+    switch (event.keyCode) {
       case KEY_CODE.BACK_SPACE:
         event.preventDefault();
         if (this.caretIndex > 0) {
@@ -188,7 +190,6 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
 
       case KEY_CODE.ENTER:
         event.preventDefault();
-        const userInput = this.userInput;
         this.userInput = '';
         await this.exec(userInput);
         break;
@@ -213,6 +214,20 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
         event.preventDefault();
         if (this.caretIndex < this.userInput.length) {
           this.caretIndex++;
+        }
+        break;
+
+      case KEY_CODE.TAB:
+        event.preventDefault();
+
+        if (userInput.length === 0) {
+          return;
+        }
+        const command = Object.keys(executors).find(c => c.indexOf(userInput) === 0);
+
+        if (command !== undefined) {
+          this.userInput = command;
+          this.caretIndex = this.userInput.length;
         }
         break;
 
