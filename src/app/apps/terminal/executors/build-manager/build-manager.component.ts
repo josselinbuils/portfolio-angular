@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
+import { Deferred } from '@portfolio/platform/deferred';
 
 import { Executor } from '../executor';
 
@@ -7,41 +8,42 @@ import { Executor } from '../executor';
   templateUrl: './build-manager.component.html',
   styleUrls: ['./build-manager.component.scss'],
 })
-export class BuildManagerComponent implements Executor, OnInit {
+export class BuildManagerComponent implements Executor {
   args!: string[];
-  endPromise = new Promise<void>(resolve => this.unfreeze = resolve);
+  releaseDeferred = new Deferred<void>();
   error?: string;
   logs: Log[] = [];
 
-  private unfreeze!: () => void;
+  private ws: WebSocket;
 
-  ngOnInit(): void {
-    const ws = new WebSocket(`wss://${location.hostname}/build-manager`);
+  constructor() {
+    this.ws = new WebSocket(`wss://${location.hostname}/build-manager`);
 
-    ws.onmessage = event => {
+    this.ws.onmessage = event => {
       try {
         this.logs.push(...JSON.parse(event.data));
       } catch (error) {
-        this.stop();
+        this.onError();
       }
     };
 
-    ws.onerror = () => this.stop();
+    this.ws.onerror = () => this.onError();
   }
 
-  private stop(): void {
+  onKill(): void {
+    if (this.ws.readyState < this.ws.CLOSING) {
+      this.ws.close();
+    }
+  }
+
+  private onError(): void {
     this.error = '-buildmanager: an error occurred';
-    this.unfreeze();
+    this.releaseDeferred.resolve();
   }
 }
 
 interface Log {
   data: string;
-  level: LogLevel;
+  level: string;
   time: number;
-}
-
-enum LogLevel {
-  Error = 'ERROR',
-  Info = 'INFO',
 }

@@ -16,6 +16,7 @@ import { SkillsComponent } from './executors/skills/skills.component';
 import { WorkComponent } from './executors/work/work.component';
 
 enum KEY_CODE {
+  C = 67,
   BACK_SPACE = 8,
   DOWN = 40,
   ENTER = 13,
@@ -62,25 +63,28 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
 
   @HostListener('window:keydown', ['$event'])
   async keyboardListener(event: KeyboardEvent): Promise<void> {
+    if (!this.windowComponent.active) {
+      return;
+    }
 
-    if (!this.windowComponent.active || this.waiting) {
+    if (this.waiting) {
+      if (!event.altKey && (event.metaKey || event.ctrlKey) && event.keyCode === KEY_CODE.C) {
+        event.preventDefault();
+        this.killExecutor();
+      }
       return;
     }
 
     if (!event.altKey && (event.metaKey || event.ctrlKey) && event.keyCode === KEY_CODE.K) {
       event.preventDefault();
       this.clear();
-
     } else if (event.key.length === 1) {
-
       if (/[a-z]/i.test(event.key) && (event.altKey || event.metaKey || event.ctrlKey)) {
         return;
       }
-
       event.preventDefault();
       this.userInput = this.userInput.slice(0, this.caretIndex) + event.key + this.userInput.slice(this.caretIndex);
       this.caretIndex++;
-
     } else if (!event.altKey && !event.ctrlKey && !event.metaKey) {
       await this.navigate(event);
     }
@@ -130,6 +134,19 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
     }
   }
 
+  private killExecutor(): void {
+    const componentRef = this.components[this.components.length - 1];
+    const executor = componentRef.instance as Executor;
+
+    if (executor.releaseDeferred !== undefined) {
+      if (executor.onKill !== undefined) {
+        executor.onKill();
+      }
+      componentRef.changeDetectorRef.detach();
+      executor.releaseDeferred.resolve();
+    }
+  }
+
   private async loadComponent(component: Type<{}>, args: any[]): Promise<void> {
     const componentFactory = this.componentFactoryResolver.resolveComponentFactory(component);
     const componentRef = this.commandsViewContainerRef.createComponent(componentFactory);
@@ -137,9 +154,9 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
     instance.args = args;
     this.components.push(componentRef);
 
-    if (instance.endPromise !== undefined) {
+    if (instance.releaseDeferred !== undefined) {
       this.waiting = true;
-      await instance.endPromise;
+      await instance.releaseDeferred.promise;
       this.waiting = false;
     }
   }

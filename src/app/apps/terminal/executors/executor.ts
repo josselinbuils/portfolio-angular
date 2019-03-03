@@ -1,4 +1,7 @@
+import { Deferred } from '@portfolio/platform/deferred';
+
 export interface Executor {
-  endPromise?: Promise<void>;
   args: string[];
+  releaseDeferred?: Deferred<void>;
+  onKill?(): void;
 }
