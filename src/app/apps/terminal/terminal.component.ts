@@ -202,9 +202,9 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
 
       case KEY_CODE.DOWN:
         event.preventDefault();
-        if (this.commandIndex < (this.commands.length - 1)) {
+        if (this.commandIndex < this.commands.length) {
           this.commandIndex++;
-          this.setUserInput(this.commands[this.commandIndex]);
+          this.setUserInput(this.commandIndex < this.commands.length ? this.commands[this.commandIndex] : '');
         }
         break;
 
