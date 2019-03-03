@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Deferred } from '@portfolio/platform/deferred';
-import * as AnsiToHtml from 'ansi-to-html';
+import { default as AnsiUp } from 'ansi_up';
 
 import { DEFAULT_ERROR_MESSAGE } from '../constants';
 import { Executor } from '../executor';
@@ -15,7 +15,7 @@ export class BuildManagerComponent implements Executor {
   releaseDeferred = new Deferred<void>();
   logs: Log[] = [];
 
-  private ansi = new AnsiToHtml();
+  private ansiUp = new (AnsiUp as any)();
   private ws: WebSocket;
 
   constructor() {
@@ -24,7 +24,7 @@ export class BuildManagerComponent implements Executor {
     this.ws.onmessage = event => {
       try {
         const logs = JSON.parse(event.data);
-        logs.forEach(log => log.data = this.ansi.toHtml(log.data));
+        logs.forEach(log => log.data = this.ansiUp.ansi_to_html(log.data));
         this.logs.push(...logs);
       } catch (error) {
         this.onError();
