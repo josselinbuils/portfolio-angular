@@ -68,11 +68,18 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
       return;
     }
 
-    if (this.waiting) {
-      if (!event.altKey && (event.metaKey || event.ctrlKey) && event.keyCode === KEY_CODE.C) {
-        event.preventDefault();
+    if (!event.altKey && (event.metaKey || event.ctrlKey) && event.keyCode === KEY_CODE.C) {
+      event.preventDefault();
+
+      if (this.waiting) {
         this.killExecutor();
+      } else {
+        await this.loadComponent(CommandComponent, [this.prefix, this.userInput]);
+        this.setUserInput('');
       }
+    }
+
+    if (this.waiting) {
       return;
     }
 
@@ -116,7 +123,6 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
 
     if (command.length > 0) {
       this.commands.push(str);
-      this.caretIndex = 0;
       this.commandIndex = this.commands.length;
 
       switch (command) {
@@ -190,7 +196,7 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
 
       case KEY_CODE.ENTER:
         event.preventDefault();
-        this.userInput = '';
+        this.setUserInput('');
         await this.exec(userInput);
         break;
 
@@ -198,8 +204,7 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
         event.preventDefault();
         if (this.commandIndex < (this.commands.length - 1)) {
           this.commandIndex++;
-          this.userInput = this.commands[this.commandIndex];
-          this.caretIndex = this.userInput.length;
+          this.setUserInput(this.commands[this.commandIndex]);
         }
         break;
 
@@ -226,8 +231,7 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
         const command = Object.keys(executors).find(c => c.indexOf(userInput) === 0);
 
         if (command !== undefined) {
-          this.userInput = command;
-          this.caretIndex = this.userInput.length;
+          this.setUserInput(command);
         }
         break;
 
@@ -235,9 +239,13 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
         event.preventDefault();
         if (this.commandIndex > 0) {
           this.commandIndex--;
-          this.userInput = this.commands[this.commandIndex];
-          this.caretIndex = this.userInput.length;
+          this.setUserInput(this.commands[this.commandIndex]);
         }
     }
+  }
+
+  private setUserInput(input: string): void {
+    this.userInput = input;
+    this.caretIndex = this.userInput.length;
   }
 }
