@@ -12,6 +12,7 @@ import { OpenComponent } from './executors/open/open.component';
 import { ProjectsComponent } from './executors/projects/projects.component';
 import { SkillsComponent } from './executors/skills/skills.component';
 import { WorkComponent } from './executors/work/work.component';
+import { SafeHtmlPipe } from './safe-html.pipe';
 import { TerminalComponent } from './terminal.component';
 
 @NgModule({
@@ -23,6 +24,7 @@ import { TerminalComponent } from './terminal.component';
     HelpComponent,
     OpenComponent,
     ProjectsComponent,
+    SafeHtmlPipe,
     SkillsComponent,
     TerminalComponent,
     WorkComponent,
