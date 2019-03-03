@@ -126,7 +126,11 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
 
         default:
           if (executors[command]) {
-            await this.loadComponent(executors[command], str.split(' ').slice(1));
+            try {
+              await this.loadComponent(executors[command], str.split(' ').slice(1));
+            } catch (error) {
+              await this.loadComponent(BashErrorComponent, [command, error.message]);
+            }
           } else {
             await this.loadComponent(BashErrorComponent, [command]);
           }
@@ -142,7 +146,6 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
       if (executor.onKill !== undefined) {
         executor.onKill();
       }
-      componentRef.changeDetectorRef.detach();
       executor.releaseDeferred.resolve();
     }
   }
@@ -154,11 +157,22 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
     instance.args = args;
     this.components.push(componentRef);
 
+    const releaseComponent = () => {
+      this.waiting = false;
+      componentRef.changeDetectorRef.detectChanges();
+      componentRef.changeDetectorRef.detach();
+    };
+
     if (instance.releaseDeferred !== undefined) {
       this.waiting = true;
-      await instance.releaseDeferred.promise;
-      this.waiting = false;
+      try {
+        await instance.releaseDeferred.promise;
+      } catch (error) {
+        releaseComponent();
+        throw error;
+      }
     }
+    releaseComponent();
   }
 
   private async navigate(event: KeyboardEvent): Promise<void> {

@@ -1,7 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
+import { Executor } from '@portfolio/apps/terminal/executors/executor';
+import { Deferred } from '@portfolio/platform/deferred';
 import dayjs from 'dayjs';
 import { first } from 'rxjs/operators';
+
+import { DEFAULT_ERROR_MESSAGE } from '../constants';
 
 const projects = [
   'malv-api', 'mal-viewer', 'myo-bot-hub', 'myo-bot-site', 'path-finding', 'pizza-day', 'portfolio', 'reverse-proxy',
@@ -21,32 +25,40 @@ const previews = {
   templateUrl: './projects.component.html',
   styleUrls: ['./projects.component.scss'],
 })
-export class ProjectsComponent implements OnInit {
+export class ProjectsComponent implements Executor, OnInit {
+  args!: string[];
   projects?: Project[];
+  releaseDeferred = new Deferred<void>();
 
   constructor(private readonly http: HttpClient) {}
 
   async ngOnInit(): Promise<void> {
-    this.projects = (await this.http.get('https://api.github.com/users/josselinbuils/repos')
-      .pipe(first())
-      .toPromise() as Repos[])
-      .filter(repos => projects.indexOf(repos.name) !== -1)
-      .sort((a, b) => new Date(a.pushed_at).getTime() - new Date(b.pushed_at).getTime())
-      .map(repos => {
-        const res: Project = {
-          description: repos.description,
-          language: repos.language,
-          name: repos.name,
-          updated: dayjs(repos.pushed_at).fromNow(),
-          url: repos.html_url,
-        };
+    try {
+      this.projects = (await this.http.get('https://api.github.com/users/josselinbuils/repos')
+        .pipe(first())
+        .toPromise() as Repos[])
+        .filter(repos => projects.indexOf(repos.name) !== -1)
+        .sort((a, b) => new Date(a.pushed_at).getTime() - new Date(b.pushed_at).getTime())
+        .map(repos => {
+          const res: Project = {
+            description: repos.description,
+            language: repos.language,
+            name: repos.name,
+            updated: dayjs(repos.pushed_at).fromNow(),
+            url: repos.html_url,
+          };
 
-        if (typeof previews[repos.name] === 'string') {
-          res.imageURL = `assets/projects/${previews[repos.name]}`;
-        }
+          if (typeof previews[repos.name] === 'string') {
+            res.imageURL = `assets/projects/${previews[repos.name]}`;
+          }
 
-        return res;
-      });
+          return res;
+        });
+
+      this.releaseDeferred.resolve();
+    } catch (error) {
+      this.releaseDeferred.reject(new Error(DEFAULT_ERROR_MESSAGE));
+    }
   }
 }
 

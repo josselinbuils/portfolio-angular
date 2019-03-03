@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Deferred } from '@portfolio/platform/deferred';
 
+import { DEFAULT_ERROR_MESSAGE } from '../constants';
 import { Executor } from '../executor';
 
 @Component({
@@ -11,7 +12,6 @@ import { Executor } from '../executor';
 export class BuildManagerComponent implements Executor {
   args!: string[];
   releaseDeferred = new Deferred<void>();
-  error?: string;
   logs: Log[] = [];
 
   private ws: WebSocket;
@@ -37,8 +37,7 @@ export class BuildManagerComponent implements Executor {
   }
 
   private onError(): void {
-    this.error = '-buildmanager: an error occurred';
-    this.releaseDeferred.resolve();
+    this.releaseDeferred.reject(new Error(DEFAULT_ERROR_MESSAGE));
   }
 }
 

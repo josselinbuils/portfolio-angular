@@ -19,6 +19,10 @@ export class BashErrorComponent implements Executor, OnInit {
 
   ngOnInit(): void {
     this.command = this.args[0];
-    this.errorMessage = commands.indexOf(this.command) !== -1 ? 'Permission denied' : 'command not found';
+    this.errorMessage = this.args[1];
+
+    if (this.errorMessage === undefined) {
+      this.errorMessage = commands.indexOf(this.command) !== -1 ? 'Permission denied' : 'command not found';
+    }
   }
 }
