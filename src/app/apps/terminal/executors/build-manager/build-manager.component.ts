@@ -23,9 +23,9 @@ export class BuildManagerComponent implements Executor {
 
     this.ws.onmessage = event => {
       try {
-        this.logs.push(
-          ...JSON.parse(event.data).forEach(log => log.data = this.ansi.toHtml(log.data)),
-        );
+        const logs = JSON.parse(event.data);
+        logs.forEach(log => log.data = this.ansi.toHtml(log.data));
+        this.logs.push(...logs);
       } catch (error) {
         this.onError();
       }
