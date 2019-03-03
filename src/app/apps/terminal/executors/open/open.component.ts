@@ -1,11 +1,20 @@
 import { Component, OnInit, Type } from '@angular/core';
 import { DicomViewerComponent } from '@portfolio/apps/dicom-viewer';
+import { Mp3PlayerComponent } from '@portfolio/apps/mp3-player';
+import { NotesComponent } from '@portfolio/apps/notes';
+import { RedditComponent } from '@portfolio/apps/reddit';
+import { TeraviaComponent } from '@portfolio/apps/teravia';
 import { WindowManagerService } from '@portfolio/platform/window';
 
 import { Executor } from '../executor';
 
+// TODO find a way to retrieve registered apps automatically
 const apps: { [name: string]: Type<{}> } = {
   dicomviewer: DicomViewerComponent,
+  mp3player: Mp3PlayerComponent,
+  notes: NotesComponent,
+  reddit: RedditComponent,
+  teravia: TeraviaComponent,
 };
 
 @Component({
