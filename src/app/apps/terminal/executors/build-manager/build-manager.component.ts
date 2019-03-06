@@ -14,6 +14,7 @@ export class BuildManagerComponent implements Executor, OnInit {
   args!: string[];
   logs: Log[] = [];
   releaseDeferred = new Deferred<void>();
+  showHelp = false;
 
   private ws?: WebSocket;
 
@@ -21,13 +22,15 @@ export class BuildManagerComponent implements Executor, OnInit {
     const command = this.args[0];
 
     switch (command) {
-      case 'logs':
-        this.showLogs();
+      case '--help':
+      case 'help':
+      case undefined:
+        this.showHelp = true;
+        this.releaseDeferred.resolve();
         break;
 
-      case undefined:
-        // TODO show help
-        this.onError('no command');
+      case 'logs':
+        this.showLogs();
         break;
 
       default:

@@ -1,1 +1,5 @@
 <p *ngFor="let log of logs" [innerHTML]="log.data | safeHtml"></p>
+<div *ngIf="showHelp" class="help">
+  <p>Usage: bm [command] [options]</p>
+  <p>Commands: help, logs [-f]</p>
+</div>
