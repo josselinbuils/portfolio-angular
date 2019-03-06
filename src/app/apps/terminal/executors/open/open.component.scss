@@ -6,3 +6,15 @@ p {
   margin: 0;
   white-space: pre-wrap;
 }
+
+.help p {
+  margin: 1ch;
+
+  &.app {
+    margin: 0 0 0 2ch;
+
+    &:last-child {
+      margin-bottom: 1ch;
+    }
+  }
+}
