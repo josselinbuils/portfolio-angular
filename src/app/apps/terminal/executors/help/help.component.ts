@@ -9,14 +9,26 @@ import { Executor } from '../executor';
 })
 export class HelpComponent implements Executor {
   args!: string[];
-  commands = [{
-    command: 'projects',
-    description: 'my GitHub projects',
-  }, {
-    command: 'skills',
-    description: 'my main skills',
-  }, {
-    command: 'work',
-    description: 'my work experience',
-  }];
+  commands = [
+    {
+      command: 'bm',
+      description: 'build manager',
+    },
+    {
+      command: 'open',
+      description: 'open an application',
+    },
+    {
+      command: 'projects',
+      description: 'show my GitHub projects',
+    },
+    {
+      command: 'skills',
+      description: 'show my main skills',
+    },
+    {
+      command: 'work',
+      description: 'show my work experience',
+    },
+  ];
 }
