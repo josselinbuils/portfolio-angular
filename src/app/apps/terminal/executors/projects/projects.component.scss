@@ -1,4 +1,4 @@
-@import '../executor';
+@import '../../terminal.constants';
 
 :host {
   display: flex;
@@ -17,6 +17,9 @@ p {
   text-decoration: none;
   display: flex;
   flex-direction: column;
+  border: 1px solid $secondary-color;
+  border-radius: 4px;
+  margin: 5px 0;
 
   &, & + & {
     margin: 7px 7px 0 0;
@@ -34,6 +37,10 @@ p {
     color: inherit;
   }
 
+  &, .header {
+    padding: 5px 7px;
+  }
+
   .description {
     text-align: justify;
     flex-grow: 1;
@@ -41,6 +48,11 @@ p {
     .loading {
       color: $secondary-color;
     }
+  }
+
+  .header {
+    border-bottom: 1px solid $secondary-color;
+    margin: -5px -7px 5px -7px;
   }
 
   .language {

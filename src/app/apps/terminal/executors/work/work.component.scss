@@ -1,4 +1,4 @@
-@import '../executor';
+@import '../../terminal.constants';
 
 :host {
   display: block;
@@ -10,12 +10,20 @@ p {
 }
 
 .description {
-  margin-top: 10px;
+  margin-top: 1ch;
   text-align: justify;
 }
 
 .description, .location {
   color: $secondary-color;
+}
+
+.entry {
+  margin: 1ch;
+
+  & + & {
+    margin-top: 2ch;
+  }
 }
 
 .period {
