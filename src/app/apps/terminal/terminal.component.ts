@@ -29,7 +29,7 @@ enum KEY_CODE {
 
 const executors = {
   about: AboutComponent,
-  buildmanager: BuildManagerComponent,
+  bm: BuildManagerComponent,
   help: HelpComponent,
   open: OpenComponent,
   projects: ProjectsComponent,
@@ -157,7 +157,7 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
     }
   }
 
-  private async loadComponent(component: Type<{}>, args: any[]): Promise<void> {
+  private async loadComponent(component: Type<{}>, args: string[]): Promise<void> {
     const componentFactory = this.componentFactoryResolver.resolveComponentFactory(component);
     const componentRef = this.commandsViewContainerRef.createComponent(componentFactory);
     const instance = componentRef.instance as Executor;

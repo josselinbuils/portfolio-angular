@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Deferred } from '@portfolio/platform/deferred';
 import { default as AnsiUp } from 'ansi_up';
 
@@ -10,38 +10,77 @@ import { Executor } from '../executor';
   templateUrl: './build-manager.component.html',
   styleUrls: ['./build-manager.component.scss'],
 })
-export class BuildManagerComponent implements Executor {
+export class BuildManagerComponent implements Executor, OnInit {
   args!: string[];
-  releaseDeferred = new Deferred<void>();
   logs: Log[] = [];
+  releaseDeferred = new Deferred<void>();
 
-  private ansiUp = new (AnsiUp as any)();
-  private ws: WebSocket;
+  private ws?: WebSocket;
 
-  constructor() {
-    this.ws = new WebSocket(`wss://${location.hostname}/build-manager`);
+  ngOnInit(): void {
+    const command = this.args[0];
 
-    this.ws.onmessage = event => {
+    switch (command) {
+      case 'logs':
+        this.showLogs();
+        break;
+
+      case undefined:
+        // TODO show help
+        this.onError('no command');
+        break;
+
+      default:
+        this.onError('unknown command');
+    }
+  }
+
+  onKill(): void {
+    this.stopWsClient();
+  }
+
+  private hasOption(option: string): boolean {
+    return this.args.slice(1).includes(`-${option}`);
+  }
+
+  private onError(errorMessage?: string): void {
+    if (errorMessage === undefined) {
+      errorMessage = DEFAULT_ERROR_MESSAGE;
+    }
+    this.stopWsClient();
+    this.releaseDeferred.reject(new Error(errorMessage));
+  }
+
+  private showLogs(): void {
+    const follow = this.hasOption('f');
+    const ansiUp = new (AnsiUp as any)();
+
+    this.startWsClient().onmessage = event => {
       try {
         const logs = JSON.parse(event.data);
-        logs.forEach(log => log.data = this.ansiUp.ansi_to_html(log.data));
+        logs.forEach(log => log.data = ansiUp.ansi_to_html(log.data));
         this.logs.push(...logs);
+
+        if (!follow) {
+          this.stopWsClient();
+          this.releaseDeferred.resolve();
+        }
       } catch (error) {
         this.onError();
       }
     };
-
-    this.ws.onerror = () => this.onError();
   }
 
-  onKill(): void {
-    if (this.ws.readyState < this.ws.CLOSING) {
+  private startWsClient(): WebSocket {
+    this.ws = new WebSocket(`wss://${location.hostname}/build-manager`);
+    this.ws.onerror = () => this.onError();
+    return this.ws;
+  }
+
+  private stopWsClient(): void {
+    if (this.ws !== undefined && this.ws.readyState < this.ws.CLOSING) {
       this.ws.close();
     }
-  }
-
-  private onError(): void {
-    this.releaseDeferred.reject(new Error(DEFAULT_ERROR_MESSAGE));
   }
 }
 
