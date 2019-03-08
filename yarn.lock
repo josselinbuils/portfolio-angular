@@ -204,6 +204,11 @@
   dependencies:
     tslib "^1.9.0"
 
+"@josselinbuils/tslint@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@josselinbuils/tslint/-/tslint-1.0.0.tgz#ca3a29d3995bef9b799f69cf7bd57c8b920e7700"
+  integrity sha512-kwAg2Zuj7K4vBPoZXtoA1IyNEjNAol38fUGFUmGMURZN305+m5wZ6mMkmdu82fgJ6i6xcH+4/13pmKizoeUeLQ==
+
 "@ngtools/webpack@7.3.4":
   version "7.3.4"
   resolved "https://registry.yarnpkg.com/@ngtools/webpack/-/webpack-7.3.4.tgz#069b3425ef928ecf91f34b0c4c04dde158534a85"

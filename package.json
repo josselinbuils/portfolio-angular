@@ -24,6 +24,7 @@
     "@angular/platform-browser": "^7.2.8",
     "@angular/platform-browser-dynamic": "^7.2.8",
     "@angular/router": "^7.2.8",
+    "@josselinbuils/tslint": "^1.0.0",
     "ansi_up": "^4.0.3",
     "body-parser": "^1.18.3",
     "core-js": "^2.6.5",
