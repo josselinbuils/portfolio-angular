@@ -61,7 +61,10 @@ export class BuildManagerComponent implements Executor, OnInit {
     this.startWsClient().onmessage = event => {
       try {
         const logs = JSON.parse(event.data);
-        logs.forEach(log => log.data = ansiUp.ansi_to_html(log.data));
+        logs.forEach(log => {
+          log.data = ansiUp.ansi_to_html(log.data)
+            .replace(/\[(\d+)]/g, '<span class="step-number">$1</span>');
+        });
         this.logs.push(...logs);
 
         if (!follow) {
