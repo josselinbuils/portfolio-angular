@@ -63,7 +63,7 @@ export class BuildManagerComponent implements Executor, OnInit {
         const logs = JSON.parse(event.data);
         logs.forEach(log => {
           log.data = ansiUp.ansi_to_html(log.data)
-            .replace(/\[(\d+)]/g, '<span class="step-number">$1</span>');
+            .replace(/\[(\d+)]/g, '<mark>$1</mark>');
         });
         this.logs.push(...logs);
 
