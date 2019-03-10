@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { Deferred } from '@portfolio/platform/deferred';
 import { default as AnsiUp } from 'ansi_up';
 
@@ -11,6 +11,9 @@ import { Executor } from '../executor';
   styleUrls: ['./build-manager.component.scss'],
 })
 export class BuildManagerComponent implements Executor, OnInit {
+
+  @ViewChild('stepIndexTemplate') stepIndexTemplateRef!: ElementRef<HTMLSpanElement>;
+
   args!: string[];
   logs: Log[] = [];
   releaseDeferred = new Deferred<void>();
@@ -42,6 +45,15 @@ export class BuildManagerComponent implements Executor, OnInit {
     this.stopWsClient();
   }
 
+  private getStepIndexTemplate(index: string): string {
+    const stepIndexTemplateElement = this.stepIndexTemplateRef.nativeElement.cloneNode() as HTMLSpanElement;
+
+    stepIndexTemplateElement.style.removeProperty('display');
+    stepIndexTemplateElement.textContent = index;
+
+    return stepIndexTemplateElement.outerHTML;
+  }
+
   private hasOption(option: string): boolean {
     return this.args.slice(1).includes(`-${option}`);
   }
@@ -61,10 +73,13 @@ export class BuildManagerComponent implements Executor, OnInit {
     this.startWsClient().onmessage = event => {
       try {
         const logs = JSON.parse(event.data);
+
         logs.forEach(log => {
-          log.data = ansiUp.ansi_to_html(log.data)
-            .replace(/\[(\d+)]/g, '<mark>$1</mark>');
+          log.data = ansiUp
+            .ansi_to_html(log.data)
+            .replace(/\[(\d+)]/g, ($0, $1) => this.getStepIndexTemplate($1));
         });
+
         this.logs.push(...logs);
 
         if (!follow) {
