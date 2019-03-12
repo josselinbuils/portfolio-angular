@@ -6,7 +6,6 @@
   "HTTP_INTERNAL_ERROR": 500,
   "HTTP_NOT_FOUND": 404,
   "MAX_AGE_DAYS": 365,
-  "MAX_CONTENT_LENGTH": 9999,
   "PORT": 9000,
   "PUBLIC_DIR": "/dist",
   "USER_AGENT": "Portfolio by youbi325"
