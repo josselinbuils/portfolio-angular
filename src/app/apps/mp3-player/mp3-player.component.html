@@ -1,5 +1,7 @@
-<app-window [windowTitle]="title" [minWidth]="size.width" [minHeight]="size.height" [width]="size.width"
-            [height]="size.height" background="#111625" titleColor="#efefef" [resizable]="showPlaylist">
+<app-window
+  [windowTitle]="title" [minWidth]="size.width" [minHeight]="size.height" [width]="size.width" [height]="size.height"
+  background="#111625" titleColor="#efefef" [resizable]="showPlaylist"
+>
 
   <!-- Min template -->
   <div class="player min" [ngClass]="{ seeking: seeking }" *ngIf="!showPlaylist">
@@ -7,8 +9,10 @@
       <div class="left">
         <ng-container *ngTemplateOutlet="controls"></ng-container>
       </div>
-      <div class="music-preview" [ngClass]="{'default-preview fa fa-music': !currentMusic || !currentMusic.image}"
-           [ngStyle]="{ 'background-image': currentMusic ? 'url(' + currentMusic.image + ')' : 'none' }"></div>
+      <div
+        class="music-preview" [ngClass]="{'default-preview fa fa-music': !currentMusic || !currentMusic.image}"
+        [ngStyle]="{ 'background-image': currentMusic ? 'url(' + currentMusic.image + ')' : 'none' }"
+      ></div>
     </div>
     <div *ngIf="currentMusic" class="music-info">
       {{currentMusic.artist_name}}<span *ngIf="currentMusic.name"> - </span>{{currentMusic.name}}
@@ -24,11 +28,15 @@
         <div class="logo">
           <i aria-hidden="true" class="fa fa-headphones"></i>
         </div>
-        <div class="item" *ngFor="let item of items" (click)="loadMusicList(item, select.value)"
-             [ngClass]="{active: item === currentItem, title: item.items}">
+        <div
+          class="item" *ngFor="let item of items" (click)="loadMusicList(item, select.value)"
+          [ngClass]="{active: item === currentItem, title: item.items}"
+        >
           {{item.name}}
-          <div class="sub-item" *ngFor="let subItem of item.items" (click)="loadMusicList(subItem, select.value)"
-               [ngClass]="{active: subItem === currentItem}">
+          <div
+            class="sub-item" *ngFor="let subItem of item.items" (click)="loadMusicList(subItem, select.value)"
+            [ngClass]="{active: subItem === currentItem}"
+          >
             {{subItem.name}}
           </div>
         </div>
@@ -62,12 +70,16 @@
         <div class="overflow">
           <table>
             <tbody>
-            <tr *ngFor="let music of musicList" [ngClass]="{active: currentMusic && music.id === currentMusic.id}"
-                (dblclick)="playMusic(music)">
+            <tr
+              *ngFor="let music of musicList" [ngClass]="{active: currentMusic && music.id === currentMusic.id}"
+              (dblclick)="playMusic(music)"
+            >
               <td class="col-preview">
                 <div class="inline-music-preview" [ngStyle]="{'background-image': 'url(' + music.image + ')'}">
-                  <i [ngClass]="music === currentMusic && !audioElement.paused ? 'fa-pause-circle' : 'fa-play-circle'"
-                     class="fa" aria-hidden="true" (click)="playMusic(music)"></i>
+                  <i
+                    [ngClass]="music === currentMusic && !audioElement.paused ? 'fa-pause-circle' : 'fa-play-circle'"
+                    class="fa" aria-hidden="true" (click)="playMusic(music)"
+                  ></i>
                 </div>
               </td>
               <td>{{music.name}}</td>
@@ -83,8 +95,10 @@
     </div>
 
     <div class="navbar">
-      <div class="music-preview" [ngClass]="{'default-preview fa fa-music': !currentMusic || !currentMusic.image}"
-           [ngStyle]="{ 'background-image': currentMusic ? 'url(' + currentMusic.image + ')' : 'none' }"></div>
+      <div
+        class="music-preview" [ngClass]="{'default-preview fa fa-music': !currentMusic || !currentMusic.image}"
+        [ngStyle]="{ 'background-image': currentMusic ? 'url(' + currentMusic.image + ')' : 'none' }"
+      ></div>
       <div *ngIf="currentMusic" class="music-info">
         <div class="name">{{currentMusic.name}}</div>
         <div class="artist">{{currentMusic.artist_name}}</div>
