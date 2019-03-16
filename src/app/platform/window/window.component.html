@@ -8,13 +8,13 @@
   >
     <div #buttons class="buttons">
       <div class="button close" (click)="close()">
-        <i class="fa fa-close" aria-hidden="true"></i>
+        <i class="fas fa-times" aria-hidden="true"></i>
       </div>
       <div class="button minimize" (click)="minimize()">
-        <i class="fa fa-minus" aria-hidden="true"></i>
+        <i class="fas fa-minus" aria-hidden="true"></i>
       </div>
       <div class="button maximize" [hidden]="!resizable" (click)="toggleMaximize()">
-        <i class="fa fa-plus" aria-hidden="true"></i>
+        <i class="fas fa-plus" aria-hidden="true"></i>
       </div>
     </div>
     <span class="title">{{windowTitle}}</span>

@@ -13,7 +13,7 @@ import { first } from 'rxjs/operators';
 })
 export class RedditComponent implements OnInit, WindowInstance {
   static appName = 'Reddit';
-  static iconClass = 'fa-reddit-alien';
+  static iconClass = 'fab fa-reddit-alien';
 
   @ViewChild(WindowComponent) windowComponent!: WindowComponent;
 

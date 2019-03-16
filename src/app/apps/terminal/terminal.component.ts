@@ -44,7 +44,7 @@ const executors = {
 })
 export class TerminalComponent implements AfterContentInit, OnInit, WindowInstance {
   static appName = 'Terminal';
-  static iconClass = 'fa-terminal';
+  static iconClass = 'fas fa-terminal';
 
   @ViewChild('commands', { read: ViewContainerRef }) commandsViewContainerRef!: ViewContainerRef;
   @ViewChild('terminal') terminalElementRef!: ElementRef<HTMLDivElement>;

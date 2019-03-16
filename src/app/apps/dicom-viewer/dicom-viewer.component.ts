@@ -22,7 +22,7 @@ const ANNOTATIONS_REFRESH_DELAY = 500;
 })
 export class DicomViewerComponent implements OnDestroy, WindowInstance {
   static appName = 'DICOM Viewer';
-  static iconClass = 'fa-heartbeat';
+  static iconClass = 'fas fa-heartbeat';
 
   @ViewChild('viewportElement') viewportElementRef!: ElementRef<HTMLDivElement>;
   @ViewChild(WindowComponent) windowComponent!: WindowComponent;

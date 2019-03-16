@@ -3,7 +3,7 @@
   <p>{{project.name}}<span class="language">{{project.language}}</span></p>
   <div class="preview">
     <img [src]="project.imageURL" *ngIf="project.imageURL" />
-    <i class="fa fa-camera" aria-hidden="true" *ngIf="!project.imageURL"></i>
+    <i class="fas fa-camera" aria-hidden="true" *ngIf="!project.imageURL"></i>
   </div>
   <p class="description">{{project.description}}</p>
   <p class="updated">Updated {{project.updated}}</p>

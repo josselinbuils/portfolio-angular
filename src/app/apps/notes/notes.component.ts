@@ -17,7 +17,7 @@ const smileys: { [smiley: string]: string } = {
 })
 export class NotesComponent implements WindowInstance {
   static appName = 'Notes';
-  static iconClass = 'fa-sticky-note';
+  static iconClass = 'fas fa-sticky-note';
 
   @ViewChild(WindowComponent) windowComponent!: WindowComponent;
 

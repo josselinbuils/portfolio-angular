@@ -8,7 +8,7 @@ import { WindowComponent, WindowInstance } from '@portfolio/platform/window';
 })
 export class TeraviaComponent implements WindowInstance {
   static appName = 'Teravia';
-  static iconClass = 'fa-gamepad';
+  static iconClass = 'fas fa-gamepad';
 
   @ViewChild(WindowComponent) windowComponent!: WindowComponent;
 

@@ -23,7 +23,7 @@ const size = {
 })
 export class Mp3PlayerComponent implements AfterContentInit, OnDestroy, OnInit, WindowInstance {
   static appName = 'MP3Player';
-  static iconClass = 'fa-headphones';
+  static iconClass = 'fas fa-headphones';
 
   @ViewChild('audio') audioElementRef!: ElementRef<HTMLAudioElement>;
   @ViewChild('currentTime') currentTimeElementRef!: ElementRef<HTMLDivElement>;

@@ -89,7 +89,7 @@ export class TaskBarComponent {
 
     if (task.instance !== undefined) {
       items.push({
-        iconClass: 'fa-close',
+        iconClass: 'fas fa-times',
         title: 'Close',
         click: () => {
           const instance = (task as Task).instance as WindowInstance;
