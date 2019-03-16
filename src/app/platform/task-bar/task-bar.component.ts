@@ -31,43 +31,42 @@ export class TaskBarComponent {
     windowManagerService.windowInstancesSubject.subscribe(windowInstances => {
       this.removeOutdatedTasks(windowInstances);
       this.addNewTasks(windowInstances);
-      this.removeDuplicatedTasks();
     });
   }
 
   addNewTasks(windowInstances: WindowInstance[]): void {
-    windowInstances.forEach(windowInstance => {
-      let refTask = this.tasks.find(task => windowInstance instanceof task.component);
+    windowInstances
+      // Keep only new instances
+      .filter(windowInstance => this.tasks.find(task => task.instance === windowInstance) === undefined)
+      .forEach(windowInstance => {
+        // Try to find a task without instance for this component (possible only if pinned)
+        const pinnedTask = this.tasks.find(
+          task => task.component === windowInstance.constructor && task.instance === undefined,
+        );
+        let newTask: Task | undefined;
 
-      if (refTask === undefined) {
-        refTask = new Task(windowInstance.constructor as Type<{}>);
-        this.tasks.push(refTask);
-      }
+        if (pinnedTask !== undefined) {
+          pinnedTask.instance = windowInstance;
+          newTask = pinnedTask;
+        } else {
+          newTask = new Task(windowInstance.constructor as Type<{}>, false, windowInstance);
+          this.tasks.push(newTask);
+        }
 
-      let newTask: Task | undefined;
+        if (newTask !== undefined) {
+          setTimeout(() => {
+            const taskElement = document.getElementById((newTask as Task).id);
 
-      if (refTask.instance === undefined) {
-        refTask.instance = windowInstance;
-        newTask = refTask;
-      } else if (refTask.instance !== windowInstance) {
-        this.tasks.push(new Task(refTask.component, false, windowInstance));
-        newTask = this.tasks[this.tasks.length - 1];
-      }
+            if (taskElement === null) {
+              throw new Error('Task element not found');
+            }
 
-      if (newTask !== undefined) {
-        setTimeout(() => {
-          const taskElement = document.getElementById((newTask as Task).id);
-
-          if (taskElement === null) {
-            throw new Error('Task element not found');
-          }
-
-          const taskClientRect = taskElement.getBoundingClientRect();
-          const topPosition = Math.round(taskClientRect.top + taskClientRect.height / 3);
-          windowInstance.windowComponent.setMinimizedTopPosition(topPosition);
-        });
-      }
-    });
+            const taskClientRect = taskElement.getBoundingClientRect();
+            const topPosition = Math.round(taskClientRect.top + taskClientRect.height / 3);
+            windowInstance.windowComponent.setMinimizedTopPosition(topPosition);
+          }, 0);
+        }
+      });
   }
 
   openContextMenu(task: Task, event: MouseEvent): void {
@@ -113,24 +112,21 @@ export class TaskBarComponent {
     });
   }
 
-  // Tasks can be duplicated if several instances of the same component are opened and one of the first ones is stopped
-  removeDuplicatedTasks(): void {
-    for (let i = this.tasks.length - 1; i > 0; i--) {
-      for (let j = 0; j < i; j++) {
-        const instance = this.tasks[j].instance;
-
-        if (instance !== undefined && instance === this.tasks[i].instance) {
-          this.tasks.splice(i, 1);
-        }
-      }
-    }
-  }
-
   removeOutdatedTasks(windowInstances: WindowInstance[]): void {
     this.tasks.forEach((task, index) => {
-      if (task.instance !== undefined && windowInstances.indexOf(task.instance) === -1) {
+      if (task.instance !== undefined && !windowInstances.includes(task.instance)) {
         if (task.pinned) {
-          delete task.instance;
+          const relatedTasks = this.tasks.filter(t => t !== task && t.component === task.component);
+
+          if (relatedTasks.length === 0) {
+            // There was only 1 instance for this component, deletes the instance
+            delete task.instance;
+          } else {
+            // There were multiple instances of the component, removes the task and makes the next task of the component
+            // pinned
+            this.tasks.splice(index, 1);
+            relatedTasks[0].pinned = true;
+          }
         } else {
           this.tasks.splice(index, 1);
         }
