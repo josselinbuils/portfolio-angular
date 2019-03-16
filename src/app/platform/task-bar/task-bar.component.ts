@@ -116,16 +116,16 @@ export class TaskBarComponent {
     this.tasks.forEach((task, index) => {
       if (task.instance !== undefined && !windowInstances.includes(task.instance)) {
         if (task.pinned) {
-          const relatedTasks = this.tasks.filter(t => t !== task && t.component === task.component);
+          const firstRelatedTask = this.tasks.find(t => t !== task && t.component === task.component);
 
-          if (relatedTasks.length === 0) {
+          if (firstRelatedTask === undefined) {
             // There was only 1 instance for this component, deletes the instance
             delete task.instance;
           } else {
-            // There were multiple instances of the component, removes the task and makes the next task of the component
-            // pinned
-            this.tasks.splice(index, 1);
-            relatedTasks[0].pinned = true;
+            // There were multiple instances of the component, removes the next task of the component and puts its
+            // instance in this task
+            task.instance = firstRelatedTask.instance;
+            this.tasks.splice(this.tasks.indexOf(firstRelatedTask), 1);
           }
         } else {
           this.tasks.splice(index, 1);
