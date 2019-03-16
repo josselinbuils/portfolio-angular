@@ -4,7 +4,7 @@
   font-family: "Courier New", Courier, monospace;
   font-size: .8em;
   white-space: nowrap;
-  padding: 5px 10px;
+  padding: 5px 8px;
   color: $text-color;
   position: absolute;
   top: 0;
@@ -24,6 +24,7 @@
 
   .user-input {
     position: relative;
+    height: 1.2em;
 
     .caret {
       background: #4d4d4d;
