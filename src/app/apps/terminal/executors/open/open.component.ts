@@ -25,7 +25,6 @@ const apps: { [name: string]: Type<{}> } = {
 export class OpenComponent implements OnInit, Executor {
   apps = Object.keys(apps);
   args!: string[];
-  error?: string;
   showHelp = false;
 
   constructor(private readonly windowManagerService: WindowManagerService) {}
@@ -36,11 +35,7 @@ export class OpenComponent implements OnInit, Executor {
     if (apps[appName] !== undefined) {
       this.windowManagerService.openWindow(apps[appName]);
     } else {
-      if (['--help', 'help', undefined].includes(appName)) {
-        this.showHelp = true;
-      } else {
-        this.error = `-open: ${appName}: unknown application`;
-      }
+      this.showHelp = true;
     }
   }
 }

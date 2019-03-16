@@ -51,9 +51,9 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
   @ViewChild(WindowComponent) windowComponent!: WindowComponent;
 
   caretIndex = 0;
-  prefix = 'user$';
   userInput = '';
   title = TerminalComponent.appName;
+  user = 'guest';
   waiting = false;
 
   private commandIndex = 0;
@@ -74,7 +74,7 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
       if (this.waiting) {
         this.killExecutor();
       } else {
-        await this.loadComponent(CommandComponent, [this.prefix, this.userInput]);
+        await this.loadComponent(CommandComponent, [this.user, this.userInput]);
         this.setUserInput('');
       }
     }
@@ -119,7 +119,7 @@ export class TerminalComponent implements AfterContentInit, OnInit, WindowInstan
   private async exec(str: string): Promise<void> {
     const command = str.trim().split(' ')[0];
 
-    await this.loadComponent(CommandComponent, [this.prefix, str]);
+    await this.loadComponent(CommandComponent, [this.user, str]);
 
     if (command.length > 0) {
       this.commands.push(str);

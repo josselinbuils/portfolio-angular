@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 import { Executor } from '../executor';
 
@@ -7,11 +7,6 @@ import { Executor } from '../executor';
   templateUrl: './command.component.html',
   styleUrls: ['./command.component.scss'],
 })
-export class CommandComponent implements Executor, OnInit {
-  args!: string[];
-  command?: string;
-
-  ngOnInit(): void {
-    this.command = this.args.join(' ');
-  }
+export class CommandComponent implements Executor {
+  @Input() args!: string[];
 }

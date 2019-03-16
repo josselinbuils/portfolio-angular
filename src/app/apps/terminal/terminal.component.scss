@@ -23,9 +23,7 @@
   }
 
   .user-input {
-    margin-bottom: 3px;
     position: relative;
-    height: 1.2em;
 
     .caret {
       background: #4d4d4d;
@@ -33,14 +31,6 @@
       top: 0;
       width: 1.1ch;
       height: 100%;
-    }
-
-    .input {
-      white-space: pre-wrap;
-    }
-
-    .prefix {
-      margin-right: 1ch;
     }
   }
 }
