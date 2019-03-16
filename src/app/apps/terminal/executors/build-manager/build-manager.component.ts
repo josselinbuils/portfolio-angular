@@ -25,19 +25,13 @@ export class BuildManagerComponent implements Executor, OnInit {
     const command = this.args[0];
 
     switch (command) {
-      case '--help':
-      case 'help':
-      case undefined:
-        this.showHelp = true;
-        this.releaseDeferred.resolve();
-        break;
-
       case 'logs':
         this.showLogs();
         break;
 
       default:
-        this.onError('unknown command');
+        this.showHelp = true;
+        this.releaseDeferred.resolve();
     }
   }
 
