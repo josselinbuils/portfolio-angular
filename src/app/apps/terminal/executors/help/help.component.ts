@@ -3,7 +3,7 @@ import { Component } from '@angular/core';
 import { Executor } from '../executor';
 
 @Component({
-  selector: 'app-help',
+  selector: 'app-terminal-help',
   templateUrl: './help.component.html',
   styleUrls: ['./help.component.scss'],
 })

@@ -18,7 +18,7 @@ const apps: { [name: string]: Type<{}> } = {
 };
 
 @Component({
-  selector: 'app-open',
+  selector: 'app-terminal-open',
   templateUrl: './open.component.html',
   styleUrls: ['./open.component.scss'],
 })

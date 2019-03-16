@@ -21,7 +21,7 @@ const previews = {
 };
 
 @Component({
-  selector: 'app-projects',
+  selector: 'app-terminal-projects',
   templateUrl: './projects.component.html',
   styleUrls: ['./projects.component.scss'],
 })

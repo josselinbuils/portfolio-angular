@@ -6,7 +6,7 @@ import { DEFAULT_ERROR_MESSAGE } from '../constants';
 import { Executor } from '../executor';
 
 @Component({
-  selector: 'app-build-manager',
+  selector: 'app-terminal-build-manager',
   templateUrl: './build-manager.component.html',
   styleUrls: ['./build-manager.component.scss'],
 })

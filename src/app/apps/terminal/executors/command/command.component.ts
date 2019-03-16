@@ -3,7 +3,7 @@ import { Component, Input } from '@angular/core';
 import { Executor } from '../executor';
 
 @Component({
-  selector: 'app-command',
+  selector: 'app-terminal-command',
   templateUrl: './command.component.html',
   styleUrls: ['./command.component.scss'],
 })

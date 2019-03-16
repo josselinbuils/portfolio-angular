@@ -8,7 +8,7 @@ const commands = [
 ];
 
 @Component({
-  selector: 'app-bash-error',
+  selector: 'app-terminal-bash-error',
   templateUrl: './bash-error.component.html',
   styleUrls: ['./bash-error.component.scss'],
 })

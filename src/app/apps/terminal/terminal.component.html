@@ -5,7 +5,7 @@
   <div #terminal class="terminal">
     <div #commands></div>
     <p class="user-input">
-      <app-command [args]="[user, userInput]"></app-command>
+      <app-terminal-command [args]="[user, userInput]"></app-terminal-command>
       <span
         class="caret" [innerText]="userInput.substr(caretIndex, 1)"
         [ngStyle]="{'left.ch': !waiting ? user.length + caretIndex + 2 : 0}"
