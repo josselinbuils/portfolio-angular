@@ -3,30 +3,30 @@
   [ngClass]="{'active-left': activeLeftTool === MouseTool.Paging, 'active-right': activeRightTool === MouseTool.Paging}"
   (click)="selectLeftTool(MouseTool.Paging)" (contextmenu)="selectRightTool(MouseTool.Paging)"
 >
-  <i class="fas fa-arrows-v" aria-hidden="true"></i>
+  <i class="fas fa-arrows-alt-v"></i>
 </button>
 <button
   *ngIf="viewport.dataset.is3D && viewport.viewType !== ViewType.Native"
   [ngClass]="{'active-left': activeLeftTool === MouseTool.Rotate, 'active-right': activeRightTool === MouseTool.Rotate}"
   (click)="selectLeftTool(MouseTool.Rotate)" (contextmenu)="selectRightTool(MouseTool.Rotate)"
 >
-  <i class="fas fa-repeat" aria-hidden="true"></i>
+  <i class="fas fa-sync-alt"></i>
 </button>
 <button
   [ngClass]="{'active-left': activeLeftTool === MouseTool.Windowing, 'active-right': activeRightTool === MouseTool.Windowing}"
   (click)="selectLeftTool(MouseTool.Windowing)" (contextmenu)="selectRightTool(MouseTool.Windowing)"
 >
-  <i class="fas fa-adjust" aria-hidden="true"></i>
+  <i class="fas fa-adjust"></i>
 </button>
 <button
   [ngClass]="{'active-left': activeLeftTool === MouseTool.Pan, 'active-right': activeRightTool === MouseTool.Pan}"
   (click)="selectLeftTool(MouseTool.Pan)" (contextmenu)="selectRightTool(MouseTool.Pan)"
 >
-  <i class="fas fa-arrows" aria-hidden="true"></i>
+  <i class="fas fa-arrows-alt"></i>
 </button>
 <button
   [ngClass]="{'active-left': activeLeftTool === MouseTool.Zoom, 'active-right': activeRightTool === MouseTool.Zoom}"
   (click)="selectLeftTool(MouseTool.Zoom)" (contextmenu)="selectRightTool(MouseTool.Zoom)"
 >
-  <i class="fas fa-search" aria-hidden="true"></i>
+  <i class="fas fa-search"></i>
 </button>

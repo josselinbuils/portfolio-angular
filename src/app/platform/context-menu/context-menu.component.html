@@ -1,7 +1,7 @@
 <ul class="context-menu" [ngStyle]="style" *ngIf="show">
   <li class="item" *ngFor="let item of descriptor.items" (click)="click(item)">
     <div class="icon">
-      <i class="fas" *ngIf="item.iconClass" [ngClass]="item.iconClass" aria-hidden="true"></i>
+      <i class="fas" *ngIf="item.iconClass" [ngClass]="item.iconClass"></i>
     </div>
     <div class="title">{{item.title}}</div>
   </li>

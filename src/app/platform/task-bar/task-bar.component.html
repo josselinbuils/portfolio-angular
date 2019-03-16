@@ -2,6 +2,6 @@
   *ngFor="let task of tasks" class="task" (click)="run(task)" (contextmenu)="openContextMenu(task, $event)"
   [ngClass]="{active: task.instance !== undefined && task.instance.windowComponent.active}" [id]="task.id"
 >
-  <i [ngClass]="task.iconClass" aria-hidden="true"></i>
+  <i [ngClass]="task.iconClass"></i>
   <div class="running" [hidden]="task.instance === undefined"></div>
 </div>

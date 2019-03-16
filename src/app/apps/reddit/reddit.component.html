@@ -4,7 +4,7 @@
   <div class="reddit">
     <div class="sidebar">
       <div class="logo">
-        <i class="fab fa-reddit-alien" aria-hidden="true"></i>
+        <i class="fab fa-reddit-alien"></i>
       </div>
       <ul class="menu">
         <li><a (click)="load('/r/popular/hot')">Popular</a></li>
@@ -53,7 +53,8 @@
               </div>
               <div>
                 <a [href]="'https://www.reddit.com' + link.permalink" target="_blank">
-                  <i class="fas fa-comment-o" aria-hidden="true"></i>{{link.num_comments}}
+                  <i class="far fa-comments"></i>
+                  <span [innerText]="link.num_comments" class="comments"></span>
                 </a>
               </div>
             </div>

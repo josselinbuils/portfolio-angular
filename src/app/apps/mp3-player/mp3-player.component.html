@@ -26,7 +26,7 @@
 
       <div class="sidebar">
         <div class="logo">
-          <i aria-hidden="true" class="fas fa-headphones"></i>
+          <i class="fas fa-headphones"></i>
         </div>
         <div
           class="item" *ngFor="let item of items" (click)="loadMusicList(item, select.value)"
@@ -48,7 +48,7 @@
           <div>
             <h2 *ngIf="currentItem">{{currentItem.name}}</h2>
             <div class="select">
-              <i class="fas fa-arrow-down" aria-hidden="true"></i>
+              <i class="fas fa-arrow-down"></i>
               <select #select (change)="loadMusicList(currentItem, select.value)">
                 <option *ngFor="let order of orders" [value]="order.order">{{order.name}}</option>
               </select>
@@ -78,7 +78,7 @@
                 <div class="inline-music-preview" [ngStyle]="{'background-image': 'url(' + music.image + ')'}">
                   <i
                     [ngClass]="music === currentMusic && !audioElement.paused ? 'fa-pause-circle' : 'fa-play-circle'"
-                    class="fas" aria-hidden="true" (click)="playMusic(music)"
+                    class="fas" (click)="playMusic(music)"
                   ></i>
                 </div>
               </td>
@@ -114,19 +114,19 @@
   <ng-template #controls>
     <div class="controls">
       <div class="button random-button" [ngClass]="{ checked: random }" (click)="random = !random">
-        <i class="fas fa-random" aria-hidden="true"></i>
+        <i class="fas fa-random"></i>
       </div>
       <div class="button prev-button" (click)="prev()">
-        <i class="fas fa-step-backward" aria-hidden="true"></i>
+        <i class="fas fa-step-backward"></i>
       </div>
       <div class="button play-button" (click)="play()">
-        <i class="fas" [ngClass]="audioElement.paused ? 'fa-play-circle' : 'fa-pause-circle'" aria-hidden="true"></i>
+        <i class="fas" [ngClass]="audioElement.paused ? 'fa-play-circle' : 'fa-pause-circle'"></i>
       </div>
       <div class="button next-button" (click)="next()">
-        <i class="fas fa-step-forward" aria-hidden="true"></i>
+        <i class="fas fa-step-forward"></i>
       </div>
       <div class="button repeat-button" [ngClass]="{ checked: repeat }" (click)="repeat = !repeat">
-        <i class="fas fa-repeat" aria-hidden="true"></i>
+        <i class="fas fa-repeat"></i>
       </div>
     </div>
   </ng-template>
@@ -141,7 +141,7 @@
       </div>
       <div class="duration">{{currentMusic ? currentMusic.readableDuration : '00:00'}}</div>
       <div class="button playlist-button" [ngClass]="{ checked: showPlaylist }" (click)="togglePlaylist()">
-        <i class="fas fa-list" aria-hidden="true"></i>
+        <i class="fas fa-list"></i>
       </div>
     </div>
   </ng-template>
