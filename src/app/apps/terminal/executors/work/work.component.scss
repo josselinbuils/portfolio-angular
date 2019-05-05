@@ -10,12 +10,9 @@ p {
 }
 
 .description {
+  color: $secondary-color;
   margin-top: 1ch;
   text-align: justify;
-}
-
-.description, .location {
-  color: $secondary-color;
 }
 
 .entry {
