@@ -40,8 +40,8 @@ export class WindowComponent implements AfterContentInit {
   }
 
   @Input() keepContentRatio = false;
-  @Input() maxHeight!: number;
-  @Input() maxWidth!: number;
+  @Input() maxHeight?: number;
+  @Input() maxWidth?: number;
   @Input() minHeight = 100;
   @Input() minWidth = 100;
   @Input() resizable = true;
