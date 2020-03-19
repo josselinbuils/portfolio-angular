@@ -4,7 +4,7 @@
   <h1>Choose the renderer</h1>
   <div class="container">
     <img
-      class="renderer" *ngFor="let renderer of renderers" [src]="'/assets/' + renderer.logo"
+      class="renderer" *ngFor="let renderer of renderers" [src]="'assets/' + renderer.logo"
       (click)="chooseRenderer(renderer.type)" [alt]="renderer.type"
     />
   </div>
